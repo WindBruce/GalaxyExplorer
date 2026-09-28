@@ -168,6 +168,18 @@
         { "text": "Map the changes from orbit.", "effects": { "research": 400 }, "outcome": "The pattern is not random. It is a schedule. Something in there is expecting visitors." },
         { "text": "Bombard the site from orbit.", "effects": { "reputation": { "vherrathi": -8 }, "credits": -5000, "flag": "destroyed_ruin" }, "outcome": "You destroy nine billion years of history to feel safe. The Vherrathi will hear about this. So, you suspect, will something else." }
       ]
+    },
+    {
+      "id": "ev_fuelLeak",
+      "title": "A Slow Hiss",
+      "weight": 7,
+      "requires": {},
+      "text": "A micro-meteoroid punched a pinhole in tank three. Fuel is leaving as a glittering fog. You can patch it, dump the tank, or keep flying and hope the math is kind.",
+      "choices": [
+        { "text": "EVA and patch it.", "effects": { "fuel": -5, "flag": "patched_tank" }, "outcome": "Twenty minutes in a suit. The leak stops. You taste metal for the rest of the watch." },
+        { "text": "Dump tank three and seal the line.", "effects": { "fuel": -25 }, "outcome": "You lose a quarter of your range in one decision. The fog disperses. The math is now honest." },
+        { "text": "Ignore it. Make the next jump first.", "effects": { "fuel": -12, "hull": -4 }, "outcome": "You jump. The pinhole becomes a tear. You arrive with less ship than you left with." }
+      ]
     }
   ]
 }

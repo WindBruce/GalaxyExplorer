@@ -7,7 +7,7 @@ how it scales.
 
 ```
 npm start     # http://localhost:8080
-npm test      # 54 headless tests (simulation, content, UI, render, playthrough)
+npm test      # 75+ headless tests (simulation, content, UI, render, playthrough, roadmap)
 npm run check # node --check over every source file
 ```
 

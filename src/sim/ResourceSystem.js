@@ -115,6 +115,23 @@ export class ResourceSystem {
     return out;
   }
 
+  /**
+   * Destroy a fraction of cargo (ship loss). Returns what was jettisoned.
+   * @param {number} fraction 0–1
+   */
+  jettison(fraction = 0.4) {
+    const lost = {};
+    const f = Math.max(0, Math.min(1, fraction));
+    for (const [id, qty] of Object.entries(this.amounts)) {
+      const drop = Math.floor(qty * f);
+      if (drop <= 0) continue;
+      this.remove(id, drop);
+      lost[id] = drop;
+    }
+    if (Object.keys(lost).length) this.state.bus.emit('cargo:jettisoned', lost);
+    return lost;
+  }
+
   /** Everything the player is carrying, for the inventory UI. */
   manifest() {
     return Object.entries(this.amounts)

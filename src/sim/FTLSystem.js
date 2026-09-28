@@ -93,6 +93,25 @@ export class FTLSystem {
     return { ok: true, amount: ship.fuel - before };
   }
 
+  /**
+   * Emergency tow back to the home system. Expensive, but better than drifting.
+   */
+  rescueTow() {
+    const cost = 8000;
+    if (this.state.player.credits < cost) {
+      return { ok: false, reason: 'Cannot afford rescue', reasonKey: 'ftl.rescuePoor', reasonVars: { n: cost } };
+    }
+    this.state.player.credits -= cost;
+    this.state.ship.fuel = Math.max(this.state.ship.fuel, this.state.ship.maxFuel * 0.35);
+    this.state.ship.destroyed = false;
+    const home = this.state.galaxy.home;
+    this.state.location.systemId = home.id;
+    this.state.location.system = home;
+    this.state.combat.clear();
+    this.state.bus.emit('ftl:rescue', { cost, systemId: home.id });
+    return { ok: true, cost, systemId: home.id };
+  }
+
   /** Fuel price per unit at a civilisation station. */
   fuelPrice(civId = null) {
     let price = 3;

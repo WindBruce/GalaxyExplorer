@@ -83,7 +83,13 @@
       <div class="map-actions">
         <button id="map-jump" class="btn primary" data-i18n="map.jump" data-i18n-vars="n:0">JUMP</button>
         <button id="map-focus" class="btn" data-i18n="map.focus">FOCUS</button>
+        <button id="map-pin" class="btn" data-i18n="map.pin">PIN</button>
         <button id="map-close" class="btn" data-i18n="map.close">CLOSE [M]</button>
+      </div>
+      <div class="map-actions" id="map-filters">
+        <button id="map-filter-visited" class="btn small" data-i18n="map.filterVisited">VISITED</button>
+        <button id="map-filter-jumpable" class="btn small" data-i18n="map.filterJump">IN RANGE</button>
+        <button id="map-filter-bookmarked" class="btn small" data-i18n="map.filterPin">PINS</button>
       </div>
     </div>
     <div id="map-help" class="dim" data-i18n="map.help">Drag to orbit · Wheel to zoom · Click a star to select · F focus · R reset</div>
@@ -129,9 +135,12 @@
   </div>
 
   <!-- Pause menu -->
+  <div id="tutorial" class="hidden"></div>
+
   <div id="pause-menu" class="hidden">
     <div class="pause-inner">
       <div class="menu-heading" data-i18n="pause.title">PAUSED</div>
+      <div class="hud-sub" id="pause-layer" data-i18n="pause.layer">Esc closes overlays first, then pauses.</div>
       <button class="btn big" id="btn-resume" data-i18n="pause.resume">RESUME</button>
       <button class="btn big" id="btn-save" data-i18n="pause.save">SAVE GAME</button>
       <button class="btn big" id="btn-pause-load" data-i18n="pause.load">LOAD SAVE</button>

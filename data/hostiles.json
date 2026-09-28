@@ -1,0 +1,61 @@
+{
+  "_comment": "Hostile archetypes. CombatSystem instantiates these; names are localised via content.hostile.<id>.name.",
+  "hostiles": {
+    "pirate": {
+      "id": "pirate",
+      "hp": 90,
+      "shield": 30,
+      "damage": 9,
+      "speed": 150,
+      "bounty": 900,
+      "color": "#ff6b6b",
+      "weaponRange": 700,
+      "approach": 260,
+      "fireInterval": 1.4,
+      "salvage": ["iron", "nickel", "rareMetals"],
+      "reputationHit": null
+    },
+    "drone": {
+      "id": "drone",
+      "hp": 60,
+      "shield": 20,
+      "damage": 7,
+      "speed": 175,
+      "bounty": 700,
+      "color": "#c77dff",
+      "weaponRange": 640,
+      "approach": 220,
+      "fireInterval": 1.1,
+      "salvage": ["silicon", "superconductor"],
+      "reputationHit": null
+    },
+    "ancient": {
+      "id": "ancient",
+      "hp": 220,
+      "shield": 120,
+      "damage": 22,
+      "speed": 120,
+      "bounty": 4200,
+      "color": "#4cc9f0",
+      "weaponRange": 780,
+      "approach": 300,
+      "fireInterval": 1.8,
+      "salvage": ["ancientAlloy", "quantumCrystal"],
+      "reputationHit": null
+    },
+    "zealot": {
+      "id": "zealot",
+      "hp": 140,
+      "shield": 70,
+      "damage": 14,
+      "speed": 165,
+      "bounty": 1500,
+      "color": "#ffd166",
+      "weaponRange": 700,
+      "approach": 250,
+      "fireInterval": 1.25,
+      "salvage": ["iron", "superconductor"],
+      "reputationHit": { "civId": "vherrathi", "amount": -0.08 }
+    }
+  }
+}

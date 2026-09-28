@@ -20,6 +20,8 @@ export class GalaxyMapScene {
     this.routeLine = null;
     this.rangeMesh = null;
     this.time = 0;
+    this.filter = { visited: false, jumpable: false, bookmarked: false };
+    this.bookmarks = new Set();
 
     this.camera = new THREE.PerspectiveCamera(55, 1, 0.5, 4000);
     this.camera.position.set(0, 26, 30);
@@ -154,7 +156,42 @@ export class GalaxyMapScene {
     this.root.add(coreGlow);
 
     this.setSelected(this.state.location.systemId);
+    this.applyFilter();
     return this;
+  }
+
+  toggleBookmark(id) {
+    if (!id) return false;
+    if (this.bookmarks.has(id)) this.bookmarks.delete(id);
+    else this.bookmarks.add(id);
+    this.applyFilter();
+    return this.bookmarks.has(id);
+  }
+
+  setFilter(partial) {
+    Object.assign(this.filter, partial);
+    this.applyFilter();
+  }
+
+  applyFilter() {
+    if (!this.points) return;
+    const sizes = this.points.geometry.getAttribute('aSize');
+    if (!sizes) return;
+    const here = this.state.location.systemId;
+    const range = this.state.shipSystem.stats.jumpRange;
+    for (let i = 0; i < this.systemIndex.length; i++) {
+      const s = this.systemIndex[i];
+      let show = true;
+      if (this.filter.visited && !s.visited) show = false;
+      if (this.filter.bookmarked && !this.bookmarks.has(s.id)) show = false;
+      if (this.filter.jumpable) {
+        const d = this.state.galaxy.distanceLy(here, s.id);
+        if (!(d <= range) && s.id !== here) show = false;
+      }
+      const base = s.visited ? 3.4 : s.discovered ? 2.6 : 1.6;
+      sizes.setX(i, show ? base : 0);
+    }
+    sizes.needsUpdate = true;
   }
 
   /** Jump-range indicator around the player's current system. */

@@ -112,6 +112,7 @@ export class GameState {
     this.research.points = 150;
     this.quests.unlock('q_firstSurvey');
     this.quests.unlock('q_hostileSpace');
+    this.quests.unlock('q_fuelRun');
 
     this.archive.add('region', 'orionSpur', {
       name: 'Orion Spur',

@@ -72,6 +72,7 @@ export async function loadAllData() {
     'quests',
     'timeline',
     'events',
+    'hostiles',
   ];
   const out = {};
   await Promise.all(names.map(async (n) => { out[n] = await loadData(n); }));
