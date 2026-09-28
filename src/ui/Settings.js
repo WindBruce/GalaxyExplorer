@@ -14,6 +14,25 @@
  */
 const STORAGE_KEY = 'galaxyexplorer.settings';
 
+export const DEFAULT_BINDINGS = {
+  cargo: 'KeyI',
+  ship: 'KeyU',
+  skills: 'KeyK',
+  tech: 'KeyL',
+  archaeology: 'KeyJ',
+  civs: 'KeyB',
+  archive: 'KeyA',
+  missions: 'KeyP',
+  systemMap: 'KeyN',
+  map: 'KeyM',
+  scan: 'KeyT',
+  land: 'KeyG',
+  rescue: 'KeyH',
+  view: 'KeyV',
+};
+
+const QUALITY_PIXEL = { low: 0.75, medium: 1, high: 2 };
+
 const DEFAULTS = {
   language: null,          // null = follow the browser
   master: 0.8,
@@ -23,6 +42,9 @@ const DEFAULTS = {
   narration: true,
   voice: '',               // '' = let the browser pick
   rate: 1,
+  quality: 'high',
+  tutorial: true,
+  bindings: { ...DEFAULT_BINDINGS },
 };
 
 function h(tag, cls, text) {
@@ -55,6 +77,7 @@ export class Settings {
     } catch {
       /* storage unavailable: run with defaults */
     }
+    out.bindings = { ...DEFAULT_BINDINGS, ...(out.bindings ?? {}) };
     return out;
   }
 
@@ -73,6 +96,16 @@ export class Settings {
   set(key, value) {
     this.values[key] = value;
     this._save();
+    if (key === 'quality') this.game.applyQuality?.();
+    if (['master', 'music', 'sfx', 'ambient'].includes(key)) this.game.audio?.sync();
+  }
+
+  binding(action) {
+    return this.values.bindings?.[action] ?? DEFAULT_BINDINGS[action];
+  }
+
+  pixelCap() {
+    return QUALITY_PIXEL[this.values.quality] ?? 2;
   }
 
   // ------------------------------------------------------------------ speech
@@ -153,7 +186,9 @@ export class Settings {
 
     const body = h('div', 'panel-body');
     body.appendChild(this._languageSection());
+    body.appendChild(this._qualitySection());
     body.appendChild(this._voiceSection());
+    body.appendChild(this._bindingsSection());
     panel.appendChild(body);
     return panel;
   }
@@ -174,6 +209,54 @@ export class Settings {
       row.appendChild(btn);
     }
     sec.appendChild(row);
+    return sec;
+  }
+
+  _qualitySection() {
+    const T = (k) => this.i18n.t(k);
+    const sec = h('div', 'panel-section');
+    sec.appendChild(h('h3', null, T('settings.quality')));
+    sec.appendChild(h('div', 'card-sub', T('settings.qualityHint')));
+    const row = h('div', 'btn-row');
+    for (const q of ['low', 'medium', 'high']) {
+      const active = this.values.quality === q;
+      const btn = h('button', `btn small${active ? ' primary' : ''}`, T(`settings.quality.${q}`));
+      btn.onclick = () => {
+        this.set('quality', q);
+        this.open();
+      };
+      row.appendChild(btn);
+    }
+    sec.appendChild(row);
+    return sec;
+  }
+
+  _bindingsSection() {
+    const T = (k) => this.i18n.t(k);
+    const sec = h('div', 'panel-section');
+    sec.appendChild(h('h3', null, T('settings.bindings')));
+    sec.appendChild(h('div', 'card-sub', T('settings.bindingsHint')));
+    const list = h('div', 'settings-grid');
+    const binds = { ...DEFAULT_BINDINGS, ...(this.values.bindings ?? {}) };
+    for (const action of Object.keys(DEFAULT_BINDINGS)) {
+      const wrap = h('div', 'settings-row');
+      wrap.appendChild(h('span', 'settings-name', T(`bind.${action}`)));
+      const btn = h('button', 'btn small', binds[action].replace(/^Key/, ''));
+      btn.onclick = () => {
+        btn.textContent = T('settings.pressKey');
+        const once = (e) => {
+          e.preventDefault();
+          window.removeEventListener('keydown', once, true);
+          const next = { ...binds, [action]: e.code };
+          this.set('bindings', next);
+          this.open();
+        };
+        window.addEventListener('keydown', once, true);
+      };
+      wrap.appendChild(btn);
+      list.appendChild(wrap);
+    }
+    sec.appendChild(list);
     return sec;
   }
 

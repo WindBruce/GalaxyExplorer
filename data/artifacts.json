@@ -130,6 +130,16 @@
     { "id": "art_theQuestion", "name": "The Question", "type": "quantumRecording", "civTag": "shepherd", "era": "eraVanishing", "tier": 5, "value": 20000,
       "desc": "A recording addressed to you specifically. It knows your ship's registry.",
       "evidenceText": "It is not a message. It is an examination. Every question it asks is one your civilisation has not yet answered, and it is marking your answers. The last question is 'do you intend to continue', and the recording is still waiting.",
-      "supports": ["evShepherd", "evVanishing", "evCoreSignal"], "techTag": null }
+      "supports": ["evShepherd", "evVanishing", "evCoreSignal"], "techTag": null },
+
+    { "id": "art_choirShard", "name": "Choir Shard", "type": "quantumRecording", "civTag": "kelthari", "era": "eraNetworks", "tier": 3, "value": 3100,
+      "desc": "A crystal that sings a frequency no instrument should produce.",
+      "evidenceText": "The shard is a compressed archive of a conversation between stars. One voice is missing. The gap is the same shape as the Core Signal.",
+      "supports": ["evNetworkBuild", "evCoreSignal"], "techTag": null },
+
+    { "id": "art_ashenLedger", "name": "Ashen Salvage Ledger", "type": "database", "civTag": "unknown", "era": "eraVanishing", "tier": 2, "value": 1800,
+      "desc": "A list of things the Remnant refused to abandon, written as if the writers expected to die mid-sentence.",
+      "evidenceText": "Every entry ends with a destination that is not a star. The last line is coordinates for a vault that survey charts insist is empty.",
+      "supports": ["evVanishing"], "techTag": null }
   ]
 }

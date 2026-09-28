@@ -49,7 +49,7 @@ const server = http.createServer((req, res) => {
   let urlPath = req.url || '/';
   if (urlPath === '/') urlPath = '/index.html';
 
-  // Simple JSON save-slot endpoint so players can keep server-side backups.
+  // Liveness probe for the Arena preview / operators.
   if (urlPath === '/api/health') {
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ ok: true, game: 'GalaxyExplorer', time: Date.now() }));

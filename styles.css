@@ -380,3 +380,16 @@ html, body, #app {
   .game-title { font-size: 30px; letter-spacing: 7px; }
   #map-info { width: 260px; }
 }
+
+#tutorial {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  background: rgba(4, 7, 13, 0.55); z-index: 40; pointer-events: auto;
+}
+#tutorial.hidden { display: none; }
+.tutorial-card {
+  max-width: 420px; padding: 22px 24px; background: var(--panel);
+  border: 1px solid var(--edge); border-radius: 8px;
+}
+.tutorial-card h3 { color: var(--accent); letter-spacing: 0.12em; margin-bottom: 10px; }
+.tutorial-card p { color: var(--text-dim); line-height: 1.45; margin-bottom: 16px; }
+#pause-layer { margin-bottom: 12px; max-width: 280px; }

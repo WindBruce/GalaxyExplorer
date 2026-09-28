@@ -175,6 +175,35 @@
         { "type": "analyzeArtifact", "count": 1, "desc": "Recover its log core" }
       ],
       "rewards": { "credits": 16000, "research": 400, "resources": { "ancientAlloy": 3 }, "xp": 700 }
+    },
+
+    {
+      "id": "q_fuelRun",
+      "title": "Hydrogen on Credit",
+      "giver": "terranConcord",
+      "category": "side",
+      "chain": "economy",
+      "description": "A Concord logistics clerk will cover your next long hop if you top up the Spur's hydrogen reserve. Distance is the difficulty; fuel is the invoice.",
+      "objectives": [
+        { "type": "collectResource", "resource": "hydrogen", "count": 50, "desc": "Deliver 50 hydrogen" },
+        { "type": "returnTo", "civ": "terranConcord", "desc": "Dock with a Concord station" }
+      ],
+      "rewards": { "credits": 8000, "research": 80, "resources": { "hydrogen": 20 }, "reputation": 3, "xp": 220 }
+    },
+
+    {
+      "id": "q_ashenSalvage",
+      "title": "What the Ashen Would Not Leave",
+      "giver": "ashenRemnant",
+      "category": "side",
+      "chain": "ashen",
+      "description": "The Ashen Remnant want a wreck in contested space stripped before the Vherrathi claim it as a trophy. Bring back what still remembers them.",
+      "objectives": [
+        { "type": "defeatHostiles", "count": 2, "desc": "Clear hostiles around the wreck" },
+        { "type": "collectResource", "resource": "ancientAlloy", "count": 4, "desc": "Recover 4 ancient alloy" },
+        { "type": "returnTo", "civ": "ashenRemnant", "desc": "Return the salvage to the Remnant" }
+      ],
+      "rewards": { "credits": 15000, "research": 220, "reputation": 7, "xp": 480, "unlockQuest": "q_salvageRun" }
     }
   ]
 }

@@ -9,6 +9,7 @@ import { SpaceScene } from '../render/SpaceScene.js';
 import { FlightControls } from '../render/FlightControls.js';
 import { makeBeam, makeBolt, makeExplosion, makeGlowTexture } from '../render/Objects.js';
 import { EventSystem } from '../sim/EventSystem.js';
+import { DEFAULT_BINDINGS } from '../ui/Settings.js';
 
 const LAND_DISTANCE_FACTOR = 2.6;
 const DOCK_DISTANCE = 150;
@@ -129,6 +130,7 @@ export class SpaceState {
     for (const plume of this.scene.shipObject.userData.plumes) {
       plume.material.uniforms.uIntensity.value = this.controls.thrustLevel;
     }
+    game.audio?.setThrust(this.controls.thrustLevel);
 
     this.scene.update(dt, game.camera);
 
@@ -142,7 +144,8 @@ export class SpaceState {
     if (near && (!this.target || near.distance < (this.target.distance ?? Infinity) - 60)) this.target = near;
 
     // --- Scanning --------------------------------------------------------
-    if (input.justPressed('KeyT') && this.target) this._startScan(this.target);
+    const bind = (action) => (typeof game.binding === 'function' ? game.binding(action) : DEFAULT_BINDINGS[action]);
+    if (input.justPressed(bind('scan')) && this.target) this._startScan(this.target);
     if (this.scanning) {
       this.scanProgress += dt / 1.6;
       if (this.scanProgress >= 1) this._completeScan();
@@ -167,7 +170,7 @@ export class SpaceState {
     // --- Landing / docking prompts ---------------------------------------
     this._updatePrompts(shipPos);
 
-    if (input.justPressed('KeyG')) {
+    if (input.justPressed(bind('land'))) {
       if (this.landPrompt) this._land(this.landPrompt);
       else if (this.dockPrompt) this._dock(this.dockPrompt);
     }
@@ -177,13 +180,27 @@ export class SpaceState {
     this._updateHostiles(dt);
 
     // --- Camera / mode keys ----------------------------------------------
-    if (input.justPressed('KeyV')) {
+    if (input.justPressed(bind('view'))) {
       const mode = this.controls.toggleCamera();
       game.ui.notify(mode === 'first' ? this.i18n.t('state.cockpit') : this.i18n.t('state.external'), null, 'info');
     }
-    if (input.justPressed('KeyM')) {
+    if (input.justPressed(bind('map'))) {
       game.states.change('map');
       return;
+    }
+    if (input.justPressed(bind('rescue')) && state.ship.fuel < 2) {
+      const res = state.ftl.rescueTow();
+      if (res.ok) {
+        this.scene.build(state.location.system);
+        this.controls = new FlightControls(this.game.camera, this.scene.shipObject);
+        this.controls.reset();
+      } else {
+        game.ui.notify(this.i18n.t('notify.rescueFail'), this.i18n.reason(res), 'warn');
+      }
+    }
+    if (input.justPressed('KeyE')) {
+      const scoop = state.combat.salvageNearest(140);
+      if (scoop.ok) game.audio?.sfx('ui');
     }
 
     // --- Dynamic events ---------------------------------------------------
@@ -461,7 +478,9 @@ export class SpaceState {
     this._warnTimer = (this._warnTimer ?? 0) - dt;
     if (this._warnTimer > 0) return;
     this._warnTimer = 12;
-    if (state.ship.fuel < state.ship.maxFuel * 0.15) {
+    if (state.ship.fuel < 2) {
+      this.game.ui.notify(this.i18n.t('state.dryFuel'), this.i18n.t('state.dryFuelBody'), 'danger');
+    } else if (state.ship.fuel < state.ship.maxFuel * 0.15) {
       this.game.ui.notify(this.i18n.t('state.lowFuel'), this.i18n.t('state.lowFuelBody'), 'warn');
     }
     if (state.ship.hull < state.ship.maxHull * 0.3) {

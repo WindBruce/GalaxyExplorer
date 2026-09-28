@@ -71,6 +71,7 @@ test('data packs are valid JSON with the expected top-level shapes', () => {
   assert.ok(json.quests.quests.length >= 8);
   assert.ok(json.events.events.length >= 10);
   assert.ok(json.timeline.events.length >= 6);
+  assert.ok(json.hostiles.hostiles.pirate && json.hostiles.hostiles.zealot);
 });
 
 test('technology prerequisites and artifact tags are consistent', () => {

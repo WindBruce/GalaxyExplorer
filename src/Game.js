@@ -19,12 +19,10 @@ import { Panels } from './ui/Panels.js';
 import { Modals } from './ui/Modals.js';
 import { GalacticMapUI } from './ui/GalacticMapUI.js';
 import { MainMenu } from './ui/MainMenu.js';
-import { Settings } from './ui/Settings.js';
+import { Settings, DEFAULT_BINDINGS } from './ui/Settings.js';
+import { GameAudio } from './core/Audio.js';
 
-const PANEL_KEYS = {
-  KeyI: 'cargo', KeyU: 'ship', KeyK: 'skills', KeyL: 'tech',
-  KeyJ: 'archaeology', KeyB: 'civs', KeyA: 'archive', KeyP: 'missions', KeyN: 'systemMap',
-};
+const PANEL_ACTIONS = ['cargo', 'ship', 'skills', 'tech', 'archaeology', 'civs', 'archive', 'missions', 'systemMap'];
 
 const SETTINGS_KEY = 'F2';
 
@@ -46,6 +44,7 @@ export class Game {
       powerPreference: 'high-performance',
     });
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    this.audio = null;
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -68,6 +67,8 @@ export class Game {
     this.ui.map = new GalacticMapUI(this);
     this.ui.menu = new MainMenu(this);
     this.ui.settings = new Settings(this);
+    this.audio = new GameAudio(this.ui.settings);
+    this.applyQuality();
     // Voice narration of transmissions, analyses and mission updates.
     this.notifications.onSpeak = (line) => this.ui.settings.speak(line);
     // Modal + map conveniences so states can talk to the UI through one object.
@@ -80,7 +81,7 @@ export class Game {
       openTrade: (civId, station) => this.ui.modals.openTrade(civId, station),
       openPanel: (name) => this.ui.panels.open(name),
       closePanel: () => this.ui.panels.close(),
-      showGalacticMap: (mapState) => this.ui.map.show(this, mapState),
+      showGalacticMap: (scene, mapState) => this.ui.map.show(scene, mapState),
       hideGalacticMap: () => this.ui.map.hide(),
       updateGalacticMapSelection: (id) => this.ui.map.updateSelection(id),
     });
@@ -140,10 +141,39 @@ export class Game {
     bus.on('civ:politics', ({ title, text }) => {
       this.ui.notify(title, text, 'info', 8000, true);
     });
-    bus.on('ship:destroyed', () => {
-      this.ui.notify(T('notify.shipDestroyed'), T('notify.shipDestroyedBody'), 'danger', 20000);
+    bus.on('ship:destroyed', (payload) => {
+      const lost = payload?.lost ?? {};
+      const n = Object.values(lost).reduce((s, v) => s + v, 0);
+      this.ui.notify(
+        T('notify.shipDestroyed'),
+        n ? T('notify.shipDestroyedCargo', { n }) : T('notify.shipDestroyedBody'),
+        'danger',
+        20000
+      );
+      this.audio?.sfx('hit');
     });
+    bus.on('combat:started', () => this.audio?.sfx('notify'));
+    bus.on('combat:playerHit', () => this.audio?.sfx('hit'));
+    bus.on('combat:hit', () => this.audio?.sfx('fire'));
+    bus.on('hostile:destroyed', () => this.audio?.sfx('hit'));
+    bus.on('wreck:salvaged', ({ resource, qty }) => {
+      this.ui.notify(T('notify.salvage'), T('notify.salvageBody', { name: resource, n: qty }), 'good');
+    });
+    bus.on('ftl:rescue', ({ cost }) => {
+      this.ui.notify(T('notify.rescue'), T('notify.rescueBody', { n: cost.toLocaleString() }), 'warn', 8000, true);
+    });
+    bus.on('ftl:start', () => this.audio?.sfx('jump'));
     bus.on('i18n:changed', () => this._onLocaleChanged());
+  }
+
+  applyQuality() {
+    const cap = this.ui.settings?.pixelCap?.() ?? 2;
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, cap));
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
+  }
+
+  binding(action) {
+    return this.ui.settings?.binding(action) ?? DEFAULT_BINDINGS[action];
   }
 
   /** Re-render every open surface when the language changes. */
@@ -208,7 +238,22 @@ export class Game {
     );
     this.states.change('space', null, true);
     this.input.requestPointerLock();
+    this.audio?.resume();
+    this.audio?.setAmbience('space');
+    this._showTutorial();
     this.saveGame('autosave');
+  }
+
+  _showTutorial() {
+    if (!this.ui.settings.get('tutorial')) return;
+    const el = document.getElementById('tutorial');
+    if (!el) return;
+    el.classList.remove('hidden');
+    el.innerHTML = `<div class="tutorial-card"><h3>${this.i18n.t('tutorial.title')}</h3><p>${this.i18n.t('tutorial.body')}</p><button class="btn primary" data-tutorial-ok="1">${this.i18n.t('tutorial.ok')}</button></div>`;
+    el.querySelector('[data-tutorial-ok]')?.addEventListener('click', () => {
+      el.classList.add('hidden');
+      this.ui.settings.set('tutorial', false);
+    });
   }
 
   loadGame(slot) {
@@ -238,7 +283,7 @@ export class Game {
   _onResize() {
     this.camera.aspect = window.innerWidth / window.innerHeight;
     this.camera.updateProjectionMatrix();
-    this.renderer.setSize(window.innerWidth, window.innerHeight);
+    this.applyQuality();
   }
 
   get inMenu() {
@@ -252,8 +297,8 @@ export class Game {
 
   _handleGlobalKeys() {
     const input = this.input;
-    for (const [code, panel] of Object.entries(PANEL_KEYS)) {
-      if (input.justPressed(code)) {
+    for (const panel of PANEL_ACTIONS) {
+      if (input.justPressed(this.binding(panel))) {
         if (this.ui.modals.isOpen()) return;
         this.ui.panels.open(panel);
         return;
@@ -287,7 +332,10 @@ export class Game {
 
   _togglePause() {
     this.paused = !this.paused;
-    document.getElementById('pause-menu').classList.toggle('hidden', !this.paused);
+    const menu = document.getElementById('pause-menu');
+    menu.classList.toggle('hidden', !this.paused);
+    const layer = document.getElementById('pause-layer');
+    if (layer) layer.textContent = this.i18n.t('pause.layer');
     if (this.paused) {
       this.input.exitPointerLock();
       document.getElementById('btn-resume').onclick = () => this._togglePause();
@@ -329,9 +377,16 @@ export class Game {
   _tick(dt) {
     const input = this.input;
     if (this.paused || !this.state || this.inMenu) {
+      this.audio?.setAmbience('menu');
+      this.audio?.setThrust(0);
       input.endFrame();
       return;
     }
+    this.audio?.sync();
+    const mode = this.states.currentName === 'surface'
+      ? 'surface'
+      : (this.state.combat?.inCombat ? 'combat' : 'space');
+    this.audio?.setAmbience(mode);
 
     this._handleGlobalKeys();
 

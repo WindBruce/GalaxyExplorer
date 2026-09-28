@@ -240,9 +240,10 @@ export class ShipSystem {
       remaining -= absorbed;
     }
     if (remaining > 0) ship.hull = Math.max(0, ship.hull - remaining);
-    if (ship.hull <= 0) {
+    if (ship.hull <= 0 && !ship.destroyed) {
       ship.destroyed = true;
-      this.state.bus.emit('ship:destroyed', {});
+      const lost = this.state.resources.jettison(0.4);
+      this.state.bus.emit('ship:destroyed', { lost });
     }
     return { hullDamage: amount - Math.max(0, remaining), shieldDamage: amount - remaining };
   }

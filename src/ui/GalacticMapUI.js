@@ -31,6 +31,21 @@ export class GalacticMapUI {
     document.getElementById('map-close').onclick = () => {
       this.game.states.change('space');
     };
+    const pin = document.getElementById('map-pin');
+    if (pin) pin.onclick = () => {
+      const id = this.mapState?.selectedId;
+      this.scene?.toggleBookmark(id);
+      this.updateSelection(id);
+    };
+    for (const key of ['visited', 'jumpable', 'bookmarked']) {
+      const el = document.getElementById(`map-filter-${key}`);
+      if (!el) continue;
+      el.onclick = () => {
+        const cur = this.scene?.filter?.[key];
+        this.scene?.setFilter({ [key]: !cur });
+        el.classList.toggle('primary', !cur);
+      };
+    }
   }
 
   show(mapScene, mapState) {

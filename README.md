@@ -10,7 +10,7 @@ vendored in `vendor/`.
 
 ```bash
 npm start      # http://localhost:8080
-npm test       # 69 headless tests
+npm test       # 75 headless tests
 npm run check  # syntax check every source file
 ```
 
@@ -63,8 +63,9 @@ early.
 | `V` | First / third person |
 | `M` | Galactic map |
 | `R` | Respawn after destruction · reset map view |
+| `H` | Emergency rescue tow (when fuel is dry) |
+| `E` | Scoop a nearby wreck (space) · excavate (on foot) |
 | `I` `U` `K` `L` `J` `B` `A` `P` `N` | Cargo · ship · skills · tech · archaeology · civilisations · archive · missions · system map |
-| `N` | System map |
 | `F2` | Settings: language, audio volumes, narration |
 | `Esc` | Close modal → settings → panel → map → pause |
 
