@@ -110,6 +110,53 @@ build if a pack references an id that does not exist (dangling dialogue nodes,
 unknown tech prerequisites, artifact tags with no matching technology, quest
 chains that point at missing quests, …).
 
+### Internationalisation
+
+`src/core/I18n.js` is a dependency-free, DOM-aware dictionary. Two locales ship
+in the repo and a third is a data edit away:
+
+```
+data/i18n/en.json          interface strings, key -> English text
+data/i18n/zh.json          the same keys -> Chinese text
+data/i18n/content/zh.json  data-pack prose -> Chinese text
+```
+
+`DataLoader.loadI18nPacks()` merges `i18n/<locale>` then
+`i18n/content/<locale>` into one flat map, so `en` falls back to the authored
+data packs and only `zh` needs a content overlay.
+
+| Call | Purpose |
+| --- | --- |
+| `t(key, vars)` | interface string, `{name}` interpolation, returns the key when unknown |
+| `tp(key, count, vars)` | plural-aware variant (`key.one` / `key.other`) |
+| `content(kind, id, fallback, field)` | prose for a data record: translation, else the pack's own text |
+| `reason(result)` | localises a simulation failure carrying `reasonKey` / `reasonVars` |
+| `setLocale(id)` | switches, persists to `localStorage`, re-renders the document, emits `i18n:changed` |
+| `applyToDocument()` | rewrites every `data-i18n`, `data-i18n-attr`, `data-i18n-html` and `data-i18n-vars` node |
+
+Unknown keys return the key itself rather than throwing, so a gap is visible in
+the UI instead of crashing. `Game._onLocaleChanged()` re-applies the document,
+then re-opens whatever panel, modal or map was on screen so the whole interface
+switches at once. Simulation prose that is generated from a seed
+(`StarSystemGenerator`, `describeLife`, `describeRuin`) reads the locale at
+generation time and never perturbs the RNG, so the galaxy stays identical in
+both languages.
+
+`tests/test_i18n.mjs` enforces the contract: key-for-key parity between
+locales, no key the code asks for is missing, no dictionary key is dead, and
+every id in every data pack (including generated prose tables) has a Chinese
+translation.
+
+### Voice & audio settings
+
+`src/ui/Settings.js` owns the overlay (F2). Language, master/music/SFX/ambient
+volumes, narration on/off, voice choice and speaking rate persist to
+`localStorage['galaxyexplorer.settings']`. Narration is one sink:
+`Notifications.onSpeak` -> `Settings.speak()` -> `speechSynthesis`, and
+`Game.narrate(text)` is the single call site for transmissions, analysis
+readings and mission reports. When narration is off (or the browser has no
+speech engine) `speak()` is a no-op, so the game stays fully playable.
+
 ### Derived ship stats
 
 `ShipSystem.recompute()` rebuilds every stat from the installed modules plus

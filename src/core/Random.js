@@ -62,7 +62,12 @@ export class Rng {
 
   /** Uniform pick from an array. */
   pick(arr) {
-    return arr[Math.floor(this._fn() * arr.length)];
+    return arr[this.pickIndex(arr.length)];
+  }
+
+  /** Uniform index in [0, n) - same stream position as `pick`, key-friendly. */
+  pickIndex(n) {
+    return Math.floor(this._fn() * n);
   }
 
   /**

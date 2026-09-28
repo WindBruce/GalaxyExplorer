@@ -46,7 +46,11 @@ export class MapState {
     const targetId = this.selectedId;
     const check = state.ftl.canJump(state.location.systemId, targetId);
     if (!check.ok) {
-      game.ui.notify('Jump unavailable', check.reason, 'warn');
+      game.ui.notify(
+        game.i18n.t('state.jumpUnavailable'),
+        game.i18n.reason(check),
+        'warn'
+      );
       return false;
     }
     state.ftl.jump(targetId);
@@ -56,7 +60,13 @@ export class MapState {
     state.ftl.arrive(targetId);
     game.ui.hideGalacticMap();
     game.states.change('space');
-    game.ui.notify('FTL jump complete', `${check.distanceLy.toFixed(0)} ly traversed. Fuel -${check.fuelCost}.`, 'ftl');
+    game.ui.notify(
+      game.i18n.t('state.ftlComplete'),
+      game.i18n.t('state.ftlCompleteBody', {
+        d: check.distanceLy.toFixed(0), f: check.fuelCost,
+      }),
+      'ftl'
+    );
     return true;
   }
 

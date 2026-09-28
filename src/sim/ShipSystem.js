@@ -76,14 +76,19 @@ export class ShipSystem {
   /** Install a module into its slot, refunding nothing. */
   install(moduleId) {
     const mod = this.getModule(moduleId);
-    if (!mod) return { ok: false, reason: 'Unknown module' };
+    if (!mod) return { ok: false, reason: 'Unknown module', reasonKey: 'sim.unknownModule' };
     const tech = this.state.tech;
     if (mod.requiresTech && !tech.has(mod.requiresTech)) {
-      return { ok: false, reason: `Requires technology: ${tech.nameOf(mod.requiresTech)}` };
+      return {
+        ok: false,
+        reason: `Requires technology: ${tech.nameOf(mod.requiresTech)}`,
+        reasonKey: 'ship.requiresTech',
+        reasonVars: { name: tech.nameOf(mod.requiresTech) },
+      };
     }
     const prev = this.installed(mod.slot);
     if (prev && prev.tier > 0 && mod.cost?.credits > 0 && !this.state.resources.canAfford(mod.cost.resources ?? {})) {
-      return { ok: false, reason: 'Insufficient resources' };
+      return { ok: false, reason: 'Insufficient resources', reasonKey: 'ship.cannotAfford' };
     }
     if (prev && prev.tier > 0) {
       // Sell back the old module for 40% of its credit cost.
@@ -102,7 +107,7 @@ export class ShipSystem {
 
   uninstall(slot) {
     const mod = this.installed(slot);
-    if (!mod || mod.tier === 0) return { ok: false, reason: 'Nothing to remove' };
+    if (!mod || mod.tier === 0) return { ok: false, reason: 'Nothing to remove', reasonKey: 'sim.nothingToRemove' };
     const base = this.moduleData[slot]?.find((m) => m.tier === 1);
     this.state.ship.modules[slot] = base?.id ?? mod.id;
     this.state.player.credits += Math.floor((mod.cost?.credits ?? 0) * 0.25);

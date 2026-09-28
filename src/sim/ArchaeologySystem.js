@@ -100,10 +100,10 @@ export class ArchaeologySystem {
    */
   analyze(uid) {
     const instance = this.instances.find((i) => i.uid === uid);
-    if (!instance) return { ok: false, reason: 'No such artifact' };
+    if (!instance) return { ok: false, reason: 'No such artifact', reasonKey: 'sim.noArtifact' };
     const def = this.artifactDef(instance.artifactId);
-    if (!def) return { ok: false, reason: 'Unknown artifact' };
-    if (instance.analyzed) return { ok: false, reason: 'Already analysed' };
+    if (!def) return { ok: false, reason: 'Unknown artifact', reasonKey: 'sim.unknownArtifact' };
+    if (instance.analyzed) return { ok: false, reason: 'Already analysed', reasonKey: 'sim.alreadyAnalysed' };
 
     const rng = new Rng((def.id.length * 2654435761) ^ (this.instances.length * 40503));
     const chance = this.analysisChance(def);

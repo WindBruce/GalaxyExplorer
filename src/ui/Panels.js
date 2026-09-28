@@ -45,6 +45,7 @@ function card(title, sub, text, tags = []) {
 export class Panels {
   constructor(game) {
     this.game = game;
+    this.i18n = game.i18n;
     this.root = document.getElementById('panel-root');
     this.current = null;
     this.onClose = null;
@@ -52,6 +53,64 @@ export class Panels {
 
   get state() {
     return this.game.state;
+  }
+
+  /** Localised content-name helpers: fall back to the authored data text. */
+  res(id) {
+    return this.i18n.content('resource', id, this.state.data.resources[id]?.name ?? id);
+  }
+
+  techName(id) {
+    return this.i18n.content('technology', id, this.state.tech.nameOf(id) ?? id, 'name');
+  }
+
+  techDesc(id) {
+    const def = this.state.data.technologies[id];
+    return this.i18n.content('technology', id, def?.desc ?? '', 'desc');
+  }
+
+  skillName(id) {
+    return this.i18n.content('skill', id, this.state.data.skills[id]?.name ?? id, 'name');
+  }
+
+  skillDesc(id) {
+    const def = this.state.data.skills[id];
+    return this.i18n.content('skill', id, def?.desc ?? '', 'desc');
+  }
+
+  moduleName(id) {
+    const mod = this.state.shipSystem.getModule(id);
+    return this.i18n.content('module', id, mod?.name ?? id, 'name');
+  }
+
+  moduleDesc(mod) {
+    return this.i18n.content('module', mod.id, mod.desc ?? '', 'desc');
+  }
+
+  slotLabel(slot) {
+    return this.i18n.t(`label.slot.${slot}`, {});
+  }
+
+  civName(id) {
+    return this.i18n.content('civilization', id, this.state.civs.get(id)?.name ?? id, 'name');
+  }
+
+  artifact(def) {
+    return {
+      name: this.i18n.content('artifact', def.id, def.name, 'name'),
+      desc: this.i18n.content('artifact', def.id, def.desc, 'desc'),
+      evidence: this.i18n.content('artifact', def.id, def.evidenceText, 'evidenceText'),
+      type: this.i18n.t(`label.artifacttype.${def.type}`, {}),
+    };
+  }
+
+  quest(q) {
+    return {
+      title: this.i18n.content('quest', q.id, q.title, 'title'),
+      giver: this.i18n.content('civilization', q.giver, q.giver ?? '', 'name'),
+      category: this.i18n.t(`label.questcat.${q.category}`, {}),
+      description: this.i18n.content('quest', q.id, q.description ?? '', 'desc'),
+    };
   }
 
   isOpen() {
@@ -98,7 +157,7 @@ export class Panels {
     const head = h('div', 'panel-head');
     head.appendChild(h('h2', null, title));
     if (subtitle) head.appendChild(h('div', 'hud-sub', subtitle));
-    const closeBtn = h('button', 'close', 'CLOSE [ESC]');
+    const closeBtn = h('button', 'close', this.i18n.t('panel.close'));
     closeBtn.onclick = () => this.close();
     head.appendChild(closeBtn);
     panel.appendChild(head);
@@ -111,49 +170,54 @@ export class Panels {
   // ---------------------------------------------------------------- Ship
   _ship() {
     const state = this.state;
-    const panel = this._frame('SHIP STATUS', 'Modular loadout & derived performance');
+    const T = (k, v) => this.i18n.t(k, v);
+    const panel = this._frame(T('panel.ship'), T('ship.sub'));
     const body = panel._body;
 
     const stats = state.shipSystem.stats;
     const sec = h('div', 'panel-section');
-    sec.appendChild(h('h3', null, 'Derived performance'));
+    sec.appendChild(h('h3', null, T('ship.derived')));
     const grid = h('div');
     grid.append(
-      row('Hull integrity', `${Math.round(state.ship.hull)} / ${state.ship.maxHull}`),
-      row('Shield capacity', `${Math.round(state.ship.maxShield)}`),
-      row('Shield regen', `${state.shipSystem.stats.shieldRegen.toFixed(1)}/s`),
-      row('Main thrust', `${stats.thrust.toFixed(0)} kN`),
-      row('FTL range', `${stats.jumpRange.toFixed(1)} ly`),
-      row('FTL efficiency', `${stats.jumpEfficiency.toFixed(2)}x`),
-      row('Jump charge', `${stats.chargeTime.toFixed(1)} s`),
-      row('Power output', `${stats.powerOutput.toFixed(0)} MW`, stats.overloaded ? 'bad' : 'good'),
-      row('Power draw', `${stats.powerDraw.toFixed(0)} MW`),
-      row('Cargo capacity', `${state.resources.capacity} t`),
-      row('Scanner range', `${stats.scanRange.toFixed(2)}x`),
-      row('Anomaly sensitivity', `${stats.anomalySense.toFixed(2)}x`),
-      row('Mining yield', `${stats.miningYield.toFixed(2)}x`),
-      row('Archaeology', `${stats.analysis.toFixed(2)}x analysis · ${stats.translation.toFixed(2)}x translation`),
-      row('Research', `${stats.research.toFixed(2)}x`),
-      row('Hazard resistance', `${stats.hazardResist.toFixed(2)}x`),
-      row('Weapon damage', stats.damage > 0 ? stats.damage.toFixed(0) : 'Unarmed', stats.damage > 0 ? '' : 'warn'),
-      row('Ship mass', `${stats.mass.toFixed(0)} t`),
+      row(T('stat.hull'), `${Math.round(state.ship.hull)} / ${state.ship.maxHull}`),
+      row(T('stat.shieldCapacity'), `${Math.round(state.ship.maxShield)}`),
+      row(T('stat.shieldRegen'), `${state.shipSystem.stats.shieldRegen.toFixed(1)}/s`),
+      row(T('stat.thrust'), `${stats.thrust.toFixed(0)} kN`),
+      row(T('stat.ftlRange'), `${stats.jumpRange.toFixed(1)} ly`),
+      row(T('stat.ftlEfficiency'), `${stats.jumpEfficiency.toFixed(2)}x`),
+      row(T('stat.jumpCharge'), `${stats.chargeTime.toFixed(1)} s`),
+      row(T('stat.powerOutput'), `${stats.powerOutput.toFixed(0)} MW${stats.overloaded ? ` · ${T('stat.overloaded')}` : ''}`, stats.overloaded ? 'bad' : 'good'),
+      row(T('stat.powerDraw'), `${stats.powerDraw.toFixed(0)} MW`),
+      row(T('stat.cargoCapacity'), `${state.resources.capacity} t`),
+      row(T('stat.scanRange'), `${stats.scanRange.toFixed(2)}x`),
+      row(T('stat.anomalySense'), `${stats.anomalySense.toFixed(2)}x`),
+      row(T('stat.miningYield'), `${stats.miningYield.toFixed(2)}x`),
+      row(T('stat.archaeology'), T('stat.archaeologyValue', {
+        a: stats.analysis.toFixed(2), t: stats.translation.toFixed(2),
+      })),
+      row(T('stat.research'), `${stats.research.toFixed(2)}x`),
+      row(T('stat.hazardResist'), `${stats.hazardResist.toFixed(2)}x`),
+      row(T('stat.weaponDamage'), stats.damage > 0 ? stats.damage.toFixed(0) : T('stat.unarmed'), stats.damage > 0 ? '' : 'warn'),
+      row(T('stat.mass'), `${stats.mass.toFixed(0)} t`),
     );
     sec.appendChild(grid);
     body.appendChild(sec);
 
     // Loadout.
     const lo = h('div', 'panel-section');
-    lo.appendChild(h('h3', null, 'Installed modules'));
+    lo.appendChild(h('h3', null, T('ship.modules')));
     const all = state.shipSystem.allModules();
     for (const { slot, module } of state.shipSystem.loadoutSummary()) {
       const c = h('div', 'card');
       const t = h('div', 'card-title');
-      t.appendChild(h('span', null, module ? module.name : 'Empty'));
-      t.appendChild(h('span', null, slot.toUpperCase()));
+      t.appendChild(h('span', null, module ? this.moduleName(module.id) : T('ship.empty')));
+      t.appendChild(h('span', null, this.slotLabel(slot)));
       c.appendChild(t);
       if (module) {
-        c.appendChild(h('div', 'card-sub', `Tier ${module.tier} · ${module.mass}t · ${module.powerDraw} MW draw`));
-        c.appendChild(h('div', 'card-text', module.desc));
+        c.appendChild(h('div', 'card-sub', T('ship.tierLine', {
+          tier: module.tier, mass: module.mass, power: module.powerDraw,
+        })));
+        c.appendChild(h('div', 'card-text', this.moduleDesc(module)));
       }
       const actions = h('div', 'btn-row');
       // Available upgrades for this slot.
@@ -162,16 +226,24 @@ export class Panels {
         const owned = !!all[opt.id];
         const techOk = !opt.requiresTech || state.tech.has(opt.requiresTech);
         const afford = state.resources.canAfford(opt.cost?.resources ?? {}) && state.player.credits >= (opt.cost?.credits ?? 0);
-        const btn = h('button', 'btn small', `${owned ? '↺ ' : ''}${opt.name}${opt.cost?.credits ? ` (¢${opt.cost.credits.toLocaleString()})` : ''}`);
+        const price = opt.cost?.credits ? T('ship.price', { n: opt.cost.credits.toLocaleString() }) : '';
+        const label = owned
+          ? T('ship.owned', { name: this.moduleName(opt.id) })
+          : this.moduleName(opt.id);
+        const btn = h('button', 'btn small', `${label}${price ? ` (${price})` : ''}`);
         btn.disabled = !techOk || !afford;
         btn.title = !techOk
-          ? `Requires technology: ${state.tech.nameOf(opt.requiresTech)}`
+          ? T('ship.requiresTech', { name: this.techName(opt.requiresTech) })
           : !afford
-            ? 'Insufficient credits or materials'
-            : opt.desc;
+            ? T('ship.cannotAfford')
+            : this.moduleDesc(opt);
         btn.onclick = () => {
           const res = state.shipSystem.install(opt.id);
-          this.game.ui.notify(res.ok ? 'Module installed' : 'Cannot install', res.ok ? opt.name : res.reason, res.ok ? 'good' : 'warn');
+          this.game.ui.notify(
+            res.ok ? T('notify.moduleInstalled') : T('notify.cannotInstall'),
+            res.ok ? this.moduleName(opt.id) : this.i18n.reason(res),
+            res.ok ? 'good' : 'warn'
+          );
           this.open('ship');
         };
         actions.appendChild(btn);
@@ -184,34 +256,34 @@ export class Panels {
     // Station services.
     const station = this._nearbyStation();
     const svc = h('div', 'panel-section');
-    svc.appendChild(h('h3', null, 'Services'));
+    svc.appendChild(h('h3', null, T('ship.services')));
     if (station) {
       const repairCost = Math.ceil((state.ship.maxHull - state.ship.hull) * 12);
       const fuelCost = Math.ceil((state.ship.maxFuel - state.ship.fuel) * state.ftl.fuelPrice(station.owner));
       const actions = h('div', 'btn-row');
-      const repair = h('button', 'btn', `REPAIR HULL (¢${repairCost.toLocaleString()})`);
+      const repair = h('button', 'btn', T('ship.repair', { n: repairCost.toLocaleString() }));
       repair.disabled = state.ship.hull >= state.ship.maxHull || state.player.credits < repairCost;
       repair.onclick = () => {
         if (state.player.credits < repairCost) return;
         state.player.credits -= repairCost;
         state.ship.repair(state.ship.maxHull);
-        this.game.ui.notify('Repaired', 'Hull restored to full integrity.', 'good');
+        this.game.ui.notify(T('notify.repaired'), T('notify.repairedBody'), 'good');
         this.open('ship');
       };
-      const refuel = h('button', 'btn', `REFUEL (¢${fuelCost.toLocaleString()})`);
+      const refuel = h('button', 'btn', T('ship.refuel', { n: fuelCost.toLocaleString() }));
       refuel.disabled = state.ship.fuel >= state.ship.maxFuel || state.player.credits < fuelCost;
       refuel.onclick = () => {
         if (state.player.credits < fuelCost) return;
         state.player.credits -= fuelCost;
         state.ship.fuel = state.ship.maxFuel;
-        this.game.ui.notify('Refuelled', 'Tanks full.', 'good');
+        this.game.ui.notify(T('notify.refuelled'), T('notify.refuelledBody'), 'good');
         this.open('ship');
       };
       actions.append(repair, refuel);
-      svc.appendChild(h('div', 'card-sub', `Docked services available at ${station.name}.`));
+      svc.appendChild(h('div', 'card-sub', T('ship.docked', { name: station.name })));
       svc.appendChild(actions);
     } else {
-      svc.appendChild(h('div', 'card-sub', 'No station in range. Dock at a station for repairs and refuelling.'));
+      svc.appendChild(h('div', 'card-sub', T('ship.noStation')));
     }
     body.appendChild(svc);
     return panel;
@@ -228,17 +300,21 @@ export class Panels {
   // ---------------------------------------------------------------- Cargo
   _cargo() {
     const state = this.state;
-    const panel = this._frame('CARGO & RESOURCES', `${state.resources.used} / ${state.resources.capacity} t · ¢${state.player.credits.toLocaleString()}`);
+    const T = (k, v) => this.i18n.t(k, v);
+    const panel = this._frame(T('panel.cargo'), T('cargo.sub', {
+      used: state.resources.used, cap: state.resources.capacity,
+      credits: state.player.credits.toLocaleString(),
+    }));
     const body = panel._body;
 
     const civId = this._nearbyStation()?.owner ?? 'terranConcord';
     const civ = state.civs.get(civId);
 
     const sec = h('div', 'panel-section');
-    sec.appendChild(h('h3', null, `Manifest — market: ${civ?.name ?? 'unknown'}`));
+    sec.appendChild(h('h3', null, T('cargo.manifest', { civ: this.civName(civId) })));
     const manifest = state.resources.manifest();
     if (!manifest.length) {
-      sec.appendChild(h('div', 'card-sub', 'Hold is empty. Mine asteroids or surface deposits.'));
+      sec.appendChild(h('div', 'card-sub', T('cargo.empty')));
     }
     for (const item of manifest) {
       const c = h('div', 'card');
@@ -250,19 +326,23 @@ export class Panels {
       nameWrap.style.display = 'flex';
       nameWrap.style.alignItems = 'center';
       nameWrap.style.gap = '7px';
-      nameWrap.append(dot, h('span', null, item.name));
+      nameWrap.append(dot, h('span', null, this.res(item.id)));
       t.append(nameWrap, h('span', null, `${item.qty} t`));
       c.appendChild(t);
       const price = state.resources.price(item.id, civId);
-      c.appendChild(h('div', 'card-sub', `${item.category} · market ¢${price}/t · hold value ¢${(price * item.qty).toLocaleString()}`));
+      c.appendChild(h('div', 'card-sub', T('cargo.marketLine', {
+        cat: T(`label.category.${item.category}`),
+        price,
+        value: (price * item.qty).toLocaleString(),
+      })));
       const actions = h('div', 'btn-row');
-      const sellAll = h('button', 'btn small primary', `SELL ALL (¢${(price * item.qty * 0.8).toLocaleString()})`);
+      const sellAll = h('button', 'btn small primary', T('cargo.sellAll', { n: (price * item.qty * 0.8).toLocaleString() }));
       sellAll.onclick = () => {
         const res = state.resources.sell(item.id, item.qty, civId);
-        this.game.ui.notify('Sold', `${item.name} x${res.price ? Math.round(res.price / Math.max(1, price * 0.8)) : 0} for ¢${res.price?.toLocaleString()}`, 'good');
+        this.game.ui.notify(T('notify.sold'), `${this.res(item.id)} x${res.price ? Math.round(res.price / Math.max(1, price * 0.8)) : 0} for ${T('missions.rewardCredits', { n: res.price?.toLocaleString() })}`, 'good');
         this.open('cargo');
       };
-      const sell10 = h('button', 'btn small', 'SELL 10');
+      const sell10 = h('button', 'btn small', T('cargo.sell10'));
       sell10.onclick = () => {
         const res = state.resources.sell(item.id, 10, civId);
         this.open('cargo');
@@ -275,22 +355,29 @@ export class Panels {
 
     // Market (buy).
     const mkt = h('div', 'panel-section');
-    mkt.appendChild(h('h3', null, 'Available for purchase'));
+    mkt.appendChild(h('h3', null, T('cargo.market')));
     const offers = state.civs.market(civId);
     for (const offer of offers.slice(0, 8)) {
       const c = h('div', 'card');
       const t = h('div', 'card-title');
-      t.append(h('span', null, offer.name), h('span', null, `¢${offer.price}/t`));
+      t.append(h('span', null, this.res(offer.id)), h('span', null, `${T('missions.rewardCredits', { n: offer.price })}/t`));
       c.appendChild(t);
-      c.appendChild(h('div', 'card-sub', `${offer.category} · demand: ${offer.demand} · stock ${offer.stock}t · you hold ${offer.playerHas}t`));
+      c.appendChild(h('div', 'card-sub', T('cargo.offerLine', {
+        cat: T(`label.category.${offer.category}`),
+        demand: offer.demand, stock: offer.stock, has: offer.playerHas,
+      })));
       const actions = h('div', 'btn-row');
-      const buy10 = h('button', 'btn small', 'BUY 10');
+      const buy10 = h('button', 'btn small', T('cargo.buy10'));
       buy10.onclick = () => {
         const res = state.resources.buy(offer.id, 10, civId);
-        this.game.ui.notify(res.ok ? 'Purchased' : 'Cannot buy', res.ok ? `${offer.name} x10 for ¢${res.price.toLocaleString()}` : res.reason, res.ok ? 'good' : 'warn');
+        this.game.ui.notify(
+          res.ok ? T('notify.purchased') : T('notify.cannotBuy'),
+          res.ok ? `${this.res(offer.id)} x10 for ${T('missions.rewardCredits', { n: res.price.toLocaleString() })}` : this.i18n.reason(res),
+          res.ok ? 'good' : 'warn'
+        );
         this.open('cargo');
       };
-      const buy50 = h('button', 'btn small', 'BUY 50');
+      const buy50 = h('button', 'btn small', T('cargo.buy50'));
       buy50.onclick = () => {
         const res = state.resources.buy(offer.id, 50, civId);
         this.open('cargo');
@@ -306,19 +393,27 @@ export class Panels {
   // ---------------------------------------------------------------- Missions
   _missions() {
     const state = this.state;
-    const panel = this._frame('MISSIONS', `${state.quests.active.length} active · ${state.quests.completed.length} complete`);
+    const T = (k, v) => this.i18n.t(k, v);
+    const panel = this._frame(T('panel.missions'), T('missions.sub', {
+      a: state.quests.active.length, c: state.quests.completed.length,
+    }));
     const body = panel._body;
 
     const avail = state.quests.available();
     if (avail.length) {
       const sec = h('div', 'panel-section');
-      sec.appendChild(h('h3', null, 'Available contracts'));
+      sec.appendChild(h('h3', null, T('missions.available')));
       for (const q of avail) {
-        const c = card(q.title, `${q.giver} · ${q.category}`, q.description);
-        const btn = h('button', 'btn small primary', 'ACCEPT');
+        const qq = this.quest(q);
+        const c = card(qq.title, `${qq.giver} · ${qq.category}`, qq.description);
+        const btn = h('button', 'btn small primary', T('missions.accept'));
         btn.onclick = () => {
           const res = state.quests.start(q.id);
-          this.game.ui.notify(res.ok ? 'Contract accepted' : 'Cannot accept', res.ok ? q.title : res.reason, res.ok ? 'good' : 'warn');
+          this.game.ui.notify(
+            res.ok ? T('notify.contractAccepted') : T('notify.cannotAccept'),
+            res.ok ? qq.title : this.i18n.reason(res),
+            res.ok ? 'good' : 'warn'
+          );
           this.open('missions');
         };
         c.appendChild(btn);
@@ -328,10 +423,11 @@ export class Panels {
     }
 
     const sec = h('div', 'panel-section');
-    sec.appendChild(h('h3', null, 'Active'));
-    if (!state.quests.active.length) sec.appendChild(h('div', 'card-sub', 'No active missions. Speak to civilisations at stations to find work.'));
+    sec.appendChild(h('h3', null, T('missions.active')));
+    if (!state.quests.active.length) sec.appendChild(h('div', 'card-sub', T('missions.none')));
     for (const q of state.quests.active) {
-      const c = card(q.title, `${q.giver} · ${q.chain}`, q.description);
+      const qq = this.quest(q);
+      const c = card(qq.title, `${qq.giver} · ${q.chain}`, qq.description);
       for (const o of state.quests.describe(q)) {
         const line = h('div', 'row');
         line.appendChild(h('span', 'k', o.done ? '✔' : '○'));
@@ -340,12 +436,13 @@ export class Panels {
       }
       const r = q.rewards ?? {};
       const rew = [];
-      if (r.credits) rew.push(`¢${r.credits.toLocaleString()}`);
-      if (r.research) rew.push(`${r.research} research`);
-      if (r.xp) rew.push(`${r.xp} XP`);
-      if (r.resources) rew.push(Object.entries(r.resources).map(([k, v]) => `${v} ${k}`).join(', '));
-      c.appendChild(h('div', 'card-sub', `Rewards: ${rew.join(' · ') || '—'}`));
-      const btn = h('button', 'btn small danger', 'ABANDON');
+      if (r.credits) rew.push(T('missions.rewardCredits', { n: r.credits.toLocaleString() }));
+      if (r.research) rew.push(T('missions.rewardResearch', { n: r.research }));
+      if (r.xp) rew.push(T('missions.rewardXp', { n: r.xp }));
+      if (r.resources) rew.push(Object.entries(r.resources)
+        .map(([k, v]) => T('missions.rewardResources', { qty: v, name: this.res(k) })).join(', '));
+      c.appendChild(h('div', 'card-sub', T('missions.rewards', { list: rew.join(' · ') || '—' })));
+      const btn = h('button', 'btn small danger', T('missions.abandon'));
       btn.onclick = () => {
         state.quests.abandon(q.id);
         this.open('missions');
@@ -357,9 +454,10 @@ export class Panels {
 
     if (state.quests.completed.length) {
       const done = h('div', 'panel-section');
-      done.appendChild(h('h3', null, 'Completed'));
+      done.appendChild(h('h3', null, T('missions.completed')));
       for (const q of state.quests.completed) {
-        done.appendChild(card(q.title, q.giver ?? '', q.description ?? ''));
+        const qq = this.quest(q);
+        done.appendChild(card(qq.title, qq.giver, qq.description));
       }
       body.appendChild(done);
     }
@@ -369,52 +467,51 @@ export class Panels {
   // ---------------------------------------------------------------- Tech
   _tech() {
     const state = this.state;
-    const panel = this._frame('TECHNOLOGY', `${state.research.points.toLocaleString()} research points · ${state.research.completed.length} known`);
+    const T = (k, v) => this.i18n.t(k, v);
+    const panel = this._frame(T('panel.tech'), T('tech.sub', {
+      rp: state.research.points.toLocaleString(), n: state.research.completed.length,
+    }));
     const body = panel._body;
     const tree = state.tech.tree();
 
-    const CAT_NAMES = {
-      energy: 'Energy', propulsion: 'Propulsion', materials: 'Materials', weapons: 'Weapons & Shields',
-      ai: 'Artificial Intelligence', quantum: 'Quantum Technology', biotech: 'Biotechnology',
-      spatial: 'Spatial Technology', civilization: 'Civilisation Technology', unknown: 'Unknown Technology',
-    };
-
     for (const [cat, nodes] of Object.entries(tree)) {
       const sec = h('div', 'tech-cat');
-      sec.appendChild(h('h3', null, CAT_NAMES[cat] ?? cat));
+      sec.appendChild(h('h3', null, T(`label.techcat.${cat}`, {})));
       for (const n of nodes) {
         const cls = n.researched ? 'done' : n.canResearch ? 'available' : '';
         const c = h('div', `tech-node ${cls}`.trim());
         const title = h('div', 'nm');
-        title.append(h('span', null, n.name), h('span', 't', `T${n.tier}`));
+        title.append(h('span', null, this.techName(n.id)), h('span', 't', `T${n.tier}`));
         c.appendChild(title);
-        c.appendChild(h('div', 'ds', n.desc));
+        c.appendChild(h('div', 'ds', this.techDesc(n.id)));
         const costBits = [`${n.cost.research} RP`];
-        for (const [id, qty] of Object.entries(n.cost.resources ?? {})) costBits.push(`${qty} ${state.data.resources[id]?.name ?? id}`);
-        const costLine = h('div', 'cost', `Cost: ${costBits.join(' · ')}`);
+        for (const [id, qty] of Object.entries(n.cost.resources ?? {})) costBits.push(`${qty} ${this.res(id)}`);
+        const costLine = h('div', 'cost', T('tech.cost', { bits: costBits.join(' · ') }));
         c.appendChild(costLine);
         if (n.requires?.length) {
-          c.appendChild(h('div', 'cost', `Requires: ${n.requires.map((r) => state.tech.nameOf(r)).join(', ')}`));
+          c.appendChild(h('div', 'cost', T('tech.requires', {
+            list: n.requires.map((r) => this.techName(r)).join(', '),
+          })));
         }
         if (n.artifactGated && !n.researched) {
-          c.appendChild(h('div', 'cost', '◈ Cannot be researched — must be reconstructed from an archaeological artifact.'));
+          c.appendChild(h('div', 'cost', T('tech.artifactGated')));
         }
         if (!n.researched) {
-          const btn = h('button', 'btn small', n.canResearch ? 'RESEARCH' : 'LOCKED');
+          const btn = h('button', 'btn small', n.canResearch ? T('tech.research') : T('tech.locked'));
           btn.disabled = !n.canResearch;
           btn.onclick = () => {
             const check = state.tech.canResearch(n.id);
             if (!check.ok) {
-              this.game.ui.notify('Cannot research', check.reason, 'warn');
+              this.game.ui.notify(T('notify.cannotResearch'), this.i18n.reason(check), 'warn');
               return;
             }
-            const res = state.tech.research(n.id);
-            this.game.ui.notify('Technology researched', n.name, 'good');
+            state.tech.research(n.id);
+            this.game.ui.notify(T('notify.techResearched'), this.techName(n.id), 'good');
             this.open('tech');
           };
           c.appendChild(btn);
         } else {
-          c.appendChild(h('div', 'cost', '✔ Researched'));
+          c.appendChild(h('div', 'cost', T('tech.researched')));
         }
         sec.appendChild(c);
       }
@@ -426,44 +523,48 @@ export class Panels {
   // ---------------------------------------------------------------- Skills
   _skills() {
     const state = this.state;
-    const panel = this._frame('CHARACTER', `${state.player.name} · Level ${state.player.level} · ${state.player.skillPoints} skill point${state.player.skillPoints === 1 ? '' : 's'}`);
+    const T = (k, v) => this.i18n.t(k, v);
+    const panel = this._frame(T('panel.skills'), this.i18n.tp('skills.sub', state.player.skillPoints, {
+      name: state.player.name,
+      level: state.player.level,
+      n: state.player.skillPoints,
+    }));
     const body = panel._body;
     const tree = state.skills.tree();
 
-    const ARCH_NAMES = {
-      explorer: 'Explorer', scientist: 'Scientist', engineer: 'Engineer', archaeologist: 'Archaeologist',
-      diplomat: 'Diplomat', soldier: 'Soldier', xenobiologist: 'Xenobiologist', aiResearcher: 'AI Researcher',
-    };
-
     const progress = state.skills.archetypeProgress();
     const sec = h('div', 'panel-section');
-    sec.appendChild(h('h3', null, 'Build summary'));
+    sec.appendChild(h('h3', null, T('skills.build')));
     sec.appendChild(h('div', 'card-sub', Object.keys(progress).length
-      ? Object.entries(progress).map(([a, n]) => `${ARCH_NAMES[a] ?? a} ×${n}`).join(' · ')
-      : 'No skills learned yet. Hybrid builds are encouraged.'));
+      ? Object.entries(progress).map(([a, n]) => `${T(`label.arch.${a}`, {})} ×${n}`).join(' · ')
+      : T('skills.none')));
     body.appendChild(sec);
 
     for (const [arch, nodes] of Object.entries(tree)) {
       const sec2 = h('div', 'skill-arch');
-      sec2.appendChild(h('h3', null, ARCH_NAMES[arch] ?? arch));
+      sec2.appendChild(h('h3', null, T(`label.arch.${arch}`, {})));
       for (const n of nodes) {
         const cls = n.unlocked ? 'unlocked' : n.canUnlock ? '' : 'locked';
         const c = h('div', `skill-node ${cls}`.trim());
         c.append(h('span', 'tier', `T${n.tier}`));
         const info = h('div');
-        info.appendChild(h('div', 'nm', n.name));
-        info.appendChild(h('div', 'ds', n.desc));
+        info.appendChild(h('div', 'nm', this.skillName(n.id)));
+        info.appendChild(h('div', 'ds', this.skillDesc(n.id)));
         c.appendChild(info);
         if (n.unlocked) {
-          c.appendChild(h('span', 'tag good', 'LEARNED'));
+          c.appendChild(h('span', 'tag good', T('skills.learned')));
         } else {
-          const btn = h('button', 'btn small', `${n.cost} SP`);
+          const btn = h('button', 'btn small', T('skills.cost', { n: n.cost }));
           btn.disabled = !n.canUnlock;
           const check = state.skills.canUnlock(n.id);
-          btn.title = check.ok ? 'Unlock this skill' : check.reason;
+          btn.title = check.ok ? T('skills.unlock') : this.i18n.reason(check);
           btn.onclick = () => {
             const res = state.skills.unlock(n.id);
-            this.game.ui.notify(res.ok ? 'Skill learned' : 'Cannot learn', res.ok ? n.name : res.reason, res.ok ? 'good' : 'warn');
+            this.game.ui.notify(
+              res.ok ? T('notify.skillLearned') : T('notify.cannotLearn'),
+              res.ok ? this.skillName(n.id) : this.i18n.reason(res),
+              res.ok ? 'good' : 'warn'
+            );
             this.open('skills');
           };
           c.appendChild(btn);
@@ -479,15 +580,20 @@ export class Panels {
   _archaeology() {
     const state = this.state;
     const arch = state.archaeology;
-    const panel = this._frame('ARCHAEOLOGY', `${arch.analyzed.length} analysed · ${arch.collected.length - arch.analyzed.length} awaiting translation`);
+    const T = (k, v) => this.i18n.t(k, v);
+    const panel = this._frame(T('panel.arch'), T('arch.sub', {
+      a: arch.analyzed.length, u: arch.collected.length - arch.analyzed.length,
+    }));
     const body = panel._body;
 
     // Main mystery.
     const mystery = arch.mysteryStage();
     const m = h('div', 'mystery');
-    m.appendChild(h('div', 'm-title', mystery.name.toUpperCase()));
-    m.appendChild(h('div', 'm-stage', `Current understanding: ${mystery.stage.label}`));
-    m.appendChild(h('div', 'm-desc', mystery.summary));
+    m.appendChild(h('div', 'm-title', this.i18n.content('mystery', 'name', mystery.name, 'name').toUpperCase()));
+    m.appendChild(h('div', 'm-stage', T('arch.understanding', {
+      label: this.i18n.content('mystery', 'stage.' + mystery.stage.id, mystery.stage.label),
+    })));
+    m.appendChild(h('div', 'm-desc', this.i18n.content('mystery', 'summary', mystery.summary, 'summary')));
     const stages = h('div', 'm-stages');
     for (const s of mystery.stages) {
       stages.appendChild(h('div', s.reached ? 'on' : ''));
@@ -497,22 +603,25 @@ export class Panels {
 
     // Inventory.
     const inv = h('div', 'panel-section');
-    inv.appendChild(h('h3', null, 'Recovered artifacts'));
+    inv.appendChild(h('h3', null, T('arch.inventory')));
     const unanalyzed = arch.collected.filter((i) => !i.analyzed);
     const analyzed = arch.analyzed;
     if (!arch.collected.length) {
-      inv.appendChild(h('div', 'card-sub', 'No artifacts recovered. Land at ruin sites and excavate.'));
+      inv.appendChild(h('div', 'card-sub', T('arch.none')));
     }
     for (const inst of unanalyzed) {
       const def = arch.artifactDef(inst.artifactId);
-      const c = card(def.name, `${def.type} · ${def.civTag} · tier ${def.tier}`, def.desc);
+      const a = this.artifact(def);
+      const c = card(a.name, T('arch.artifactMeta', {
+        type: T(`label.artifacttype.${def.type}`, {}), civ: def.civTag, tier: def.tier,
+      }), a.desc);
       const chance = arch.analysisChance(def);
-      c.appendChild(h('div', 'card-sub', `Translation confidence: ${(chance * 100).toFixed(0)}%`));
-      const btn = h('button', 'btn small primary', 'ANALYSE');
+      c.appendChild(h('div', 'card-sub', T('arch.confidence', { p: (chance * 100).toFixed(0) })));
+      const btn = h('button', 'btn small primary', T('arch.analyze'));
       btn.onclick = () => {
         const res = arch.analyze(inst.uid);
         if (!res.ok) {
-          this.game.ui.notify('Cannot analyse', res.reason, 'warn');
+          this.game.ui.notify(T('notify.cannotAnalyse'), this.i18n.reason(res), 'warn');
           return;
         }
         this.game.ui.showAnalysis(res);
@@ -522,10 +631,11 @@ export class Panels {
       inv.appendChild(c);
     }
     if (analyzed.length) {
-      inv.appendChild(h('h3', null, 'Analysed evidence'));
+      inv.appendChild(h('h3', null, T('arch.analysed')));
       for (const inst of analyzed) {
         const def = arch.artifactDef(inst.artifactId);
-        inv.appendChild(card(def.name, `${def.type} · ${def.civTag}`, def.evidenceText, [{ text: 'ANALYSED', cls: 'good' }]));
+        const a = this.artifact(def);
+        inv.appendChild(card(a.name, `${T(`label.artifacttype.${def.type}`, {})} · ${def.civTag}`, a.evidence, [{ text: T('arch.tagAnalysed'), cls: 'good' }]));
       }
     }
     body.appendChild(inv);
@@ -534,9 +644,9 @@ export class Panels {
     const hyps = arch.hypotheses();
     if (hyps.length) {
       const sec = h('div', 'panel-section');
-      sec.appendChild(h('h3', null, 'Working hypotheses'));
+      sec.appendChild(h('h3', null, T('arch.hypotheses')));
       for (const hyp of hyps) {
-        const c = card(hyp.title, `Confidence ${(hyp.confidence * 100).toFixed(0)}%`, hyp.text);
+        const c = card(hyp.title, T('arch.hypConfidence', { p: (hyp.confidence * 100).toFixed(0) }), hyp.text);
         sec.appendChild(c);
       }
       body.appendChild(sec);
@@ -544,20 +654,25 @@ export class Panels {
 
     // Timeline.
     const tl = h('div', 'panel-section');
-    tl.appendChild(h('h3', null, 'Reconstructed galactic timeline'));
+    tl.appendChild(h('h3', null, T('arch.timeline')));
     for (const era of arch.timeline()) {
       const e = h('div', 'era');
-      e.appendChild(h('div', 'era-name', era.name));
-      e.appendChild(h('div', 'era-range', `${era.startBya} – ${era.endBya} billion years ago · ${era.known}/${era.events.length} events reconstructed`));
-      e.appendChild(h('div', 'era-desc', era.desc));
+      e.appendChild(h('div', 'era-name', this.i18n.content('timeline', 'era.' + era.id, era.name, 'name')));
+      e.appendChild(h('div', 'era-range', T('arch.eraRange', {
+        start: era.startBya, end: era.endBya, known: era.known, total: era.events.length,
+      })));
+      e.appendChild(h('div', 'era-desc', this.i18n.content('timeline', 'era.' + era.id, era.desc, 'desc')));
       for (const ev of era.events) {
         if (ev.status === 'unknown') continue;
         const ec = h('div', `event ${ev.status}`);
         const title = h('div', 'ev-title');
-        title.append(h('span', null, ev.title), h('span', 'ev-state', ev.status === 'confirmed' ? 'CONFIRMED' : 'HYPOTHESIS'));
+        title.append(
+          h('span', null, this.i18n.content('timeline', 'event.' + ev.id, ev.title, 'title')),
+          h('span', 'ev-state', ev.status === 'confirmed' ? T('arch.confirmed') : T('arch.hypothesis'))
+        );
         ec.appendChild(title);
-        ec.appendChild(h('div', 'ev-text', ev.summary));
-        ec.appendChild(h('div', 'ev-ev', `Evidence: ${ev.evidenceNames.join(', ')}`));
+        ec.appendChild(h('div', 'ev-text', this.i18n.content('timeline', 'event.' + ev.id, ev.summary, 'summary')));
+        ec.appendChild(h('div', 'ev-ev', T('arch.evidence', { names: ev.evidenceNames.join(', ') })));
         e.appendChild(ec);
       }
       tl.appendChild(e);
@@ -569,31 +684,44 @@ export class Panels {
   // ---------------------------------------------------------------- Civilisations
   _civs() {
     const state = this.state;
-    const panel = this._frame('CIVILISATION DATABASE', `${state.civs.discovered().length} contacted`);
+    const T = (k, v) => this.i18n.t(k, v);
+    const panel = this._frame(T('panel.civs'), T('civs.sub', { n: state.civs.discovered().length }));
     const body = panel._body;
 
     const sec = h('div', 'panel-section');
-    sec.appendChild(h('h3', null, 'Living civilisations'));
+    sec.appendChild(h('h3', null, T('civs.living')));
     for (const civ of state.civs.all()) {
       const tpl = civ.template;
       const c = card(
-        civ.name,
-        `Tech level ${tpl.techLevel} · ${tpl.government} · reputation: ${state.civs.reputationLabel(civ.id)} (${civ.reputation > 0 ? '+' : ''}${civ.reputation.toFixed(2)})`,
-        tpl.background
+        this.civName(civ.id),
+        T('civs.cardLine', {
+          n: tpl.techLevel,
+          gov: this.i18n.content('civilization', civ.id, tpl.government, 'government'),
+          rep: state.civs.reputationLabel(civ.id),
+          value: `${civ.reputation > 0 ? '+' : ''}${civ.reputation.toFixed(2)}`,
+        }),
+        this.i18n.content('civilization', civ.id, tpl.background, 'background')
       );
-      c.appendChild(h('div', 'card-text', `Philosophy: ${tpl.philosophy}`));
+      c.appendChild(h('div', 'card-text', T('civs.philosophy', {
+        text: this.i18n.content('civilization', civ.id, tpl.philosophy, 'philosophy'),
+      })));
       const tags = [];
       for (const t of tpl.traits ?? []) tags.push({ text: t, cls: '' });
-      if (civ.warWith?.length) tags.push({ text: `AT WAR: ${civ.warWith.join(', ')}`, cls: 'bad' });
-      if (civ.alliedWith?.length) tags.push({ text: `ALLIED: ${civ.alliedWith.join(', ')}`, cls: 'good' });
-      if (civ.politics && civ.politics !== 'stable') tags.push({ text: civ.politics.toUpperCase(), cls: 'warn' });
+      if (civ.warWith?.length) tags.push({ text: T('civs.atWar', { list: civ.warWith.join(', ') }), cls: 'bad' });
+      if (civ.alliedWith?.length) tags.push({ text: T('civs.allied', { list: civ.alliedWith.join(', ') }), cls: 'good' });
+      if (civ.politics && civ.politics !== 'stable') tags.push({ text: T(`label.politics.${civ.politics}`, {}), cls: 'warn' });
       const tagRow = h('div');
       for (const t of tags) tagRow.appendChild(h('span', `tag ${t.cls}`.trim(), t.text));
       c.appendChild(tagRow);
-      c.appendChild(h('div', 'card-text', `Existential problem: ${tpl.existentialProblem}`));
-      c.appendChild(h('div', 'card-sub', `Known systems: ${civ.knownSystemIds.length} · language: ${tpl.language.family}`));
+      c.appendChild(h('div', 'card-text', T('civs.problem', {
+        text: this.i18n.content('civilization', civ.id, tpl.existentialProblem, 'existentialProblem'),
+      })));
+      c.appendChild(h('div', 'card-sub', T('civs.known', {
+        n: civ.knownSystemIds.length,
+        lang: this.i18n.content('civilization', civ.id, tpl.language.family, 'language'),
+      })));
       if (civ.met) {
-        const btn = h('button', 'btn small', 'OPEN DIALOGUE');
+        const btn = h('button', 'btn small', T('civs.dialogue'));
         btn.onclick = () => {
           this.close();
           this.game.ui.openDialogue(civ.id);
@@ -605,14 +733,19 @@ export class Panels {
     body.appendChild(sec);
 
     const ext = h('div', 'panel-section');
-    ext.appendChild(h('h3', null, 'Extinct civilisations (archaeological record)'));
+    ext.appendChild(h('h3', null, T('civs.extinct')));
     for (const civ of state.civs.extinct()) {
       const events = state.archaeology.eventRecords().filter((e) => e.status !== 'unknown' && e.era === civ.era);
       ext.appendChild(card(
-        civ.name,
-        `${civ.bya} billion years ago · signature: ${civ.signature}`,
-        civ.desc,
-        events.length ? [{ text: `${events.length} timeline event(s) reconstructed`, cls: 'accent' }] : [{ text: 'NO EVIDENCE RECOVERED', cls: 'warn' }]
+        this.i18n.content('extinct', civ.id, civ.name, 'name'),
+        T('civs.extinctSub', {
+          bya: civ.bya,
+          sig: this.i18n.content('extinct', civ.id, civ.signature, 'signature'),
+        }),
+        this.i18n.content('extinct', civ.id, civ.desc, 'desc'),
+        events.length
+          ? [{ text: T('civs.events', { n: events.length }), cls: 'accent' }]
+          : [{ text: T('civs.noEvidence'), cls: 'warn' }]
       ));
     }
     body.appendChild(ext);
@@ -623,11 +756,12 @@ export class Panels {
   _archive() {
     const state = this.state;
     const counts = state.archive.counts();
-    const panel = this._frame('GALACTIC CIVILIZATION ARCHIVE', `${state.archive.total} entries recorded`);
+    const T = (k, v) => this.i18n.t(k, v);
+    const panel = this._frame(T('panel.archive'), T('archive.sub', { n: state.archive.total }));
     const body = panel._body;
 
     const overview = h('div', 'panel-section');
-    overview.appendChild(h('h3', null, 'Encyclopedia coverage'));
+    overview.appendChild(h('h3', null, T('archive.coverage')));
     const grid = h('div', 'grid three');
     for (const [cat, label] of Object.entries(CATEGORY_LABELS)) {
       const c = h('div', 'res-chip');
@@ -635,16 +769,18 @@ export class Panels {
       grid.appendChild(c);
     }
     overview.appendChild(grid);
-    overview.appendChild(h('div', 'card-sub', 'Every civilisation, species, planet, star, artifact, ruin, historical event, anomaly and phenomenon you have encountered is preserved here permanently.'));
+    overview.appendChild(h('div', 'card-sub', T('archive.blurb')));
     body.appendChild(overview);
 
     for (const cat of Object.keys(CATEGORY_LABELS)) {
       const entries = state.archive.byCategory(cat);
       if (!entries.length) continue;
       const sec = h('div', 'panel-section');
-      sec.appendChild(h('h3', null, `${CATEGORY_LABELS[cat]} (${entries.length})`));
+      sec.appendChild(h('h3', null, T('archive.count', { label: CATEGORY_LABELS[cat], n: entries.length })));
       for (const e of entries) {
-        sec.appendChild(card(e.name, `Recorded SD ${e.discoveredAt?.toFixed?.(1) ?? e.discoveredAt}`, e.summary));
+        sec.appendChild(card(e.name, T('archive.recorded', {
+          sd: e.discoveredAt?.toFixed?.(1) ?? e.discoveredAt,
+        }), e.summary));
       }
       body.appendChild(sec);
     }
@@ -655,11 +791,12 @@ export class Panels {
   _systemMap() {
     const state = this.state;
     const sys = state.location.system;
-    const panel = this._frame('SYSTEM MAP', sys ? sys.name : '—');
+    const T = (k, v) => this.i18n.t(k, v);
+    const panel = this._frame(T('panel.sysmap'), sys ? sys.name : T('hud.unknown'));
     const body = panel._body;
 
     if (!sys) {
-      body.appendChild(h('div', 'card-sub', 'No system loaded.'));
+      body.appendChild(h('div', 'card-sub', T('sysmap.noSystem')));
       return panel;
     }
 
@@ -716,32 +853,52 @@ export class Panels {
 
     // Body list.
     const sec = h('div', 'panel-section');
-    sec.appendChild(h('h3', null, 'System bodies'));
-    const starCard = card(sys.star.name, `${sys.star.classLabel} · ${sys.star.temp}K · ${sys.star.mass.toFixed(2)} M☉ · age ${sys.star.ageGyr.toFixed(1)} Gyr`, sys.summary);
+    sec.appendChild(h('h3', null, T('sysmap.bodies')));
+    const starCard = card(sys.star.name, T('sysmap.starLine', {
+      label: this.i18n.content('starclass', sys.star.classId, sys.star.classLabel, 'label'),
+      temp: sys.star.temp, mass: sys.star.mass.toFixed(2), age: sys.star.ageGyr.toFixed(1),
+    }), this.i18n.content('starclass', sys.star.classId, sys.summary, 'desc'));
     sec.appendChild(starCard);
     for (const p of sys.planets) {
-      const c = card(p.name, `${p.typeLabel} · ${p.orbitAu.toFixed(2)} AU · ${p.tempK.toFixed(0)}K · ${p.gravity.toFixed(2)}g`, p.description);
+      const c = card(p.name, T('sysmap.planetLine', {
+        type: this.i18n.content('planettype', p.type, p.typeLabel, 'label'),
+        au: p.orbitAu.toFixed(2), temp: p.tempK.toFixed(0), grav: p.gravity.toFixed(2),
+      }), p.description);
       const tags = [];
-      if (p.life) tags.push({ text: 'LIFE', cls: 'good' });
-      if (p.breathable) tags.push({ text: 'BREATHABLE', cls: 'good' });
-      if (p.tidallyLocked) tags.push({ text: 'TIDALLY LOCKED', cls: 'warn' });
-      if (p.ruinSiteIds.length) tags.push({ text: `${p.ruinSiteIds.length} RUIN(S)`, cls: 'accent' });
-      if (p.ring) tags.push({ text: 'RINGED', cls: '' });
-      if (!p.landable) tags.push({ text: 'NOT LANDABLE', cls: 'bad' });
+      if (p.life) tags.push({ text: T('sysmap.life'), cls: 'good' });
+      if (p.breathable) tags.push({ text: T('sysmap.breathable'), cls: 'good' });
+      if (p.tidallyLocked) tags.push({ text: T('sysmap.tidallyLocked'), cls: 'warn' });
+      if (p.ruinSiteIds.length) tags.push({ text: T('sysmap.ruins', { n: p.ruinSiteIds.length }), cls: 'accent' });
+      if (p.ring) tags.push({ text: T('sysmap.ringed'), cls: '' });
+      if (!p.landable) tags.push({ text: T('sysmap.notLandable'), cls: 'bad' });
       const tagRow = h('div');
       for (const t of tags) tagRow.appendChild(h('span', `tag ${t.cls}`.trim(), t.text));
       c.appendChild(tagRow);
-      c.appendChild(h('div', 'card-sub', `Resources: ${p.resources.map((r) => `${r.id} ×${r.quantity}`).join(', ')}`));
+      c.appendChild(h('div', 'card-sub', T('sysmap.resources', {
+        list: p.resources.map((r) => T('sysmap.resourceList', { id: this.res(r.id), qty: r.quantity })).join(', '),
+      })));
       sec.appendChild(c);
     }
     for (const s of sys.stations) {
-      sec.appendChild(card(s.name, `${s.kind} · ${s.orbitAu.toFixed(2)} AU${s.derelict ? ' · DERELICT' : ''}`, `Owner: ${s.owner ?? 'none'}`));
+      sec.appendChild(card(s.name, T('sysmap.stationLine', {
+        kind: T(`label.stationkind.${s.kind}`, {}),
+        au: s.orbitAu.toFixed(2),
+        derelict: s.derelict ? T('sysmap.derelict') : '',
+      }), T('sysmap.owner', { name: s.owner ?? T('cargo.unknown') })));
     }
     for (const r of sys.ruins) {
-      sec.appendChild(card(r.name, `${r.size} ruin · attributed to ${r.civTag} · age ${r.ageGyr.toFixed(1)} Gyr`, r.description, [{ text: r.scanned ? 'SCANNED' : 'UNSCANNED', cls: r.scanned ? 'good' : 'warn' }]));
+      sec.appendChild(card(r.name, T('sysmap.ruinLine', {
+        size: r.size,
+        civ: this.i18n.content('ruinCiv', r.civTag, r.civTag),
+        age: r.ageGyr.toFixed(1),
+      }), r.description, [{ text: r.scanned ? T('sysmap.scanned') : T('sysmap.unscanned'), cls: r.scanned ? 'good' : 'warn' }]));
     }
     for (const a of sys.anomalies) {
-      sec.appendChild(card(a.name, `Anomaly (${a.kind}) · hazard ${(a.hazard * 100).toFixed(0)}%`, `Resources: ${a.resources.join(', ')}`));
+      sec.appendChild(card(a.name, T('sysmap.anomalyLine', {
+        kind: this.i18n.content('anomalyKind', a.kind, a.kind), p: (a.hazard * 100).toFixed(0),
+      }), T('sysmap.resources', {
+        list: a.resources.map((id) => this.res(id)).join(', '),
+      })));
     }
     body.appendChild(sec);
     return panel;

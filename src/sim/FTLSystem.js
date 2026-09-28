@@ -14,9 +14,9 @@ export class FTLSystem {
   canJump(fromId, toId) {
     const galaxy = this.state.galaxy;
     const shipSystem = this.state.shipSystem;
-    if (fromId === toId) return { ok: false, reason: 'Already there' };
+    if (fromId === toId) return { ok: false, reason: 'Already there', reasonKey: 'ftl.alreadyThere' };
     const distance = galaxy.distanceLy(fromId, toId);
-    if (!isFinite(distance)) return { ok: false, reason: 'No route' };
+    if (!isFinite(distance)) return { ok: false, reason: 'No route', reasonKey: 'ftl.noRoute' };
     const range = shipSystem.stats.jumpRange;
     const cost = shipSystem.jumpFuelCost(distance);
     const inRange = distance <= range;
@@ -27,6 +27,17 @@ export class FTLSystem {
         : this.state.ship.fuel < cost
           ? `Insufficient fuel (${cost} needed, ${Math.floor(this.state.ship.fuel)} available)`
           : this.state.ship.destroyed ? 'Ship destroyed' : null,
+      // Machine-readable mirror of `reason`, so the UI can localise it.
+      reasonKey: !inRange
+        ? 'ftl.outOfRange'
+        : this.state.ship.fuel < cost
+          ? 'ftl.noFuel'
+          : this.state.ship.destroyed ? 'ftl.destroyed' : null,
+      reasonVars: !inRange
+        ? { d: Math.round(distance), r: Math.round(range) }
+        : this.state.ship.fuel < cost
+          ? { need: cost, have: Math.floor(this.state.ship.fuel) }
+          : {},
       distanceLy: distance,
       fuelCost: cost,
       inRange,
@@ -73,7 +84,9 @@ export class FTLSystem {
   /** Refuel at a station or by scooping a gas giant. */
   refuel(amount = 50, cost = 0) {
     const ship = this.state.ship;
-    if (cost > 0 && this.state.player.credits < cost) return { ok: false, reason: 'Not enough credits' };
+    if (cost > 0 && this.state.player.credits < cost) {
+      return { ok: false, reason: 'Not enough credits', reasonKey: 'ftl.notEnoughCredits' };
+    }
     const before = ship.fuel;
     ship.fuel = Math.min(ship.maxFuel, ship.fuel + amount);
     if (cost > 0) this.state.player.credits -= cost;

@@ -10,7 +10,7 @@ vendored in `vendor/`.
 
 ```bash
 npm start      # http://localhost:8080
-npm test       # 54 headless tests
+npm test       # 69 headless tests
 npm run check  # syntax check every source file
 ```
 
@@ -65,7 +65,8 @@ early.
 | `R` | Respawn after destruction · reset map view |
 | `I` `U` `K` `L` `J` `B` `A` `P` `N` | Cargo · ship · skills · tech · archaeology · civilisations · archive · missions · system map |
 | `N` | System map |
-| `Esc` | Close modal → panel → map → pause |
+| `F2` | Settings: language, audio volumes, narration |
+| `Esc` | Close modal → settings → panel → map → pause |
 
 ## Layout
 
@@ -78,8 +79,9 @@ src/sim/                  12 simulation systems (ship, resources, skills, tech, 
                           archaeology, civilisations, quests, events, FTL, combat, state)
 src/render/               shaders, object factories, input, controls, 3 scenes
 src/states/               state machine + space / surface / map states
-src/ui/                   notifications, HUD, panels, modals, galactic map, main menu
+src/ui/                   notifications, HUD, panels, modals, galactic map, main menu, settings
 data/                     11 JSON content packs (all game content lives here)
+data/i18n/                interface + content translations (`en`, `zh`)
 vendor/three.module.js    Three.js r0.160.1
 tests/                    simulation, content, UI, scene and playthrough suites
 docs/                     design + architecture
@@ -87,3 +89,19 @@ docs/                     design + architecture
 
 All game content is data-driven: adding a civilisation, quest, technology,
 resource or event is a JSON edit, validated by `tests/test_content.mjs`.
+
+## Languages & narration
+
+The interface is bilingual — English and Chinese — and the switch is global:
+pick a language in the main menu or press `F2`, and the HUD, panels, modals,
+galactic map, generated system descriptions, dialogue and quest text all change
+at once, including whatever was already on screen. `data/i18n/` holds the
+dictionaries; `zh` additionally carries a content pack that translates every
+resource, technology, skill, civilization, artifact, quest, event, era and
+dialogue line, plus the procedurally generated prose tables.
+`tests/test_i18n.mjs` fails the build if a key is missing, dead or untranslated.
+
+`F2` also holds the audio mix (master, music, SFX, ambience) and a narration
+toggle: when on, transmissions, artifact analysis and mission reports are read
+aloud through the browser's speech engine. Preferences persist across sessions;
+with narration off the game is identical and silent.

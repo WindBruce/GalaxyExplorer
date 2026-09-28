@@ -64,9 +64,11 @@ export class QuestSystem {
   /** Start a quest, resolving 'any' targets against the galaxy. */
   start(questId) {
     const tpl = this.template(questId);
-    if (!tpl) return { ok: false, reason: 'Unknown quest' };
-    if (this.isActive(questId)) return { ok: false, reason: 'Already active' };
-    if (this.completed.some((q) => q.id === questId)) return { ok: false, reason: 'Already completed' };
+    if (!tpl) return { ok: false, reason: 'Unknown quest', reasonKey: 'sim.unknownQuest' };
+    if (this.isActive(questId)) return { ok: false, reason: 'Already active', reasonKey: 'sim.questActive' };
+    if (this.completed.some((q) => q.id === questId)) {
+      return { ok: false, reason: 'Already completed', reasonKey: 'sim.questComplete' };
+    }
 
     const objectives = tpl.objectives.map((o, i) => this._resolveObjective(questId, o, i));
     const quest = {

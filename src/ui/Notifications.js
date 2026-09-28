@@ -3,6 +3,8 @@ export class Notifications {
   constructor(root) {
     this.root = root;
     this.items = [];
+    /** Set by the Game so notifications can be narrated (see Settings). */
+    this.onSpeak = null;
   }
 
   /**
@@ -10,8 +12,9 @@ export class Notifications {
    * @param {string|null} body
    * @param {'info'|'good'|'warn'|'danger'|'scan'|'mine'|'ftl'|'system'} kind
    * @param {number} ttl ms
+   * @param {boolean} speak read the notification aloud when narration is on
    */
-  notify(title, body = null, kind = 'info', ttl = 6500) {
+  notify(title, body = null, kind = 'info', ttl = 6500, speak = false) {
     const el = document.createElement('div');
     el.className = `notif ${kind}`;
     const t = document.createElement('div');
@@ -26,6 +29,7 @@ export class Notifications {
     }
     this.root.appendChild(el);
     this.items.push(el);
+    if (speak) this.onSpeak?.(`${title}. ${body ?? ''}`.trim());
     // Keep the stack short.
     while (this.items.length > 5) {
       const old = this.items.shift();

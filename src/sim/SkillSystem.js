@@ -23,14 +23,26 @@ export class SkillSystem {
   }
 
   canUnlock(id) {
-    if (this.has(id)) return { ok: false, reason: 'Already learned' };
+    if (this.has(id)) return { ok: false, reason: 'Already learned', reasonKey: 'sim.alreadyLearned' };
     const node = this.data[id];
-    if (!node) return { ok: false, reason: 'Unknown skill' };
+    if (!node) return { ok: false, reason: 'Unknown skill', reasonKey: 'sim.unknownSkill' };
     for (const req of node.requires ?? []) {
-      if (!this.has(req)) return { ok: false, reason: `Requires ${this.data[req]?.name ?? req}` };
+      if (!this.has(req)) {
+        return {
+          ok: false,
+          reason: `Requires ${this.data[req]?.name ?? req}`,
+          reasonKey: 'sim.needsSkill',
+          reasonVars: { name: this.data[req]?.name ?? req },
+        };
+      }
     }
     if (this.state.player.skillPoints < node.cost) {
-      return { ok: false, reason: `Requires ${node.cost} skill point${node.cost > 1 ? 's' : ''}` };
+      return {
+        ok: false,
+        reason: `Requires ${node.cost} skill point${node.cost > 1 ? 's' : ''}`,
+        reasonKey: node.cost > 1 ? 'sim.needsPointsPlural' : 'sim.needsPointsOne',
+        reasonVars: { n: node.cost },
+      };
     }
     return { ok: true };
   }

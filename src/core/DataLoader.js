@@ -82,3 +82,27 @@ export async function loadAllData() {
   out.regions = out.regions.regions;
   return out;
 }
+
+/**
+ * Load the interface dictionaries plus the per-locale content packs.
+ * Returns `{ en: {...}, zh: {...} }`, ready for `i18n.load()`.
+ *
+ * English has no separate content pack: the data files themselves are the
+ * English source, and `i18n.content()` falls back to them.
+ */
+export async function loadI18nPacks() {
+  const locales = ['en', 'zh'];
+  const packs = {};
+  await Promise.all(locales.map(async (loc) => {
+    const ui = await loadData(`i18n/${loc}`);
+    const merged = { ...ui };
+    try {
+      const content = await loadData(`i18n/content/${loc}`);
+      Object.assign(merged, content);
+    } catch {
+      /* no content pack for this locale: data files stay the source */
+    }
+    packs[loc] = merged;
+  }));
+  return packs;
+}

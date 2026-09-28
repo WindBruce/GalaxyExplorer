@@ -9,10 +9,12 @@
  * by ArchaeologySystem + the timeline.
  */
 import { Rng, hashString } from '../core/Random.js';
+import { i18n } from '../core/I18n.js';
 
 export class CivilizationSystem {
   constructor(state) {
     this.state = state;
+    this.i18n = i18n;
     /** @type {Map<string, object>} */
     this.instances = new Map();
     this._init();
@@ -204,7 +206,10 @@ export class CivilizationSystem {
             civ.politics = 'at war';
             const other = this.get(target);
             if (other && !other.warWith.includes(civ.id)) other.warWith.push(civ.id);
-            this._recordPhenomenon(`${civ.name} declares war on ${other?.name ?? target}`, 'A border dispute escalates. Trade routes through the region will suffer.');
+            this._recordPhenomenon('civ.politics.war', {
+              a: this.i18n.content('civilization', civ.id, civ.name, 'name'),
+              b: this.i18n.content('civilization', target, other?.name ?? target, 'name'),
+            });
           }
         } else if (roll < 0.6) {
           const target = rng.pick(Object.keys(civ.relations));
@@ -213,7 +218,10 @@ export class CivilizationSystem {
             if (!civ.warWith.length) civ.politics = 'stable';
             const other = this.get(target);
             if (other) other.warWith = other.warWith.filter((w) => w !== civ.id);
-            this._recordPhenomenon(`Ceasefire between ${civ.name} and ${other?.name ?? target}`, 'Both sides claim victory. Both sides are relieved.');
+            this._recordPhenomenon('civ.politics.ceasefire', {
+              a: this.i18n.content('civilization', civ.id, civ.name, 'name'),
+              b: this.i18n.content('civilization', target, other?.name ?? target, 'name'),
+            });
           }
         } else if (roll < 0.8) {
           const target = rng.pick(Object.keys(civ.relations));
@@ -221,21 +229,33 @@ export class CivilizationSystem {
             civ.alliedWith.push(target);
             const other = this.get(target);
             if (other && !other.alliedWith.includes(civ.id)) other.alliedWith.push(civ.id);
-            this._recordPhenomenon(`${civ.name} and ${other?.name ?? target} sign a mutual defence pact`, 'The balance of the region shifts.');
+            this._recordPhenomenon('civ.politics.pact', {
+              a: this.i18n.content('civilization', civ.id, civ.name, 'name'),
+              b: this.i18n.content('civilization', target, other?.name ?? target, 'name'),
+            });
           }
         } else {
           civ.migrationTarget = rng.pick(['coreward', 'rimward', 'unknownRegions']);
           civ.politics = 'migrating';
-          this._recordPhenomenon(`${civ.name} begins a great migration ${civ.migrationTarget}`, 'Thousands of hulls, one direction, and a great deal of fear.');
+          this._recordPhenomenon('civ.politics.migration', {
+            a: this.i18n.content('civilization', civ.id, civ.name, 'name'),
+            dir: this.i18n.t(`civ.direction.${civ.migrationTarget}`, {}),
+          });
         }
       }
     }
   }
 
-  _recordPhenomenon(title, text) {
-    const id = `phen_${title.replace(/\W+/g, '_').slice(0, 40)}_${Math.floor(this.state.clock.stardate)}`;
+  /**
+   * Record a political shift. `key` is an i18n key with `.title` / `.text`
+   * suffixes so the notification and the archive entry are localised.
+   */
+  _recordPhenomenon(key, vars = {}) {
+    const title = this.i18n.t(`${key}.title`, vars);
+    const text = this.i18n.t(`${key}.text`, vars);
+    const id = `phen_${key.replace(/\W+/g, '_').slice(0, 40)}_${Math.floor(this.state.clock.stardate)}`;
     this.state.archive.add('phenomenon', id, { name: title, summary: text, meta: { at: this.state.clock.stardate } });
-    this.state.bus.emit('civ:politics', { title, text });
+    this.state.bus.emit('civ:politics', { title, text, key });
   }
 
   /**

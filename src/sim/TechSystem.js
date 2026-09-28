@@ -63,16 +63,21 @@ export class TechSystem {
 
   canResearch(id) {
     const tech = this.data[id];
-    if (!tech) return { ok: false, reason: 'Unknown technology' };
-    if (this.has(id)) return { ok: false, reason: 'Already researched' };
-    if (tech.requiresArtifact) return { ok: false, reason: 'Reconstruct from an artifact' };
-    if (!this._prereqsMet(tech)) return { ok: false, reason: 'Prerequisites not met' };
+    if (!tech) return { ok: false, reason: 'Unknown technology', reasonKey: 'sim.unknownTech' };
+    if (this.has(id)) return { ok: false, reason: 'Already researched', reasonKey: 'sim.alreadyResearched' };
+    if (tech.requiresArtifact) return { ok: false, reason: 'Reconstruct from an artifact', reasonKey: 'sim.artifactOnly' };
+    if (!this._prereqsMet(tech)) return { ok: false, reason: 'Prerequisites not met', reasonKey: 'sim.prereqs' };
     const cost = tech.cost ?? { research: 0, resources: {} };
     if (this.state.research.points < cost.research) {
-      return { ok: false, reason: `Requires ${cost.research} research points` };
+      return {
+        ok: false,
+        reason: `Requires ${cost.research} research points`,
+        reasonKey: 'sim.needsPoints',
+        reasonVars: { n: cost.research },
+      };
     }
     if (!this.state.resources.canAfford(cost.resources ?? {})) {
-      return { ok: false, reason: 'Missing required materials' };
+      return { ok: false, reason: 'Missing required materials', reasonKey: 'sim.needsMaterials' };
     }
     return { ok: true };
   }

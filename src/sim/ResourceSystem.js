@@ -84,8 +84,10 @@ export class ResourceSystem {
   /** Buy from a civilisation market. */
   buy(id, qty, civId) {
     const price = this.price(id, civId) * qty;
-    if (this.state.player.credits < price) return { ok: false, reason: 'Not enough credits' };
-    if (this.free < qty) return { ok: false, reason: 'Cargo hold full' };
+    if (this.state.player.credits < price) {
+      return { ok: false, reason: 'Not enough credits', reasonKey: 'ftl.notEnoughCredits' };
+    }
+    if (this.free < qty) return { ok: false, reason: 'Cargo hold full', reasonKey: 'sim.cargoFull' };
     this.state.player.credits -= price;
     this.add(id, qty);
     return { ok: true, price };
@@ -95,7 +97,7 @@ export class ResourceSystem {
   sell(id, qty, civId) {
     const have = this.amount(id);
     const amount = Math.min(have, qty);
-    if (amount <= 0) return { ok: false, reason: 'Nothing to sell' };
+    if (amount <= 0) return { ok: false, reason: 'Nothing to sell', reasonKey: 'sim.nothingToSell' };
     const price = Math.round(this.price(id, civId) * amount * 0.8);
     this.state.player.credits += price;
     this.remove(id, amount);

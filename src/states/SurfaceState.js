@@ -13,6 +13,7 @@ import { makeCharacter, makeBeam } from '../render/Objects.js';
 export class SurfaceState {
   constructor(game) {
     this.game = game;
+    this.i18n = game.i18n;
     this.name = 'surface';
     // Built on enter(): see SpaceState._ensureScene().
     this.scene = null;
@@ -70,8 +71,12 @@ export class SurfaceState {
     game.ui.hud.setPlanet(planet, ruin);
     game.ui.hud.show();
     game.ui.notify(
-      `Landed on ${planet.name}`,
-      `${planet.description}${planet.life ? '' : ' No biosignatures.'}${ruin ? ` Ruin site: ${ruin.name}.` : ''}`,
+      this.i18n.t('state.landed', { name: planet.name }),
+      this.i18n.t('state.landedBody', {
+        desc: planet.description,
+        life: planet.life ? '' : this.i18n.t('gen.noLife'),
+        ruin: ruin ? this.i18n.t('state.landedRuin', { name: ruin.name }) : '',
+      }),
       'landing'
     );
     state.bus.emit('surface:entered', { planetId: planet.id });
@@ -112,7 +117,11 @@ export class SurfaceState {
       if (damage > 0.5) {
         state.ship.applyDamage(damage, 'environmental');
         if (Math.random() < 0.4) {
-          game.ui.notify('Environmental damage', `Hull integrity dropping on the surface of ${planet.name}.`, 'warn');
+          game.ui.notify(
+            this.i18n.t('state.envDamage'),
+            this.i18n.t('state.envDamageBody', { name: planet.name }),
+            'warn'
+          );
         }
       }
     }
@@ -133,10 +142,12 @@ export class SurfaceState {
 
     // --- Prompts ---------------------------------------------------------
     let prompt = null;
-    if (node) prompt = `[Hold LMB] Extract ${state.data.resources[node.resourceId]?.name ?? node.resourceId}`;
-    if (artifact) prompt = `[E] Excavate artifact`;
+    if (node) prompt = this.i18n.t('state.extract', {
+      name: this.i18n.content('resource', node.resourceId, state.data.resources[node.resourceId]?.name ?? node.resourceId),
+    });
+    if (artifact) prompt = this.i18n.t('state.excavate');
     const distToShipSpawn = Math.hypot(charPos.x, charPos.z);
-    if (distToShipSpawn < 14) prompt = '[F] Return to ship';
+    if (distToShipSpawn < 14) prompt = this.i18n.t('state.return');
     this.game.ui.hud.setPrompt(prompt);
 
     if (input.justPressed('KeyF') && distToShipSpawn < 14) {
@@ -146,7 +157,7 @@ export class SurfaceState {
     }
     if (input.justPressed('KeyV')) {
       const mode = this.controls.toggleCamera();
-      game.ui.notify(mode === 'first' ? 'First person' : 'Third person', null, 'info');
+      game.ui.notify(mode === 'first' ? this.i18n.t('state.firstPerson') : this.i18n.t('state.thirdPerson'), null, 'info');
     }
     if (input.justPressed('KeyM')) {
       game.states.change('map');
@@ -203,8 +214,12 @@ export class SurfaceState {
       const got = this.scene.mineNode(node, this.game.state.shipSystem.stats.miningYield);
       if (got?.amount > 0) {
         this.game.ui.notify(
-          'Extracted',
-          `${this.game.state.data.resources[got.resourceId]?.name ?? got.resourceId} +${got.amount}`,
+          this.i18n.t('state.extracted'),
+          this.i18n.t('state.extractedBody', {
+            name: this.i18n.content('resource', got.resourceId,
+              this.game.state.data.resources[got.resourceId]?.name ?? got.resourceId),
+            qty: got.amount,
+          }),
           'mine'
         );
       }
@@ -221,8 +236,12 @@ export class SurfaceState {
     state.stats.artifactsFound += 1;
     state.addXp(150);
     this.game.ui.notify(
-      `Recovered: ${def.name}`,
-      `${def.desc} Analyse it in the Archaeology Archive [J].`,
+      this.i18n.t('state.recovered', {
+        name: this.i18n.content('artifact', def.id, def.name, 'name'),
+      }),
+      this.i18n.t('state.recoveredBody', {
+        desc: this.i18n.content('artifact', def.id, def.desc, 'desc'),
+      }),
       'artifact'
     );
     // Discovering a ruin site on the ground also counts.

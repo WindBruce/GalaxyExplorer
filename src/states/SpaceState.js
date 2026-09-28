@@ -17,6 +17,7 @@ const SCAN_RANGE_FACTOR = 6.0;
 export class SpaceState {
   constructor(game) {
     this.game = game;
+    this.i18n = game.i18n;
     this.name = 'space';
     // Built on enter(): Game constructs the states before boot() creates the
     // GameState, and loading a save replaces that state object entirely.
@@ -69,7 +70,15 @@ export class SpaceState {
 
     game.ui.hud.setSystem(system);
     game.ui.hud.show();
-    game.ui.notify(`Arrived at ${system.name}`, system.summary, 'system');
+    game.ui.notify(
+      this.i18n.t('state.arrived', { name: system.name }),
+      this.i18n.t('gen.systemSummary', {
+        star: this.i18n.content('starclass', system.star.classId, system.star.classLabel, 'label'),
+        planets: this.i18n.tp('gen.planets', system.planets.length, { n: system.planets.length }),
+        extras: system.summary,
+      }),
+      'system'
+    );
 
     // Intro event roll when arriving somewhere new.
     this._rollEvent(true);
@@ -103,7 +112,7 @@ export class SpaceState {
     if (!state || !this.scene || !this.controls) return;
 
     if (state.ship.destroyed) {
-      game.ui.hud.setPrompt('SHIP DESTROYED - press R to respawn at the last station');
+      game.ui.hud.setPrompt(this.i18n.t('state.destroyed'));
       if (input.justPressed('KeyR')) this._respawn();
       return;
     }
@@ -170,7 +179,7 @@ export class SpaceState {
     // --- Camera / mode keys ----------------------------------------------
     if (input.justPressed('KeyV')) {
       const mode = this.controls.toggleCamera();
-      game.ui.notify(mode === 'first' ? 'Cockpit view' : 'External view', null, 'info');
+      game.ui.notify(mode === 'first' ? this.i18n.t('state.cockpit') : this.i18n.t('state.external'), null, 'info');
     }
     if (input.justPressed('KeyM')) {
       game.states.change('map');
@@ -200,7 +209,7 @@ export class SpaceState {
     if (!candidates.length) return;
     const idx = this.target ? candidates.findIndex((b) => b.name === this.target.name) : -1;
     this.target = candidates[(idx + 1) % candidates.length];
-    this.game.ui.notify(`Target: ${this.target.name}`, this.target.label, 'info');
+    this.game.ui.notify(this.i18n.t('state.target', { name: this.target.name }), this.target.label, 'info');
   }
 
   _startScan(body) {
@@ -209,7 +218,11 @@ export class SpaceState {
     const dist = body.object.getWorldPosition(new THREE.Vector3()).distanceTo(this.scene.shipObject.position);
     const range = state.shipSystem.stats.scanRange * 900 + body.radius * 3;
     if (dist > range) {
-      this.game.ui.notify('Out of scanner range', `Target is ${Math.round(dist)} units away.`, 'warn');
+      this.game.ui.notify(
+      this.i18n.t('state.outOfRange'),
+      this.i18n.t('state.outOfRangeBody', { n: Math.round(dist) }),
+      'warn'
+    );
       return;
     }
     this.scanning = body;
@@ -226,25 +239,41 @@ export class SpaceState {
     state.markScanned(body.data, body.kind);
     this.game.ui.hud.setScan({ active: false, name: body.name, progress: 1 });
     const info = this._describe(body);
-    this.game.ui.notify(`Scan complete: ${body.name}`, info, 'scan');
+    this.game.ui.notify(this.i18n.t('state.scanComplete', { name: body.name }), info, 'scan');
     this.game.ui.showScanResult(body, info);
   }
 
   _describe(body) {
     const d = body.data;
+    const T = (k, v) => this.i18n.t(k, v);
+    const list = (ids) => ids.map((id) => this.i18n.content('resource', id, id)).join(', ');
     switch (body.kind) {
       case 'planet':
-        return `${d.description} Resources: ${d.resources.map((r) => `${r.id} x${r.quantity}`).join(', ')}.`;
+        return T('gen.scanPlanet', {
+          desc: d.description,
+          list: d.resources.map((r) => `${list([r.id])} x${r.quantity}`).join(', '),
+        });
       case 'star':
-        return `${d.classLabel} (${d.spectral}), ${d.temp}K, mass ${d.mass.toFixed(2)} M☉, age ${d.ageGyr.toFixed(1)} Gyr.`;
+        return T('gen.scanStar', {
+          label: this.i18n.content('starclass', d.classId, d.classLabel, 'label'),
+          spectral: d.spectral, temp: d.temp,
+          mass: d.mass.toFixed(2), age: d.ageGyr.toFixed(1),
+        });
       case 'station':
-        return `${d.kind}${d.derelict ? ' (derelict)' : ''}, owner: ${d.owner ?? 'none'}.`;
+        return T('gen.scanStation', {
+          kind: T(`label.stationkind.${d.kind}`, {}),
+          derelict: d.derelict ? ` (${T('modal.derelict')})` : '',
+          owner: d.owner ? this.i18n.content('civilization', d.owner, d.owner, 'name') : T('cargo.unknown'),
+        });
       case 'ruin':
-        return `${d.description} Estimated age: ${d.ageGyr.toFixed(1)} Gyr.`;
+        return T('gen.scanRuin', { desc: d.description, age: d.ageGyr.toFixed(1) });
       case 'anomaly':
-        return `Anomalous region (${d.kind}). Hazard ${(d.hazard * 100).toFixed(0)}%. Resources: ${d.resources.join(', ')}.`;
+        return T('gen.scanAnomaly', {
+          kind: this.i18n.content('anomalyKind', d.kind, d.kind),
+          p: (d.hazard * 100).toFixed(0), list: list(d.resources),
+        });
       case 'asteroid':
-        return `Composition: ${d.resources.map((r) => r.id).join(', ')}.`;
+        return T('gen.scanAsteroid', { list: list(d.resources.map((r) => r.id)) });
       default:
         return '';
     }
@@ -273,7 +302,7 @@ export class SpaceState {
       const resources = asteroid.object.userData.resources ?? this.target?.data?.resources ?? [{ id: 'iron', quantity: 100 }];
       const got = this.game.state.resources.mine(resources, this.game.state.shipSystem.stats.miningYield);
       const names = Object.entries(got).map(([id, q]) => `${id} +${q}`).join(', ');
-      if (names) this.game.ui.notify('Extracted', names, 'mine');
+      if (names) this.game.ui.notify(this.i18n.t('state.extracted'), names, 'mine');
     }
     this._mineCooldown -= 1 / 60;
   }
@@ -375,19 +404,22 @@ export class SpaceState {
         const d = world.distanceTo(shipPos);
         if (b.data.landable && d < b.radius * LAND_DISTANCE_FACTOR) {
           this.landPrompt = { planet: b.data, body: b, distance: d };
-          prompt = `[G] Land on ${b.data.name} (${b.data.typeLabel})`;
+          prompt = this.i18n.t('state.land', {
+            name: b.data.name,
+            type: this.i18n.content('planettype', b.data.type, b.data.typeLabel, 'label'),
+          });
         }
       } else if (b.kind === 'station') {
         const world = b.object.getWorldPosition(new THREE.Vector3());
         const d = world.distanceTo(shipPos);
         if (d < DOCK_DISTANCE) {
           this.dockPrompt = { station: b.data, distance: d };
-          prompt = `[G] Dock at ${b.data.name}`;
+          prompt = this.i18n.t('state.dock', { name: b.data.name });
         }
       } else if (b.kind === 'anomaly') {
         const world = b.object.getWorldPosition(new THREE.Vector3());
         const d = world.distanceTo(shipPos);
-        if (d < b.radius * 1.2) prompt = `[T] Scan anomaly: ${b.data.name}`;
+        if (d < b.radius * 1.2) prompt = this.i18n.t('state.scanAnomaly', { name: b.data.name });
       }
     }
     this.game.ui.hud.setPrompt(prompt);
@@ -420,7 +452,7 @@ export class SpaceState {
     this.scene.build(home);
     this.controls = new FlightControls(this.game.camera, this.scene.shipObject);
     this.controls.reset();
-    this.game.ui.notify('Rescue tow', 'You were recovered and repaired at Station Kepler\'s Rest. A bill was invoiced to your account.', 'warn');
+    this.game.ui.notify(this.i18n.t('state.respawn'), this.i18n.t('state.respawnBody'), 'warn');
     state.player.credits = Math.max(0, state.player.credits - 4000);
   }
 
@@ -430,10 +462,10 @@ export class SpaceState {
     if (this._warnTimer > 0) return;
     this._warnTimer = 12;
     if (state.ship.fuel < state.ship.maxFuel * 0.15) {
-      this.game.ui.notify('Low fuel', 'Refuel at a station or scoop a gas giant before jumping again.', 'warn');
+      this.game.ui.notify(this.i18n.t('state.lowFuel'), this.i18n.t('state.lowFuelBody'), 'warn');
     }
     if (state.ship.hull < state.ship.maxHull * 0.3) {
-      this.game.ui.notify('Hull critical', 'Dock at a station for repairs.', 'warn');
+      this.game.ui.notify(this.i18n.t('state.hullCritical'), this.i18n.t('state.hullCriticalBody'), 'warn');
     }
   }
 

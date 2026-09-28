@@ -4,7 +4,8 @@
  * a stub. Lets the whole gameplay loop be driven headlessly.
  */
 import * as THREE from '../../vendor/three.module.js';
-import { loadAllData } from '../../src/core/DataLoader.js';
+import { loadAllData, loadI18nPacks } from '../../src/core/DataLoader.js';
+import { i18n } from '../../src/core/I18n.js';
 import { GameState } from '../../src/sim/GameState.js';
 import { Notifications } from '../../src/ui/Notifications.js';
 import { HUD } from '../../src/ui/HUD.js';
@@ -46,6 +47,7 @@ export class FakeInput {
 
 export async function makeGame(seed = 'playthrough') {
   const dom = await installDom('index.html');
+  i18n.load(await loadI18nPacks());
   const data = await loadAllData();
   const state = new GameState(data);
   state.newGame(seed, 'Play Tester');
@@ -53,6 +55,7 @@ export async function makeGame(seed = 'playthrough') {
   const game = {
     state,
     data,
+    i18n,
     scene: new THREE.Scene(),
     camera: new THREE.PerspectiveCamera(68, 16 / 9, 0.35, 90000),
     renderer: {
@@ -67,6 +70,7 @@ export async function makeGame(seed = 'playthrough') {
     states: null,
     save: { save: () => ({ ok: true }), load: () => ({ ok: true }), peek: () => null, allSlots: () => [], remove() {} },
     notify(title, body, kind, ttl) { this.notifications.push({ title, body, kind, ttl }); },
+    narrate() {},
   };
   game.ui.notify = (...a) => game.notify(...a);
   game.ui.hud = new HUD(game);
@@ -74,6 +78,7 @@ export async function makeGame(seed = 'playthrough') {
   game.ui.modals = new Modals(game);
   game.ui.map = new GalacticMapUI(game);
   game.ui.menu = new MainMenu(game);
+  game.ui.settings = { speak() {}, isOpen: () => false, open() {}, close() {} };
   Object.assign(game.ui, {
     showEvent: (ev) => game.ui.modals.showEvent(ev),
     showStation: (s) => game.ui.modals.showStation(s),

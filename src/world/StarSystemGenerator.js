@@ -8,6 +8,7 @@
  * detail pass (used when the player actually arrives).
  */
 import { Rng } from '../core/Random.js';
+import { i18n } from '../core/I18n.js';
 import { planetName, starName, siteName, anomalyName } from './NameGen.js';
 
 /** Gameplay scale constants. Real units are kept for stats; rendering uses these. */
@@ -380,7 +381,7 @@ function generatePlanet(rng, star, starClass, regionId, systemSeed, index, au) {
     surfaceNodes: hasLife || type !== 'barren' ? prng.int(3, 9) : prng.int(1, 4),
     description: '',
   };
-  planet.description = describePlanet(planet, star);
+  planet.description = describePlanet(planet);
   return planet;
 }
 
@@ -496,56 +497,59 @@ function generateRuin(rng, system, index) {
 }
 
 function describeRuin(rng, civTag, size) {
-  const civNames = { aelthera: "Ael'thera", synthari: 'Synthari', korrathi: 'Korrathi', veshari: 'Veshari', unknown: 'an unidentified people', shepherd: 'something that left no name' };
-  const sizeWords = {
-    outpost: 'A compact structure, half-swallowed by the regolith',
-    city: 'A city, laid out on a geometry that predates the local mountain range',
-    megastructure: 'A structure of planetary scale, its purpose not recoverable from the outside',
-  };
-  const tail = [
-    'Nothing here has eroded the way it should.',
-    'The interior power is still live.',
-    'Something has been maintaining this place.',
-    'The dust inside is arranged in layers, each layer a different age.',
-    'Corridors run in directions that fight the local gravity.',
-    'Every surface bears the same symbol, cut to a depth no tool of ours can match.',
-  ];
-  return `${sizeWords[size]}. Stratigraphy attributes it to ${civNames[civTag] ?? 'unknown builders'}. ${rng.pick(tail)}`;
+  const T = (k) => i18n.t(k);
+  const civ = i18n.content('ruinCiv', civTag, 'unknown builders');
+  return `${T(`content.ruinSize.${size}`)}. ${i18n.t('gen.ruinAttribution', { civ })} ${T(`content.ruinTail.${rng.pickIndex(6)}`)}`;
 }
 
-function describeLife(rng, type) {
-  const pools = {
-    terrestrial: [' microbial mats in the soil', ' shallow-rooted flora and small hexapod grazers', ' a full trophic web, none of it familiar'],
-    ocean: [' drifting plankton-analogues', ' reef structures visible from orbit', ' something large, moving slowly at depth'],
-    desert: [' endolithic life inside the rocks', ' a single opportunistic bloom species', ' nocturnal burrowers'],
-    ice: [' cryophilic mats under the ice', ' vent ecosystems at the ice-rock boundary', ' nothing visible, but the methane is wrong'],
-    volcanic: [' thermophilic films around fissures', ' sulphur-metabolising mats', ' nothing that should work, working'],
-    toxic: [' acid-tolerant films', ' metal-accumulating crusts', ' slow, patient chemistry that is definitely alive'],
-    tidallyLocked: [' a band of flora at the terminator', ' migratory grazers following the twilight', ' life in the twilight band and something else in the dark'],
-    exotic: [' a standing field that is, by some definitions, alive', ' structures that grow and then stop', ' life, if the word applies'],
-  };
-  return `Detected:${rng.pick(pools[type] ?? pools.terrestrial)}.`;
+/**
+ * Life-description pool sizes. The index comes from the seeded RNG, so the same
+ * seed always yields the same phrase; only the wording follows the language.
+ * Keys must stay in the order the generator uses them (no RNG-stream change).
+ */
+const LIFE_POOLS = {
+  terrestrial: 3, ocean: 3, desert: 3, ice: 3,
+  volcanic: 3, toxic: 3, tidallyLocked: 3, exotic: 3,
+};
+
+/**
+ * Human-readable text for generated content. Every string lives in the i18n
+ * packs (`gen.*` / `content.*`) so the same seed produces the same structure in
+ * any language; only the prose follows the player's locale.
+ */
+export function describeLife(rng, type) {
+  const size = LIFE_POOLS[type] ?? LIFE_POOLS.terrestrial;
+  return `Detected:${i18n.t(`content.life.${type}.${rng.pickIndex(size)}`, {})}.`;
 }
 
-function describePlanet(planet, star) {
-  const t = planet.typeLabel;
-  const tempC = Math.round(planet.tempK - 273);
-  const g = planet.gravity.toFixed(2);
-  const lock = planet.tidallyLocked ? ' Tidally locked: one face in permanent day, the other in permanent night.' : '';
-  const life = planet.life ? ' Biosignatures confirmed.' : ' No biosignatures.';
-  const ring = planet.ring ? ' Prominent ring system.' : '';
-  return `${t}, ${planet.radiusKm.toFixed(0)} km radius, ${g}g, mean ${tempC}C. ${planet.atmosphere.name} atmosphere at ${planet.atmosphere.pressure.toFixed(2)} atm.${lock}${ring}${life}`;
+export function describePlanet(planet) {
+  const T = (k, v) => i18n.t(k, v);
+  return T('gen.planetLine', {
+    type: i18n.content('planettype', planet.type, planet.typeLabel, 'label'),
+    radius: planet.radiusKm.toFixed(0),
+    g: planet.gravity.toFixed(2),
+    temp: Math.round(planet.tempK - 273),
+    atmosphere: i18n.content('atmosphere', planet.atmosphere.name, planet.atmosphere.name),
+    pressure: planet.atmosphere.pressure.toFixed(2),
+    lock: planet.tidallyLocked ? T('gen.tidallyLocked') : '',
+    ring: planet.ring ? T('gen.ring') : '',
+    life: planet.life ? T('gen.life') : T('gen.noLife'),
+  });
 }
 
-function summarizeSystem(system) {
-  const bits = [system.star.classLabel];
-  bits.push(`${system.planets.length} ${system.planets.length === 1 ? 'planet' : 'planets'}`);
-  if (system.planets.some((p) => p.life)) bits.push('biosignatures');
-  if (system.ruins.length) bits.push(`${system.ruins.length} ruin${system.ruins.length > 1 ? 's' : ''}`);
-  if (system.stations.length) bits.push('station');
-  if (system.anomalies.length) bits.push('anomaly');
-  if (system.star.classId === 'blackHole') bits.push('EXTREME HAZARD');
-  if (system.star.isPulsar) bits.push('pulsar');
+/** One-line dossier used by the galactic map and arrival toasts. */
+export function summarizeSystem(system) {
+  const T = (k, v) => i18n.t(k, v);
+  const bits = [i18n.content('starclass', system.star.classId, system.star.classLabel, 'label')];
+  bits.push(T('gen.planets', { n: system.planets.length }));
+  const extras = [];
+  if (system.planets.some((p) => p.life)) extras.push(T('gen.biosignatures'));
+  if (system.ruins.length) extras.push(T('gen.ruins', { n: system.ruins.length }));
+  if (system.stations.length) extras.push(T('gen.station'));
+  if (system.anomalies.length) extras.push(T('gen.anomaly'));
+  if (system.star.classId === 'blackHole') extras.push(T('gen.extremeHazard'));
+  if (system.star.isPulsar) extras.push(T('gen.pulsar'));
+  if (extras.length) bits.push(extras.join(' · '));
   return bits.join(' | ');
 }
 

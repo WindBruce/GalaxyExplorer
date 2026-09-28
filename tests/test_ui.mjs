@@ -72,10 +72,12 @@ async function makeUi() {
   };
   for (const [k, v] of Object.entries(globals)) setGlobal(k, v);
 
-  const { loadAllData } = await import('../src/core/DataLoader.js');
+  const { loadAllData, loadI18nPacks } = await import('../src/core/DataLoader.js');
   const { GameState } = await import('../src/sim/GameState.js');
   const { Game } = await import('../src/Game.js');
+  const { i18n } = await import('../src/core/I18n.js');
 
+  i18n.load(await loadI18nPacks());
   const data = await loadAllData();
   const state = new GameState(data);
   state.newGame('ui-test', 'UI Tester');
@@ -85,6 +87,8 @@ async function makeUi() {
   game.bus = state.bus;
   game.data = data;
   game.state = state;
+  game.i18n = i18n;
+  game.narrate = () => {};
   game.save = { save: () => ({ ok: true, bytes: 100 }), load: () => ({ ok: true }), peek: () => null, allSlots: () => [], remove() {} };
   game.input = { requestPointerLock() {}, exitPointerLock() {}, justPressed: () => false, isDown: () => false, justClicked: () => false, endFrame() {} };
   game.renderer = { domElement: window.document.createElement('canvas') };
@@ -102,7 +106,9 @@ async function makeUi() {
   game.ui.panels = new Panels(game);
   game.ui.modals = new Modals(game);
   game.ui.map = new GalacticMapUI(game);
+  game.i18n = i18n;
   game.ui.menu = new MainMenu(game);
+  game.ui.settings = { speak() {}, isOpen: () => false, open() {}, close() {} };
   game.ui.notify = (...a) => game.notifications.notify(...a);
   game.saveGame = () => ({ ok: true });
   game.loadGame = () => ({ ok: true });

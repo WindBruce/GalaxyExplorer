@@ -50,7 +50,8 @@ export class Input {
     if (tag === 'input' || tag === 'textarea' || e.target?.isContentEditable) return;
     if (!this.keys.has(e.code)) this.pressed.add(e.code);
     this.keys.add(e.code);
-    if (['Space', 'Tab', 'F5', 'Slash'].includes(e.code)) e.preventDefault();
+    // Space/Tab would scroll or move focus; F2 and F5 are browser-owned too.
+    if (['Space', 'Tab', 'F2', 'F5', 'Slash'].includes(e.code)) e.preventDefault();
   }
 
   _onKeyUp(e) {

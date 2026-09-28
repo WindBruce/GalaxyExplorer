@@ -5,6 +5,7 @@
 export class HUD {
   constructor(game) {
     this.game = game;
+    this.i18n = game.i18n;
     this.el = document.getElementById('hud');
     this.crosshair = document.getElementById('crosshair');
     this.prompt = document.getElementById('hud-prompt');
@@ -41,12 +42,16 @@ export class HUD {
   }
 
   setSystem(system) {
-    this._txt('hud-system-name', system?.name ?? '—');
+    this._txt('hud-system-name', system?.name ?? this.i18n.t('hud.unknown'));
   }
 
   setPlanet(planet, ruin) {
-    this._txt('hud-system-name', planet ? `${planet.name} — surface` : '—');
-    this._txt('hud-region', ruin ? `Ruin: ${ruin.name}` : (planet?.typeLabel ?? ''));
+    this._txt('hud-system-name', planet
+      ? this.i18n.t('hud.surface', { planet: planet.name })
+      : this.i18n.t('hud.unknown'));
+    this._txt('hud-region', ruin
+      ? this.i18n.t('hud.ruin', { name: ruin.name })
+      : this.i18n.content('planettype', planet?.type, planet?.typeLabel ?? '', 'label'));
   }
 
   setPrompt(text) {
@@ -82,9 +87,9 @@ export class HUD {
 
     if (!d.surface) {
       this._txt('hud-region', d.region || '');
-      this._txt('hud-stardate', `SD ${d.stardate.toFixed(2)}`);
+      this._txt('hud-stardate', this.i18n.t('hud.stardate', { sd: d.stardate.toFixed(2) }));
     } else {
-      this._txt('hud-stardate', `SD ${d.stardate.toFixed(2)}`);
+      this._txt('hud-stardate', this.i18n.t('hud.stardate', { sd: d.stardate.toFixed(2) }));
     }
 
     // Vitals.
@@ -98,10 +103,16 @@ export class HUD {
     this._txt('val-cargo', `${d.cargoUsed}/${d.cargoMax}`);
 
     // Ship block.
-    this._txt('hud-power', `PWR ${Math.round(d.power ?? 0)}/${Math.round(d.powerDraw ?? 0)}`);
+    this._txt('hud-power', this.i18n.t('hud.power', {
+      a: Math.round(d.power ?? 0), b: Math.round(d.powerDraw ?? 0),
+    }));
     this._txt('hud-modules', d.modules ?? '');
-    this._txt('hud-credits', `¢ ${state.player.credits.toLocaleString()}`);
-    this._txt('hud-level', `LVL ${state.player.level} · XP ${state.player.xp}/${state.xpForLevel(state.player.level)}`);
+    this._txt('hud-credits', this.i18n.t('hud.credits', { credits: state.player.credits.toLocaleString() }));
+    this._txt('hud-level', this.i18n.t('hud.level', {
+      level: state.player.level,
+      xp: state.player.xp,
+      need: state.xpForLevel(state.player.level),
+    }));
 
     // Speed.
     if (d.speed !== undefined) {
@@ -114,18 +125,20 @@ export class HUD {
       this.targetPanel.classList.remove('hidden');
       this._txt('target-name', d.target.name);
       this._txt('target-label', d.target.label);
-      this._txt('target-dist', `${Math.round(d.target.distance)} u`);
-      this._txt('target-scan', d.target.scanned ? 'Scanned' : '[T] scan');
+      this._txt('target-dist', this.i18n.t('hud.unit', { n: Math.round(d.target.distance) }));
+      this._txt('target-scan', d.target.scanned ? this.i18n.t('hud.scanned') : this.i18n.t('hud.scanPrompt'));
     } else {
       this.targetPanel.classList.add('hidden');
     }
     this.setScan(d.scanning);
 
     if (d.combat) {
-      this._txt('hud-region', `${d.region || ''} · ⚠ ${d.combat} hostile${d.combat > 1 ? 's' : ''}`);
+      this._txt('hud-region', `${d.region || ''} · ${this.i18n.tp('hud.hostiles', d.combat, { n: d.combat })}`);
     }
     if (d.surface && d.hazard > 0.4) {
-      this._txt('hud-region', `Hazard ${(d.hazard * 100).toFixed(0)}% · resist ${(d.resist ?? 1).toFixed(1)}x`);
+      this._txt('hud-region', this.i18n.t('hud.hazard', {
+        p: (d.hazard * 100).toFixed(0), r: (d.resist ?? 1).toFixed(1),
+      }));
     }
   }
 }

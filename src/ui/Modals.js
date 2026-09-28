@@ -12,6 +12,7 @@ function h(tag, cls, text) {
 export class Modals {
   constructor(game) {
     this.game = game;
+    this.i18n = game.i18n;
     this.root = document.getElementById('modal-root');
     this.current = null;
     this._dialogue = null;
@@ -35,7 +36,7 @@ export class Modals {
   }
 
   /** Generic modal. choices: [{text, disabled, onClick}] */
-  open({ title, sub, paragraphs = [], choices = [], onClose = null, wide = false }) {
+  open({ title, sub, paragraphs = [], choices = [], onClose = null, wide = false, rerender = null }) {
     this.root.innerHTML = '';
     const modal = h('div', 'modal');
     if (wide) modal.style.width = 'min(880px, 96vw)';
@@ -61,7 +62,8 @@ export class Modals {
     }
     this.root.appendChild(modal);
     this.root.classList.remove('hidden');
-    this.current = { title, onClose };
+    // Keep the full spec so a language switch can rebuild the same modal.
+    this.current = { title, sub, paragraphs, choices, onClose, wide, rerender };
     this.game.input.exitPointerLock();
     return modal;
   }
@@ -85,8 +87,8 @@ export class Modals {
       this.close();
       return;
     }
-    const choices = (node.options ?? []).map((opt) => ({
-      text: opt.text,
+    const choices = (node.options ?? []).map((opt, i) => ({
+      text: this.i18n.content('dialogue', `${d.civId}.${d.nodeId}`, opt.text, `option.${i}`),
       disabled: !this._optionAvailable(opt, civ),
       onClick: () => {
         if (opt.effects) this._applyDialogueEffects(opt.effects, d.civId);
@@ -100,10 +102,11 @@ export class Modals {
       },
     }));
     this.open({
-      title: civ.name,
-      sub: `${civ.template.government} · ${this.state.civs.reputationLabel(d.civId)}`,
-      paragraphs: [node.text],
+      title: this.i18n.content('civilization', civ.id, civ.name, 'name'),
+      sub: `${this.i18n.content('civilization', civ.id, civ.template.government, 'government')} · ${this.state.civs.reputationLabel(d.civId)}`,
+      paragraphs: [this.i18n.content('dialogue', `${d.civId}.${d.nodeId}`, node.text)],
       choices,
+      rerender: () => this._renderDialogue(),
     });
   }
 
@@ -125,57 +128,74 @@ export class Modals {
     const out = this.state.civs.applyEffects(effects);
     for (const r of out) {
       if (r.type === 'credits' && r.amount < 0) {
-        this.game.ui.notify('Credits spent', `¢${Math.abs(r.amount).toLocaleString()}`, 'info');
+        this.game.ui.notify(
+          this.i18n.t('notify.creditsSpent'),
+          this.i18n.t('missions.rewardCredits', { n: Math.abs(r.amount).toLocaleString() }),
+          'info'
+        );
       }
     }
   }
 
   // ---------------------------------------------------------------- Events
   showEvent(ev) {
+    const T = (k, v) => this.i18n.t(k, v);
+    const title = this.i18n.content('event', ev.id, ev.title, 'title');
+    const text = this.i18n.content('event', ev.id, ev.text, 'text');
     this.open({
-      title: ev.title,
-      sub: 'INCOMING TRANSMISSION',
-      paragraphs: [ev.text, '—'],
+      title,
+      sub: T('modal.incoming'),
+      paragraphs: [text, '—'],
       choices: ev.choices.map((c, i) => ({
-        text: c.text,
+        text: this.i18n.content('event', ev.id, c.text, `choice.${i}`),
         onClick: () => {
           const res = this.state.events.choose(i);
           this.open({
-            title: ev.title,
-            sub: 'OUTCOME',
-            paragraphs: [res.outcome ?? ''],
-            choices: [{ text: 'Acknowledge', onClick: () => this.close() }],
+            title,
+            sub: T('modal.outcome'),
+            paragraphs: [this.i18n.content('event', ev.id, res.outcome ?? '', `outcome.${i}`)],
+            choices: [{ text: T('modal.acknowledge'), onClick: () => this.close() }],
           });
         },
       })),
+      rerender: () => this.showEvent(ev),
     });
+    this.game.narrate(`${title}. ${text}`);
   }
 
   // ---------------------------------------------------------------- Station
   showStation(station) {
     const state = this.state;
+    const T = (k, v) => this.i18n.t(k, v);
     const civ = station.owner ? state.civs.get(station.owner) : null;
+    const civName = civ ? this.i18n.content('civilization', civ.id, civ.name, 'name') : null;
+    const kind = this.i18n.t(`label.stationkind.${station.kind}`, {});
     const paragraphs = [
-      `${station.kind}${station.derelict ? ' — DERELICT' : ''}`,
+      `${kind}${station.derelict ? ` — ${T('modal.derelict')}` : ''}`,
       station.derelict
-        ? 'The station is dark. Life support is offline, but the docking clamp still works and there may be salvage aboard.'
-        : `Operated by ${civ?.name ?? 'an unlisted operator'}. Standard services available.`,
+        ? T('modal.derelictText')
+        : T('modal.operated', { name: civName ?? T('modal.unlisted') }),
     ];
     const choices = [];
     if (!station.derelict) {
-      choices.push({ text: `Trade with ${civ?.name ?? 'the station'}`, onClick: () => this.openTrade(station.owner ?? 'terranConcord', station) });
       choices.push({
-        text: 'Refuel and repair',
+        text: T('modal.tradeWith', { name: civName ?? T('modal.tradeWithStation') }),
+        onClick: () => this.openTrade(station.owner ?? 'terranConcord', station),
+      });
+      choices.push({
+        text: T('modal.refuelRepair'),
         onClick: () => {
           const repair = Math.ceil((state.ship.maxHull - state.ship.hull) * 12);
           const fuel = Math.ceil((state.ship.maxFuel - state.ship.fuel) * state.ftl.fuelPrice(station.owner));
           const total = repair + fuel;
           if (state.player.credits < total) {
             this.open({
-              title: 'Insufficient credits',
-              sub: 'REFUSED',
-              paragraphs: [`Services cost ¢${total.toLocaleString()}; you hold ¢${state.player.credits.toLocaleString()}.`],
-              choices: [{ text: 'Back', onClick: () => this.showStation(station) }],
+              title: T('modal.insufficient'),
+              sub: T('modal.refused'),
+              paragraphs: [T('modal.costLine', {
+                total: total.toLocaleString(), have: state.player.credits.toLocaleString(),
+              })],
+              choices: [{ text: T('modal.back'), onClick: () => this.showStation(station) }],
             });
             return;
           }
@@ -183,19 +203,22 @@ export class Modals {
           state.ship.repair(state.ship.maxHull);
           state.ship.fuel = state.ship.maxFuel;
           this.open({
-            title: 'Serviced',
-            sub: `¢${total.toLocaleString()} CHARGED`,
-            paragraphs: ['Hull restored to full integrity. Fuel tanks full. The station AI logs your departure without comment.'],
-            choices: [{ text: 'Undock', onClick: () => this.close() }],
+            title: T('modal.serviced'),
+            sub: T('modal.charged', { n: total.toLocaleString() }),
+            paragraphs: [T('modal.servicedText')],
+            choices: [{ text: T('modal.undock'), onClick: () => this.close() }],
           });
         },
       });
       if (civ) {
-        choices.push({ text: `Speak with ${civ.name} representative`, onClick: () => this.openDialogue(civ.id) });
+        choices.push({
+          text: T('modal.speakWith', { name: civName }),
+          onClick: () => this.openDialogue(civ.id),
+        });
       }
     } else {
       choices.push({
-        text: 'Salvage what you can',
+        text: T('modal.salvage'),
         onClick: () => {
           const rng = Math.random();
           const loot = [
@@ -206,24 +229,37 @@ export class Modals {
           const got = [];
           for (const l of loot) {
             const stored = state.resources.add(l.id, l.quantity);
-            if (stored > 0) got.push(`${state.data.resources[l.id]?.name ?? l.id} +${stored}`);
+            if (stored > 0) got.push(T('modal.gain', {
+              name: this.i18n.content('resource', l.id, state.data.resources[l.id]?.name ?? l.id),
+              qty: stored,
+            }));
           }
           if (rng > 0.75) {
             const def = state.archaeology.catalog[Math.floor(Math.random() * state.archaeology.catalog.length)];
             state.archaeology.collect(def.id, state.location.systemId, station.id);
-            got.push(`Artifact: ${def.name}`);
+            got.push(T('modal.artifact', {
+              name: this.i18n.content('artifact', def.id, def.name, 'name'),
+            }));
           }
           this.open({
-            title: 'Salvage recovered',
+            title: T('modal.salvageTitle'),
             sub: station.name,
-            paragraphs: [got.length ? `Recovered: ${got.join(', ')}.` : 'The station has already been stripped. Nothing remains but dust patterns in the wrong places.'],
-            choices: [{ text: 'Undock', onClick: () => this.close() }],
+            paragraphs: [got.length
+              ? T('modal.salvageText', { list: got.join(', ') })
+              : T('modal.stripped')],
+            choices: [{ text: T('modal.undock'), onClick: () => this.close() }],
           });
         },
       });
     }
-    choices.push({ text: 'Undock', onClick: () => this.close() });
-    this.open({ title: station.name, sub: 'STATION SERVICES', paragraphs, choices });
+    choices.push({ text: T('modal.undock'), onClick: () => this.close() });
+    this.open({
+      title: station.name,
+      sub: T('modal.station'),
+      paragraphs,
+      choices,
+      rerender: () => this.showStation(station),
+    });
   }
 
   // ---------------------------------------------------------------- Trade
@@ -236,6 +272,7 @@ export class Modals {
 
   _renderTrade() {
     const state = this.state;
+    const T = (k, v) => this.i18n.t(k, v);
     const { civId, station } = this._trade;
     const civ = state.civs.get(civId);
     const offers = state.civs.market(civId);
@@ -243,7 +280,8 @@ export class Modals {
 
     const table = h('div');
     const head = h('div', 'trade-row head');
-    ['Resource', 'Price', 'Stock', 'You hold', 'Action'].forEach((t) => head.appendChild(h('span', null, t)));
+    ['trade.resource', 'trade.price', 'trade.stock', 'trade.youHold', 'trade.action']
+      .forEach((k) => head.appendChild(h('span', null, this.i18n.t(k))));
     table.appendChild(head);
 
     const rows = [
@@ -252,18 +290,20 @@ export class Modals {
     ];
     for (const item of rows) {
       const r = h('div', 'trade-row');
-      r.appendChild(h('span', null, item.name));
-      r.appendChild(h('span', null, `¢${item.price}`));
-      r.appendChild(h('span', null, item.kind === 'buy' ? `${item.stock}t` : '—'));
+      r.appendChild(h('span', null, this.i18n.content('resource', item.id, item.name)));
+      r.appendChild(h('span', null, T('missions.rewardCredits', { n: item.price })));
+      r.appendChild(h('span', null, item.kind === 'buy' ? `${item.stock}t` : T('trade.dash')));
       r.appendChild(h('span', null, `${item.qty ?? item.playerHas ?? 0}t`));
-      const btn = h('button', 'btn small', item.kind === 'buy' ? 'BUY 10' : 'SELL 10');
+      const btn = h('button', 'btn small', item.kind === 'buy' ? T('cargo.buy10') : T('cargo.sell10'));
       btn.onclick = () => {
         const res = item.kind === 'buy'
           ? state.resources.buy(item.id, 10, civId)
           : state.resources.sell(item.id, 10, civId);
         this.game.ui.notify(
-          res.ok ? (item.kind === 'buy' ? 'Purchased' : 'Sold') : 'Failed',
-          res.ok ? `${item.name} — ¢${res.price.toLocaleString()}` : res.reason,
+          res.ok ? (item.kind === 'buy' ? T('notify.purchased') : T('notify.sold')) : T('notify.failed'),
+          res.ok
+            ? `${this.i18n.content('resource', item.id, item.name)} — ${T('missions.rewardCredits', { n: res.price.toLocaleString() })}`
+            : this.i18n.reason(res),
           res.ok ? 'good' : 'warn'
         );
         this._renderTrade();
@@ -273,58 +313,81 @@ export class Modals {
     }
 
     this.open({
-      title: `TRADE — ${civ.name}`,
-      sub: station ? station.name : 'remote exchange',
+      title: T('modal.tradeTitle', {
+        civ: this.i18n.content('civilization', civId, civ.name, 'name'),
+      }),
+      sub: station ? station.name : T('modal.remote'),
       paragraphs: [
-        `Credits: ¢${state.player.credits.toLocaleString()} · Cargo: ${state.resources.used}/${state.resources.capacity} t`,
+        T('modal.credits', {
+          credits: state.player.credits.toLocaleString(),
+          used: state.resources.used, cap: state.resources.capacity,
+        }),
         table,
       ],
-      choices: [{ text: 'Close', onClick: () => this.close() }],
+      choices: [{ text: T('modal.close'), onClick: () => this.close() }],
       wide: true,
+      rerender: () => this._renderTrade(),
     });
   }
 
   // ---------------------------------------------------------------- Analysis
   showAnalysis(res) {
-    const paragraphs = [`Artifact: ${res.artifact.name} (${res.artifact.type}, tier ${res.artifact.tier})`];
+    const T = (k, v) => this.i18n.t(k, v);
+    const art = res.artifact ?? {};
+    const artName = this.i18n.content('artifact', art.id, art.name, 'name');
+    const paragraphs = [T('analysis.artifact', {
+      name: artName, type: T(`label.artifacttype.${art.type}`, {}), tier: art.tier,
+    })];
     if (res.success) {
-      paragraphs.push('Translation successful.');
-      paragraphs.push(res.reading);
+      paragraphs.push(T('analysis.success'));
+      paragraphs.push(this.i18n.content('artifact', art.id, res.reading, 'evidenceText'));
       if (res.newEvents.length) {
-        const titles = res.newEvents.map((e) => this.state.data.timeline.events.find((x) => x.id === e)?.title ?? e);
-        paragraphs.push(`New hypothesis formed: ${titles.join(', ')}.`);
+        const titles = res.newEvents.map((e) => {
+          const ev = this.state.data.timeline.events.find((x) => x.id === e);
+          return this.i18n.content('timeline', 'event.' + e, ev?.title ?? e, 'title');
+        });
+        paragraphs.push(T('analysis.newHypothesis', { titles: titles.join(', ') }));
       }
       if (res.confirmedEvents.length) {
-        const titles = res.confirmedEvents.map((e) => this.state.data.timeline.events.find((x) => x.id === e)?.title ?? e);
-        paragraphs.push(`CONFIRMED historical event: ${titles.join(', ')}. The timeline has shifted.`);
+        const titles = res.confirmedEvents.map((e) => {
+          const ev = this.state.data.timeline.events.find((x) => x.id === e);
+          return this.i18n.content('timeline', 'event.' + e, ev?.title ?? e, 'title');
+        });
+        paragraphs.push(T('analysis.confirmed', { titles: titles.join(', ') }));
       }
       if (res.techUnlocked) {
-        paragraphs.push(`Technology reconstructed from the artifact: ${res.techUnlocked.name}. It cannot be researched conventionally.`);
+        paragraphs.push(T('analysis.tech', {
+          name: this.i18n.content('technology', res.techUnlocked.id, res.techUnlocked.name, 'name'),
+        }));
       }
-      paragraphs.push(`+${res.researchGain} research points`);
+      paragraphs.push(T('analysis.rp', { n: res.researchGain }));
     } else {
-      paragraphs.push('The inscription resists translation. You have a partial reading only — more evidence, or a better archaeology module, will be required.');
-      paragraphs.push(res.reading);
+      paragraphs.push(T('analysis.failed'));
+      paragraphs.push(this.i18n.content('artifact', art.id, res.reading, 'evidenceText'));
     }
     this.open({
-      title: 'ANALYSIS',
-      sub: res.success ? 'DECODED' : 'PARTIAL',
+      title: T('analysis.title'),
+      sub: res.success ? T('analysis.decoded') : T('analysis.partial'),
       paragraphs,
-      choices: [{ text: 'File in archive', onClick: () => this.close() }],
+      choices: [{ text: T('analysis.file'), onClick: () => this.close() }],
+      rerender: () => this.showAnalysis(res),
     });
+    this.game.narrate(`${T('analysis.title')}: ${artName}. ${paragraphs[paragraphs.length - 1]}`);
   }
 
   // ---------------------------------------------------------------- Scan result
   showScanResult(body, info) {
+    const T = (k, v) => this.i18n.t(k, v);
     const paragraphs = [info];
     const d = body.data;
-    if (body.kind === 'planet' && d.landable) paragraphs.push('The world is landable.');
-    if (body.kind === 'ruin') paragraphs.push('A ruin site. Land on the parent planet and excavate to recover artifacts.');
+    if (body.kind === 'planet' && d.landable) paragraphs.push(T('scan.landable'));
+    if (body.kind === 'ruin') paragraphs.push(T('scan.ruin'));
     this.open({
       title: body.name,
       sub: (body.label ?? '').toUpperCase(),
       paragraphs,
-      choices: [{ text: 'Close', onClick: () => this.close() }],
+      choices: [{ text: T('modal.close'), onClick: () => this.close() }],
+      rerender: () => this.showScanResult(body, info),
     });
   }
 }

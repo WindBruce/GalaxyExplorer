@@ -6,47 +6,12 @@ function h(tag, cls, text) {
   return e;
 }
 
-const BRIEFING = `
-<h4>THE PREMISE</h4>
-You command a survey ship on the edge of charted space. The Milky Way is old —
-older than any civilisation in it. Somewhere in its ruins is the answer to why
-every advanced species that ever lived disappeared without trace.
-<br><br>
-Explore. Scan. Land. Gather. Investigate. Discover. Research. Upgrade. Go deeper.
-The history you reconstruct is yours alone.
-
-<h4>FLIGHT CONTROLS</h4>
-<kbd>Mouse</kbd> steer &nbsp; <kbd>W</kbd>/<kbd>S</kbd> thrust &nbsp; <kbd>A</kbd>/<kbd>D</kbd> yaw<br>
-<kbd>Q</kbd>/<kbd>E</kbd> roll &nbsp; <kbd>R</kbd>/<kbd>F</kbd> vertical &nbsp; <kbd>Shift</kbd> boost<br>
-<kbd>Space</kbd> brake &nbsp; <kbd>X</kbd> full stop &nbsp; <kbd>Tab</kbd> cycle target<br>
-<kbd>T</kbd> scan target &nbsp; <kbd>G</kbd> land / dock &nbsp; <kbd>LMB</kbd> weapons &nbsp; <kbd>RMB</kbd> mining laser<br>
-<kbd>V</kbd> camera view &nbsp; <kbd>M</kbd> galactic map &nbsp; <kbd>N</kbd> system map<br>
-<kbd>Esc</kbd> pause menu
-
-<h4>INTERFACES</h4>
-<kbd>I</kbd> cargo &amp; market &nbsp; <kbd>U</kbd> ship status &amp; modules<br>
-<kbd>K</kbd> character skills &nbsp; <kbd>L</kbd> technology tree<br>
-<kbd>J</kbd> archaeology &amp; timeline &nbsp; <kbd>B</kbd> civilisation database<br>
-<kbd>A</kbd> Galactic Civilization Archive &nbsp; <kbd>P</kbd> missions
-
-<h4>ON FOOT</h4>
-<kbd>WASD</kbd> walk &nbsp; <kbd>Shift</kbd> sprint &nbsp; <kbd>Space</kbd> jump<br>
-<kbd>LMB</kbd> extract resource &nbsp; <kbd>E</kbd> excavate artifact &nbsp; <kbd>F</kbd> return to ship
-
-<h4>ARCHAEOLOGY</h4>
-Artifacts are evidence, not loot. One piece of evidence forms a HYPOTHESIS.
-A second, independent piece CONFIRMS the event. Confirmed events reconstruct
-the galactic timeline and advance the main mystery. Some artifacts contain
-schematics for technologies that cannot be researched any other way.
-
-<h4>RISK</h4>
-Fuel is finite. Hulls break. Radiation kills. Anomalies do not care whether
-you are ready. Decide constantly: push deeper, or come home with what you have.
-`;
+const BRIEFING_SECTIONS = ['premise', 'flight', 'interfaces', 'onFoot', 'archaeology', 'risk'];
 
 export class MainMenu {
   constructor(game) {
     this.game = game;
+    this.i18n = game.i18n;
     this.root = document.getElementById('main-menu');
     this.boxMain = document.getElementById('menu-main');
     this.boxSaves = document.getElementById('menu-saves');
@@ -58,8 +23,32 @@ export class MainMenu {
     document.getElementById('btn-help').onclick = () => this.showHelp();
     document.getElementById('btn-saves-back').onclick = () => this.showMain();
     document.getElementById('btn-help-back').onclick = () => this.showMain();
-    document.getElementById('help-content').innerHTML = BRIEFING;
+    this.langRow = document.getElementById('menu-lang');
+    if (this.langRow) {
+      for (const loc of this.i18n.available) {
+        const btn = h('button', 'btn small lang-btn', loc.native);
+        btn.dataset.lang = loc.id;
+        btn.onclick = () => this.i18n.setLocale(loc.id);
+        this.langRow.appendChild(btn);
+      }
+    }
+    this._renderBriefing();
     this._refreshContinue();
+  }
+
+  /** The briefing is authored once per language and re-rendered on switch. */
+  _renderBriefing() {
+    const box = document.getElementById('help-content');
+    box.innerHTML = '';
+    const T = (k) => this.i18n.t(`brief.${k}`);
+    for (const section of BRIEFING_SECTIONS) {
+      const head = document.createElement('h4');
+      head.textContent = this.i18n.t(`brief.head.${section}`);
+      const body = document.createElement('div');
+      body.className = 'brief-section';
+      body.innerHTML = T(section);
+      box.append(head, body);
+    }
   }
 
   _refreshContinue() {
@@ -67,17 +56,31 @@ export class MainMenu {
     const btn = document.getElementById('btn-continue');
     if (autosave) {
       btn.disabled = false;
-      btn.textContent = `CONTINUE — ${autosave.player ?? 'unknown'} · LVL ${autosave.level ?? 1}`;
+      btn.textContent = this.i18n.t('menu.continueWith', {
+        sd: (autosave.stardate ?? 0).toFixed(0),
+        player: autosave.player ?? this.i18n.t('cargo.unknown'),
+        level: autosave.level ?? 1,
+      });
     } else {
       btn.disabled = true;
-      btn.textContent = 'CONTINUE';
+      btn.textContent = this.i18n.t('menu.continue');
     }
   }
 
   show() {
     this.root.classList.remove('hidden');
+    this._renderBriefing();
     this.showMain();
     this._refreshContinue();
+    this._refreshLang();
+  }
+
+  /** Highlight the active language button. */
+  _refreshLang() {
+    if (!this.langRow) return;
+    for (const btn of this.langRow.querySelectorAll('.lang-btn')) {
+      btn.classList.toggle('primary', btn.dataset.lang === this.i18n.locale);
+    }
   }
 
   hide() {
@@ -106,13 +109,19 @@ export class MainMenu {
       info.innerHTML = `<b>${s.slot}</b> — ${s.player ?? 'unknown'} · LVL ${s.level ?? 1} · ¢${(s.credits ?? 0).toLocaleString()}<br>` +
         `<span class="dim">${new Date(s.savedAt).toLocaleString()} · ${s.archiveEntries ?? 0} archive entries · ${s.questsCompleted ?? 0} missions</span>`;
       const actions = h('div', 's-actions');
-      const load = h('button', 'btn small primary', 'LOAD');
+      const load = h('button', 'btn small primary', this.i18n.t('menu.slotLoad'));
       load.onclick = () => {
         const res = this.game.loadGame(s.slot);
-        this.game.ui.notify(res.ok ? 'Save loaded' : 'Load failed', res.ok ? `Resumed in ${this.game.state.location.system?.name ?? 'deep space'}` : res.reason, res.ok ? 'good' : 'danger');
+        this.game.ui.notify(
+          res.ok ? this.i18n.t('notify.saved') : this.i18n.t('notify.saveFailed'),
+          res.ok
+            ? this.i18n.t('menu.slotLoaded', { name: this.game.state.location.system?.name ?? this.i18n.t('cargo.unknown') })
+            : this.i18n.reason(res),
+          res.ok ? 'good' : 'danger'
+        );
         if (res.ok) this.hide();
       };
-      const del = h('button', 'btn small danger', 'DEL');
+      const del = h('button', 'btn small danger', this.i18n.t('menu.slotDel'));
       del.onclick = () => {
         this.game.save.remove(s.slot);
         this.showSaves();
@@ -121,7 +130,7 @@ export class MainMenu {
       row.append(info, actions);
       list.appendChild(row);
     }
-    if (!any) list.appendChild(h('div', 'card-sub', 'No saves found. Start a new expedition.'));
+    if (!any) list.appendChild(h('div', 'card-sub', this.i18n.t('menu.savesEmpty')));
   }
 
   showHelp() {
@@ -139,6 +148,6 @@ export class MainMenu {
   continueGame() {
     const res = this.game.loadGame('autosave');
     if (res.ok) this.hide();
-    else this.game.ui.notify('No autosave', res.reason, 'warn');
+    else this.game.ui.notify(this.i18n.t('menu.noAutosave'), this.i18n.reason(res), 'warn');
   }
 }

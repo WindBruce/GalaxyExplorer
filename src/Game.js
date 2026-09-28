@@ -3,8 +3,9 @@
  * and the main loop, and wires every subsystem to the global event bus.
  */
 import * as THREE from '../vendor/three.module.js';
-import { loadAllData } from './core/DataLoader.js';
+import { loadAllData, loadI18nPacks } from './core/DataLoader.js';
 import { bus } from './core/EventBus.js';
+import { i18n } from './core/I18n.js';
 import { GameState } from './sim/GameState.js';
 import { saveSystem } from './core/SaveSystem.js';
 import { StateMachine } from './states/StateMachine.js';
@@ -18,15 +19,19 @@ import { Panels } from './ui/Panels.js';
 import { Modals } from './ui/Modals.js';
 import { GalacticMapUI } from './ui/GalacticMapUI.js';
 import { MainMenu } from './ui/MainMenu.js';
+import { Settings } from './ui/Settings.js';
 
 const PANEL_KEYS = {
   KeyI: 'cargo', KeyU: 'ship', KeyK: 'skills', KeyL: 'tech',
   KeyJ: 'archaeology', KeyB: 'civs', KeyA: 'archive', KeyP: 'missions', KeyN: 'systemMap',
 };
 
+const SETTINGS_KEY = 'F2';
+
 export class Game {
   constructor() {
     this.bus = bus;
+    this.i18n = i18n;
     this.data = null;
     this.state = null;
     this.save = saveSystem;
@@ -53,7 +58,8 @@ export class Game {
     this.input = new Input(this.canvas);
     this.notifications = new Notifications(document.getElementById('notifications'));
     this.ui = {
-      notify: (title, body, kind, ttl) => this.notifications.notify(title, body, kind, ttl),
+      notify: (title, body, kind, ttl, speak = false) =>
+        this.notifications.notify(title, body, kind, ttl, speak),
       hud: null, panels: null, modals: null, map: null, menu: null,
     };
     this.ui.hud = new HUD(this);
@@ -61,6 +67,9 @@ export class Game {
     this.ui.modals = new Modals(this);
     this.ui.map = new GalacticMapUI(this);
     this.ui.menu = new MainMenu(this);
+    this.ui.settings = new Settings(this);
+    // Voice narration of transmissions, analyses and mission updates.
+    this.notifications.onSpeak = (line) => this.ui.settings.speak(line);
     // Modal + map conveniences so states can talk to the UI through one object.
     Object.assign(this.ui, {
       showEvent: (ev) => this.ui.modals.showEvent(ev),
@@ -95,43 +104,65 @@ export class Game {
   }
 
   _wireBus() {
+    const T = (k, v) => this.i18n.t(k, v);
     bus.on('player:levelup', ({ level }) => {
-      this.ui.notify('Level up', `You are now level ${level}. +2 skill points.`, 'good');
+      this.ui.notify(T('notify.levelup'), T('notify.levelupBody', { n: level }), 'good');
     });
     bus.on('archive:added', (record) => {
-      this.ui.notify('Archive updated', `${record.name} recorded in the Galactic Civilization Archive.`, 'scan', 4200);
+      this.ui.notify(T('notify.archive'), T('notify.archiveBody', { name: record.name }), 'scan', 4200);
     });
     bus.on('civ:discovered', ({ name }) => {
-      this.ui.notify('First contact', `${name} added to the civilisation database.`, 'good');
+      this.ui.notify(T('notify.firstContact'), T('notify.firstContactBody', { name }), 'good');
     });
     bus.on('quest:started', ({ title }) => {
-      this.ui.notify('Mission accepted', title, 'info');
+      this.ui.notify(T('notify.missionAccepted'), title, 'info');
     });
     bus.on('quest:completed', ({ title, rewards }) => {
       const bits = [];
-      if (rewards?.credits) bits.push(`¢${rewards.credits.toLocaleString()}`);
-      if (rewards?.research) bits.push(`${rewards.research} research`);
-      if (rewards?.xp) bits.push(`${rewards.xp} XP`);
-      this.ui.notify('Mission complete', `${title}${bits.length ? ` — ${bits.join(', ')}` : ''}`, 'good');
+      if (rewards?.credits) bits.push(T('missions.rewardCredits', { n: rewards.credits.toLocaleString() }));
+      if (rewards?.research) bits.push(T('missions.rewardResearch', { n: rewards.research }));
+      if (rewards?.xp) bits.push(T('missions.rewardXp', { n: rewards.xp }));
+      const line = `${title}${bits.length ? ` — ${bits.join(', ')}` : ''}`;
+      this.ui.notify(T('notify.missionComplete'), line, 'good', 6500, true);
     });
     bus.on('quest:available', ({ title }) => {
-      this.ui.notify('New contract available', title, 'info');
+      this.ui.notify(T('notify.newContract'), title, 'info', 6500, true);
     });
     bus.on('tech:researched', ({ name }) => {
-      this.ui.notify('Technology researched', name, 'good');
+      this.ui.notify(T('notify.techResearched'), name, 'good');
     });
     bus.on('tech:reconstructed', ({ name }) => {
-      this.ui.notify('Technology reconstructed', `${name} — recovered from archaeological evidence.`, 'good');
+      this.ui.notify(T('notify.techReconstructed'), T('notify.techReconstructedBody', { name }), 'good');
     });
     bus.on('skill:unlocked', ({ name }) => {
-      this.ui.notify('Skill learned', name, 'good');
+      this.ui.notify(T('notify.skillLearned'), name, 'good');
     });
     bus.on('civ:politics', ({ title, text }) => {
-      this.ui.notify(title, text, 'info', 8000);
+      this.ui.notify(title, text, 'info', 8000, true);
     });
     bus.on('ship:destroyed', () => {
-      this.ui.notify('SHIP DESTROYED', 'Press R to be recovered by the Terran Concord rescue tow.', 'danger', 20000);
+      this.ui.notify(T('notify.shipDestroyed'), T('notify.shipDestroyedBody'), 'danger', 20000);
     });
+    bus.on('i18n:changed', () => this._onLocaleChanged());
+  }
+
+  /** Re-render every open surface when the language changes. */
+  _onLocaleChanged() {
+    if (!this.ui) return;
+    this.i18n.applyToDocument();
+    const open = this.ui.panels?.current ?? null;
+    if (open) this.ui.panels.open(open);
+    if (this.ui.modals?.isOpen()) {
+      const modal = this.ui.modals.current;
+      if (modal?.rerender) modal.rerender();
+      else if (modal?.title) this.ui.modals.open(modal);
+    }
+    if (this.ui.settings?.isOpen()) this.ui.settings.open();
+    this.ui.hud?.setSystem(this.state?.location?.system ?? null);
+    if (this.state?.location?.mode === 'surface') {
+      this.ui.hud?.setPlanet(this.state.location.planet ?? null, null);
+    }
+    if (this.ui.menu?.isOpen()) this.ui.menu.show();
   }
 
   async boot() {
@@ -141,7 +172,11 @@ export class Game {
       fill.style.width = `${pct}%`;
       status.textContent = text;
     };
-    step(10, 'Loading data packs…');
+    // Language first: every later status string is localised.
+    const packs = await loadI18nPacks();
+    this.i18n.load(packs);
+    this.i18n.applyToDocument();
+    step(10, this.i18n.t('app.loading'));
     this.data = await loadAllData();
     step(45, 'Generating procedural galaxy…');
     this.state = new GameState(this.data);
@@ -160,8 +195,14 @@ export class Game {
     this.ui.menu.hide();
     this.ui.hud.setSystem(this.state.location.system);
     this.ui.notify(
-      'Expedition begins',
-      `${this.state.galaxy.allSystems().length} systems generated from seed "${seed}". You are in orbit at ${this.state.location.system.name}. Press M for the galactic map.`,
+      this.i18n.t('state.arrived', { name: this.state.location.system.name }),
+      this.i18n.t('gen.systemSummary', {
+        star: this.state.location.system.star.classLabel,
+        planets: this.i18n.tp('gen.planets', this.state.location.system.planets.length, {
+          n: this.state.location.system.planets.length,
+        }),
+        extras: this.state.location.system.summary,
+      }),
       'good',
       12000
     );
@@ -185,8 +226,10 @@ export class Game {
   saveGame(slot = 'slot1') {
     const res = this.save.save(slot, this.state);
     this.ui.notify(
-      res.ok ? 'Game saved' : 'Save failed',
-      res.ok ? `Slot: ${slot} (${(res.bytes / 1024).toFixed(0)} KB)` : res.reason,
+      res.ok ? this.i18n.t('notify.saved') : this.i18n.t('notify.saveFailed'),
+      res.ok
+        ? this.i18n.t('notify.savedBody', { slot, kb: (res.bytes / 1024).toFixed(0) })
+        : this.i18n.reason(res),
       res.ok ? 'good' : 'danger'
     );
     return res;
@@ -202,6 +245,11 @@ export class Game {
     return !this.ui.menu.root.classList.contains('hidden');
   }
 
+  /** Read a line aloud when voice narration is enabled (see Settings). */
+  narrate(text) {
+    this.ui?.settings?.speak(text);
+  }
+
   _handleGlobalKeys() {
     const input = this.input;
     for (const [code, panel] of Object.entries(PANEL_KEYS)) {
@@ -211,9 +259,18 @@ export class Game {
         return;
       }
     }
+    if (input.justPressed(SETTINGS_KEY)) {
+      if (this.ui.settings.isOpen()) this.ui.settings.close();
+      else this.ui.settings.open();
+      return;
+    }
     if (input.justPressed('Escape')) {
       if (this.ui.modals.isOpen()) {
         this.ui.modals.close();
+        return;
+      }
+      if (this.ui.settings.isOpen()) {
+        this.ui.settings.close();
         return;
       }
       if (this.ui.panels.isOpen()) {
@@ -249,6 +306,10 @@ export class Game {
         this.saveGame('autosave');
         this._togglePause();
         this.ui.menu.show();
+      };
+      document.getElementById('btn-settings').onclick = () => {
+        this._togglePause();
+        this.ui.settings.open();
       };
     } else {
       this.input.requestPointerLock();
