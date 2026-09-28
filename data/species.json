@@ -1,0 +1,85 @@
+{
+  "_comment": "Species templates for known civilisations plus procedural biome life pools used by PlanetGenerator.",
+
+  "templates": [
+    {
+      "id": "human",
+      "name": "Terran Human",
+      "biology": "Carbon-based, endothermic, bipedal, socially obsessive",
+      "lifespan": 85,
+      "traits": ["adaptive", "fractious", "tool-dependent", "narrative-driven"],
+      "homeworld": "Earth",
+      "notes": "Survived its own technological adolescence by roughly one generation's margin."
+    },
+    {
+      "id": "vherrathi",
+      "name": "Vherrathi",
+      "biology": "Silicate-carbon hybrid, hexapedal, cold-blooded, slow-metabolising",
+      "lifespan": 340,
+      "traits": ["long-memoried", "honour-bound", "hierarchical", "deliberate"],
+      "homeworld": "Vherr (tidally locked, Perseus Arm)",
+      "notes": "A Vherrathi never forgets a slight, because forgetting is how the Sundering happened."
+    },
+    {
+      "id": "kelthari",
+      "name": "Kelthari",
+      "biology": "Colonial gas-filled floaters; individuals are short-lived organs of a continuous organism",
+      "lifespan": 12,
+      "traits": ["collective", "patient", "harmonic", "gentle"],
+      "homeworld": "The Outer Reef (gas giant, Outer Disk)",
+      "notes": "Individual death is unremarkable to them. The death of a song is a tragedy."
+    },
+    {
+      "id": "remnant",
+      "name": "Remnant Clans",
+      "biology": "Heterogeneous human and near-human stock; heavy clan endogamy",
+      "lifespan": 90,
+      "traits": ["pragmatic", "suspicious", "ingenious", "clannish"],
+      "homeworld": "Hollowed asteroids, Inner Disk",
+      "notes": "Not one people but a marketplace of peoples with a shared grudge."
+    }
+  ],
+
+  "biomeLife": {
+    "terrestrial": [
+      { "name": "Spiregrass", "kind": "flora", "desc": "Silica-reinforced blades that ring in the wind like cut glass." },
+      { "name": "Lumenpods", "kind": "flora", "desc": "Seed casings that glow faintly when the local star is high." },
+      { "name": "Grazer-herd", "kind": "fauna", "desc": "Low-slung hexapods that migrate along thermal seams." },
+      { "name": "Bark-eels", "kind": "fauna", "desc": "Arboreal ambush predators. Do not stand under trees." }
+    ],
+    "ocean": [
+      { "name": "Raft-forests", "kind": "flora", "desc": "Floating mats kilometres wide, alive with trapped gas." },
+      { "name": "Abyssal lanterns", "kind": "fauna", "desc": "Pressure-adapted filter feeders that farm their own light." },
+      { "name": "Tidewraiths", "kind": "fauna", "desc": "Pack hunters that ride the thermocline. Curious about ships." }
+    ],
+    "desert": [
+      { "name": "Stone-bloom", "kind": "flora", "desc": "A cactus-analogue that flowers for eleven minutes per decade." },
+      { "name": "Dune skippers", "kind": "fauna", "desc": "Heat-gliding reptiles that burrow to escape the noon." },
+      { "name": "Glasswyrms", "kind": "fauna", "desc": "Subsurface tunnellers. Their passages collapse under vehicle weight." }
+    ],
+    "ice": [
+      { "name": "Cryomoss", "kind": "flora", "desc": "A red-black lichen that metabolises at 40 Kelvin." },
+      { "name": "Vent swarms", "kind": "fauna", "desc": "Blind filter feeders clustered around hydrothermal vents." },
+      { "name": "Frost-leviathans", "kind": "fauna", "desc": "Enormous, slow, and entirely uninterested in you, until they are not." }
+    ],
+    "volcanic": [
+      { "name": "Slag-ferns", "kind": "flora", "desc": "Iron-leafed plants that grow only where the crust is thin." },
+      { "name": "Magma-grazers", "kind": "fauna", "desc": "Thermophilic crawlers with ceramic shells." },
+      { "name": "Cinder-stalkers", "kind": "fauna", "desc": "Predators that hunt by infrared silhouette. Highly territorial." }
+    ],
+    "toxic": [
+      { "name": "Sulphur veils", "kind": "flora", "desc": "Translucent sheets that metabolise atmospheric acid." },
+      { "name": "Chrome beetles", "kind": "fauna", "desc": "Metal-shelled detritivores the size of a fist." },
+      { "name": "Haze-angels", "kind": "fauna", "desc": "Floating drifters that sift toxin for trace metals." }
+    ],
+    "gasGiant": [
+      { "name": "Drift-meadows", "kind": "flora", "desc": "Aeroplankton continents drifting in the upper atmosphere." },
+      { "name": "Storm-whales", "kind": "fauna", "desc": "Kilometre-long filter drifters that ride the jet streams." }
+    ],
+    "tidallyLocked": [
+      { "name": "Twilight-bands", "kind": "flora", "desc": "Everything lives in the thin ring of permanent dusk." },
+      { "name": "Terminus herds", "kind": "fauna", "desc": "Migratory grazers that follow the terminator line." },
+      { "name": "Night-things", "kind": "fauna", "desc": "Whatever evolved on the dark side. It is not friendly and it is not stupid." }
+    ]
+  }
+}

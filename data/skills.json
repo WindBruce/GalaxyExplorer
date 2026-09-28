@@ -1,0 +1,371 @@
+{
+  "_comment": "Character skill tree. 8 archetypes x 3 tiers (plus capstones). Effects are additive percentages (bonuses), multiplicative (statMods) or flat values. Hybrid builds are supported: any node can be purchased if its prerequisites are met.",
+
+  "exp_core1": {
+    "name": "Starfarer's Instinct",
+    "archetype": "explorer",
+    "tier": 1,
+    "cost": 1,
+    "requires": [],
+    "desc": "You read a star chart the way others read faces.",
+    "effects": { "bonuses": { "scanSpeed": 0.15, "xp": 0.05 }, "capabilities": [] }
+  },
+  "exp_core2": {
+    "name": "Deep Range Navigation",
+    "archetype": "explorer",
+    "tier": 2,
+    "cost": 2,
+    "requires": ["exp_core1"],
+    "desc": "Plan jumps that others would call reckless, and arrive anyway.",
+    "effects": { "statMods": { "jumpRange": 0.2, "jumpEfficiency": 0.15 }, "bonuses": { "fuelSaving": 0.1 } }
+  },
+  "exp_core3": {
+    "name": "Cartographer of the Void",
+    "archetype": "explorer",
+    "tier": 3,
+    "cost": 3,
+    "requires": ["exp_core2"],
+    "desc": "Every new system teaches you something the last one hid.",
+    "effects": { "statMods": { "scanRange": 0.35, "anomalySense": 0.4 }, "bonuses": { "xp": 0.15 }, "capabilities": ["autoSurvey"] }
+  },
+  "exp_side1": {
+    "name": "Salvage Eye",
+    "archetype": "explorer",
+    "tier": 1,
+    "cost": 1,
+    "requires": [],
+    "desc": "Wreckage is just inventory with a history.",
+    "effects": { "bonuses": { "salvage": 0.25 } }
+  },
+  "exp_cap": {
+    "name": "Pathfinder",
+    "archetype": "explorer",
+    "tier": 4,
+    "cost": 4,
+    "requires": ["exp_core3", "exp_side1"],
+    "desc": "Where you walk, the unknown becomes known.",
+    "effects": { "statMods": { "scanRange": 0.25, "jumpRange": 0.25 }, "bonuses": { "xp": 0.2, "salvage": 0.2 }, "capabilities": ["firstContactBonus"] }
+  },
+
+  "sci_core1": {
+    "name": "Methodical Mind",
+    "archetype": "scientist",
+    "tier": 1,
+    "cost": 1,
+    "requires": [],
+    "desc": "Slow, careful, correct.",
+    "effects": { "bonuses": { "research": 0.2 } }
+  },
+  "sci_core2": {
+    "name": "Spectroscopy & Sampling",
+    "archetype": "scientist",
+    "tier": 2,
+    "cost": 2,
+    "requires": ["sci_core1"],
+    "desc": "Read a world's chemistry from the light it throws away.",
+    "effects": { "statMods": { "scanResolution": 0.3 }, "bonuses": { "research": 0.15 } }
+  },
+  "sci_core3": {
+    "name": "Theoretical Synthesis",
+    "archetype": "scientist",
+    "tier": 3,
+    "cost": 3,
+    "requires": ["sci_core2"],
+    "desc": "Connect findings across disciplines and centuries.",
+    "effects": { "bonuses": { "research": 0.4 }, "capabilities": ["crossDiscipline"] }
+  },
+  "sci_side1": {
+    "name": "Anomaly Physics",
+    "archetype": "scientist",
+    "tier": 1,
+    "cost": 1,
+    "requires": [],
+    "desc": "When instruments scream, you take notes.",
+    "effects": { "statMods": { "anomalySense": 0.5 }, "bonuses": { "anomalyResearch": 0.3 } }
+  },
+  "sci_cap": {
+    "name": "First of Her Kind",
+    "archetype": "scientist",
+    "tier": 4,
+    "cost": 4,
+    "requires": ["sci_core3", "sci_side1"],
+    "desc": "Publish, and the galaxy's understanding shifts.",
+    "effects": { "bonuses": { "research": 0.3, "anomalyResearch": 0.3 }, "capabilities": ["publication"] }
+  },
+
+  "eng_core1": {
+    "name": "Systems Diagnostics",
+    "archetype": "engineer",
+    "tier": 1,
+    "cost": 1,
+    "requires": [],
+    "desc": "Hear a failing pump before it complains.",
+    "effects": { "bonuses": { "repair": 0.3, "powerEfficiency": 0.1 } }
+  },
+  "eng_core2": {
+    "name": "Power Routing",
+    "archetype": "engineer",
+    "tier": 2,
+    "cost": 2,
+    "requires": ["eng_core1"],
+    "desc": "Squeeze a reactor until it begs, then squeeze more.",
+    "effects": { "statMods": { "powerOutput": 0.2 }, "bonuses": { "powerEfficiency": 0.2 } }
+  },
+  "eng_core3": {
+    "name": "Hull Reforging",
+    "archetype": "engineer",
+    "tier": 3,
+    "cost": 3,
+    "requires": ["eng_core2"],
+    "desc": "Rebuild your ship in a hangar you built yourself.",
+    "effects": { "flat": { "hull": 120 }, "bonuses": { "repair": 0.3 }, "capabilities": ["fieldRefit"] }
+  },
+  "eng_side1": {
+    "name": "Extraction Engineering",
+    "archetype": "engineer",
+    "tier": 1,
+    "cost": 1,
+    "requires": [],
+    "desc": "Every rock has a schedule and a price.",
+    "effects": { "bonuses": { "miningYield": 0.3 } }
+  },
+  "eng_cap": {
+    "name": "Deep-Space Engineer",
+    "archetype": "engineer",
+    "tier": 4,
+    "cost": 4,
+    "requires": ["eng_core3", "eng_side1"],
+    "desc": "Given scrap and time, you will build a civilisation.",
+    "effects": { "statMods": { "powerOutput": 0.25, "cargoCapacity": 0.25 }, "bonuses": { "repair": 0.4, "miningYield": 0.25 }, "capabilities": ["overdrive"] }
+  },
+
+  "arc_core1": {
+    "name": "Field Methodology",
+    "archetype": "archaeologist",
+    "tier": 1,
+    "cost": 1,
+    "requires": [],
+    "desc": "Grid, brush, patience.",
+    "effects": { "bonuses": { "analysis": 0.25 } }
+  },
+  "arc_core2": {
+    "name": "Comparative Cultures",
+    "archetype": "archaeologist",
+    "tier": 2,
+    "cost": 2,
+    "requires": ["arc_core1"],
+    "desc": "Two dead civilisations, one story.",
+    "effects": { "bonuses": { "analysis": 0.2, "translation": 0.25 } }
+  },
+  "arc_core3": {
+    "name": "Historical Reconstruction",
+    "archetype": "archaeologist",
+    "tier": 3,
+    "cost": 3,
+    "requires": ["arc_core2"],
+    "desc": "Assemble the past from its own debris.",
+    "effects": { "bonuses": { "analysis": 0.35, "translation": 0.35 }, "capabilities": ["reconstruction"] }
+  },
+  "arc_side1": {
+    "name": "Linguistic Intuition",
+    "archetype": "archaeologist",
+    "tier": 1,
+    "cost": 1,
+    "requires": [],
+    "desc": "Grammar is a fossil you can still read.",
+    "effects": { "bonuses": { "translation": 0.3 } }
+  },
+  "arc_cap": {
+    "name": "Galactic Archaeologist",
+    "archetype": "archaeologist",
+    "tier": 4,
+    "cost": 4,
+    "requires": ["arc_core3", "arc_side1"],
+    "desc": "You do not find ruins. You find arguments, and settle them.",
+    "effects": { "bonuses": { "analysis": 0.3, "translation": 0.3, "evidenceChance": 0.4 }, "capabilities": ["deepReconstruction"] }
+  },
+
+  "dip_core1": {
+    "name": "Protocol & Etiquette",
+    "archetype": "diplomat",
+    "tier": 1,
+    "cost": 1,
+    "requires": [],
+    "desc": "Do not point the weapon at the ambassador.",
+    "effects": { "bonuses": { "diplomacy": 0.25 } }
+  },
+  "dip_core2": {
+    "name": "Conflict Resolution",
+    "archetype": "diplomat",
+    "tier": 2,
+    "cost": 2,
+    "requires": ["dip_core1"],
+    "desc": "Everyone leaves the table thinking they won.",
+    "effects": { "bonuses": { "diplomacy": 0.3 }, "capabilities": ["mediation"] }
+  },
+  "dip_core3": {
+    "name": "Inter-Species Rapport",
+    "archetype": "diplomat",
+    "tier": 3,
+    "cost": 3,
+    "requires": ["dip_core2"],
+    "desc": "Trust is a currency you can mint.",
+    "effects": { "bonuses": { "diplomacy": 0.4, "tradePrice": 0.15 }, "capabilities": ["embassyAccess"] }
+  },
+  "dip_side1": {
+    "name": "Cultural Translation",
+    "archetype": "diplomat",
+    "tier": 1,
+    "cost": 1,
+    "requires": [],
+    "desc": "Say what they need to hear, in their own frame.",
+    "effects": { "bonuses": { "diplomacy": 0.2, "translation": 0.2 } }
+  },
+  "dip_cap": {
+    "name": "Voice of the Spur",
+    "archetype": "diplomat",
+    "tier": 4,
+    "cost": 4,
+    "requires": ["dip_core3", "dip_side1"],
+    "desc": "When you speak, systems listen.",
+    "effects": { "bonuses": { "diplomacy": 0.4, "tradePrice": 0.2 }, "capabilities": ["alliance"] }
+  },
+
+  "sol_core1": {
+    "name": "Marksmanship",
+    "archetype": "soldier",
+    "tier": 1,
+    "cost": 1,
+    "requires": [],
+    "desc": "Hit what you aim at.",
+    "effects": { "bonuses": { "combat": 0.25 } }
+  },
+  "sol_core2": {
+    "name": "Shield Discipline",
+    "archetype": "soldier",
+    "tier": 2,
+    "cost": 2,
+    "requires": ["sol_core1"],
+    "desc": "Put the wall between you and the problem.",
+    "effects": { "statMods": { "shield": 0.2 }, "bonuses": { "combat": 0.2 } }
+  },
+  "sol_core3": {
+    "name": "Tactical Awareness",
+    "archetype": "soldier",
+    "tier": 3,
+    "cost": 3,
+    "requires": ["sol_core2"],
+    "desc": "See the fight three moves ahead.",
+    "effects": { "bonuses": { "combat": 0.35 }, "capabilities": ["targetAnalysis"] }
+  },
+  "sol_side1": {
+    "name": "Damage Control",
+    "archetype": "soldier",
+    "tier": 1,
+    "cost": 1,
+    "requires": [],
+    "desc": "Keep the hull in one argument.",
+    "effects": { "bonuses": { "repair": 0.25, "hazardResist": 0.2 } }
+  },
+  "sol_cap": {
+    "name": "Void Marine",
+    "archetype": "soldier",
+    "tier": 4,
+    "cost": 4,
+    "requires": ["sol_core3", "sol_side1"],
+    "desc": "Whatever is out there, you have seen worse.",
+    "effects": { "statMods": { "shield": 0.25, "hull": 0.2 }, "bonuses": { "combat": 0.4, "repair": 0.3 }, "capabilities": ["boarding"] }
+  },
+
+  "xen_core1": {
+    "name": "Xenobiology Basics",
+    "archetype": "xenobiologist",
+    "tier": 1,
+    "cost": 1,
+    "requires": [],
+    "desc": "It is alive. That is already remarkable.",
+    "effects": { "bonuses": { "xenobiology": 0.3 } }
+  },
+  "xen_core2": {
+    "name": "Exotic Biochemistry",
+    "archetype": "xenobiologist",
+    "tier": 2,
+    "cost": 2,
+    "requires": ["xen_core1"],
+    "desc": "Life that runs on ammonia, methane, or something else entirely.",
+    "effects": { "bonuses": { "xenobiology": 0.35 }, "capabilities": ["biomeSurvey"] }
+  },
+  "xen_core3": {
+    "name": "Symbiotic Engineering",
+    "archetype": "xenobiologist",
+    "tier": 3,
+    "cost": 3,
+    "requires": ["xen_core2"],
+    "desc": "Wear life instead of building it.",
+    "effects": { "bonuses": { "xenobiology": 0.4, "hazardResist": 0.3 }, "capabilities": ["bioTools"] }
+  },
+  "xen_side1": {
+    "name": "Field Genetics",
+    "archetype": "xenobiologist",
+    "tier": 1,
+    "cost": 1,
+    "requires": [],
+    "desc": "Sequence it before it sequences you.",
+    "effects": { "bonuses": { "xenobiology": 0.2, "analysis": 0.2 } }
+  },
+  "xen_cap": {
+    "name": "Gardeners of Dead Worlds",
+    "archetype": "xenobiologist",
+    "tier": 4,
+    "cost": 4,
+    "requires": ["xen_core3", "xen_side1"],
+    "desc": "Bring back what the Silence killed.",
+    "effects": { "bonuses": { "xenobiology": 0.5, "hazardResist": 0.3 }, "capabilities": ["terraforming"] }
+  },
+
+  "air_core1": {
+    "name": "Machine Cognition",
+    "archetype": "aiResearcher",
+    "tier": 1,
+    "cost": 1,
+    "requires": [],
+    "desc": "Teach a machine to wonder.",
+    "effects": { "bonuses": { "research": 0.15, "aiAssist": 0.3 } }
+  },
+  "air_core2": {
+    "name": "Autonomous Agents",
+    "archetype": "aiResearcher",
+    "tier": 2,
+    "cost": 2,
+    "requires": ["air_core1"],
+    "desc": "Your drones stop needing instructions.",
+    "effects": { "bonuses": { "aiAssist": 0.35 }, "capabilities": ["autonomousDrones"] }
+  },
+  "air_core3": {
+    "name": "Recursive Self-Improvement",
+    "archetype": "aiResearcher",
+    "tier": 3,
+    "cost": 3,
+    "requires": ["air_core2"],
+    "desc": "The AI now researches the AI.",
+    "effects": { "bonuses": { "research": 0.3, "aiAssist": 0.4 }, "capabilities": ["selfImproving"] }
+  },
+  "air_side1": {
+    "name": "Data Archaeology",
+    "archetype": "aiResearcher",
+    "tier": 1,
+    "cost": 1,
+    "requires": [],
+    "desc": "Dead databases are not dead ideas.",
+    "effects": { "bonuses": { "translation": 0.25, "analysis": 0.15 } }
+  },
+  "air_cap": {
+    "name": "Architect of Minds",
+    "archetype": "aiResearcher",
+    "tier": 4,
+    "cost": 4,
+    "requires": ["air_core3", "air_side1"],
+    "desc": "You build companions that outlive the stars they were born under.",
+    "effects": { "bonuses": { "research": 0.3, "aiAssist": 0.5, "translation": 0.2 }, "capabilities": ["mindUpload"] }
+  }
+}

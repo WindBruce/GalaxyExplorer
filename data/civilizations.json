@@ -1,0 +1,339 @@
+{
+  "_comment": "Civilisation templates. `current` civilisations are living polities the player can meet, trade with and change; `extinct` civilisations exist only as archaeological evidence and feed the galactic timeline / main mystery.",
+
+  "templates": [
+    {
+      "id": "terranConcord",
+      "name": "Terran Concord",
+      "status": "current",
+      "homeRegion": "orionSpur",
+      "techLevel": 5,
+      "government": "Federated council democracy, commercially dominated",
+      "philosophy": "Expansion as survival. Every frontier world is a hedge against extinction.",
+      "traits": ["expansionist", "tradeFocused", "youthful", "fractious"],
+      "biology": "Terran human",
+      "language": { "family": "Anglo-Sinic creole", "notes": "Written in 28 glyphs and one extremely stubborn comma." },
+      "economy": { "strength": ["iron", "silicon", "oxygen"], "weakness": ["ancientAlloy", "exoticMatter"], "currency": "credit" },
+      "architecture": "Modular pressure domes and spine-cities; everything looks like it was assembled last week because it was.",
+      "background": "Two centuries past first contact with itself in orbit. The Concord is loud, fast, and only now beginning to notice that the galaxy is very old and very quiet.",
+      "conflicts": ["Inner Disk tariff war with the Vherrathi", "secessionist movements on the rim"],
+      "existentialProblem": "The Concord has found nineteen dead civilisations in its own backyard and cannot explain any of them.",
+      "relations": { "vherrathi": -0.2, "kelthari": 0.3, "ashenRemnant": -0.4 },
+      "startingReputation": 0.25,
+      "dialogue": {
+        "greet": {
+          "text": "Terran Concord registry. This is Commander Vance of Station Kepler's Rest. Welcome to the Spur, explorer. You're a long way from any charted lane.",
+          "options": [
+            { "text": "Who are you?", "next": "about" },
+            { "text": "I'm looking for work.", "next": "work" },
+            { "text": "What do you know about the ruins?", "next": "ruins" },
+            { "text": "Let's trade.", "next": "trade", "requires": { "capability": "trade" } },
+            { "text": "[Leave]", "next": "END" }
+          ]
+        },
+        "about": {
+          "text": "The Concord. Eleven hundred systems, four hundred years, and a Parliament that argues about all of it. We're the newcomers out here - the oldest thing we've found that can still file a report is older than our sun.",
+          "options": [
+            { "text": "That can't be right.", "next": "age" },
+            { "text": "Tell me about the other civilisations.", "next": "others" },
+            { "text": "[Back]", "next": "greet" }
+          ]
+        },
+        "age": {
+          "text": "It's right. We've dated alloy from the Bulge at nine billion years. We don't have a theory that survives peer review. You look like the kind who might bring us one.",
+          "options": [
+            { "text": "I'll see what I can find out.", "next": "greet", "effects": { "quest": "q_firstSurvey" } },
+            { "text": "[Back]", "next": "about" }
+          ]
+        },
+        "others": {
+          "text": "The Vherrathi to spinward - old, proud, and convinced we're a temporary inconvenience. The Kelthari far out on the rim, who take forty years to answer a letter. And the Remnant, who sell precursor junk and don't ask where you got it.",
+          "options": [
+            { "text": "Any of them know what happened to the ancients?", "next": "ruins" },
+            { "text": "[Back]", "next": "about" }
+          ]
+        },
+        "work": {
+          "text": "Always. Survey work pays best - scan uncharted systems, log what's there, bring back anything that isn't rock. We have a contract open on the Kepler chain. Interest?",
+          "options": [
+            { "text": "I'll take it.", "next": "END", "effects": { "quest": "q_firstSurvey", "reputation": 2 } },
+            { "text": "What else is there?", "next": "work2" },
+            { "text": "[Back]", "next": "greet" }
+          ]
+        },
+        "work2": {
+          "text": "Longer term? We'd pay very well for a working theory of the Vanishing. Nine billion years of archaeology and not one survivor's account. Something erased them. Find out what.",
+          "options": [
+            { "text": "That's what I intend to do.", "next": "END", "effects": { "quest": "q_vanishing", "reputation": 3, "flag": "concord_vanishing_interest" } },
+            { "text": "[Back]", "next": "work" }
+          ]
+        },
+        "ruins": {
+          "text": "Here's what keeps people awake: the ruins are all the same age. Not roughly - the same. Different stars, different chemistries, one date. Whatever ended them was coordinated.",
+          "options": [
+            { "text": "Coordinated by whom?", "next": "who" },
+            { "text": "[Back]", "next": "greet" }
+          ]
+        },
+        "who": {
+          "text": "That's the question, isn't it. Bring me evidence and I'll get you funded. Bring me a theory and I'll get you a statue.",
+          "options": [
+            { "text": "[Back]", "next": "greet" }
+          ]
+        },
+        "trade": {
+          "text": "Concord exchange rates posted. Fair prices, no questions about cargo manifests - within reason.",
+          "options": [
+            { "text": "[Trade]", "next": "END", "effects": { "action": "openTrade" } },
+            { "text": "[Back]", "next": "greet" }
+          ]
+        }
+      }
+    },
+
+    {
+      "id": "vherrathi",
+      "name": "Vherrathi Ascendancy",
+      "status": "current",
+      "homeRegion": "perseusArm",
+      "techLevel": 7,
+      "government": "Hereditary matriarchate of seven spire-houses",
+      "philosophy": "The old debt. Every citizen owes their existence to ancestors who survived the Sundering, and pays it forward in vigilance.",
+      "traits": ["ancient", "honourBound", "xenophobic", "patient", "militaristic"],
+      "biology": "Tall hexapedal silicate-carbon hybrids; slow metabolism, long memory",
+      "language": { "family": "Spire-Script", "notes": "Written vertically; tense is encoded in stroke weight. Lying is grammatically awkward." },
+      "economy": { "strength": ["quantumCrystal", "ancientAlloy", "superconductor"], "weakness": ["carbon", "oxygen"], "currency": "seal-mark" },
+      "architecture": "Boron-spired citadels grown into asteroid rock; every building is also a fortress and a reliquary.",
+      "background": "The Vherrathi remember the Network Age only as myth, but their archives are the most complete in the galaxy. They have never once been conquered, and have never once won a war they cared about.",
+      "conflicts": ["Tariff war with the Terran Concord", "suppression of Remnant salvage fleets"],
+      "existentialProblem": "Their birth rate is collapsing and their archive is the only complete record of the Vanishing. They are choosing which memories to keep.",
+      "relations": { "terranConcord": -0.2, "kelthari": 0.1, "ashenRemnant": -0.6 },
+      "startingReputation": -0.05,
+      "dialogue": {
+        "greet": {
+          "text": "Halt. You stand in the Hall of Marks, offworlder. The Ascendancy grants you the courtesy of speech. Spend it carefully - our archive records everything, and we have excellent recall.",
+          "options": [
+            { "text": "I come to learn, not to take.", "next": "learn" },
+            { "text": "Your archives mention the Vanishing.", "next": "vanishing" },
+            { "text": "What happened to the ancient civilisations?", "next": "ancients" },
+            { "text": "I seek passage through your territory.", "next": "passage" },
+            { "text": "[Leave]", "next": "END" }
+          ]
+        },
+        "learn": {
+          "text": "Words are cheap and we have heard ten thousand years of them. Yet... you carry survey data we do not have. Bring us something true, and we will bring you something older.",
+          "options": [
+            { "text": "What would you consider true?", "next": "ancients" },
+            { "text": "[Back]", "next": "greet" }
+          ]
+        },
+        "vanishing": {
+          "text": "The Vanishing. Yes. Our deepest reliquary holds a record written by a people who watched it happen - the Veshari. They recorded the sky going quiet over nine hundred years. They recorded no enemy. No war. No plague. Only... absence.",
+          "options": [
+            { "text": "Only absence?", "next": "absence" },
+            { "text": "[Back]", "next": "greet" }
+          ]
+        },
+        "absence": {
+          "text": "The Veshari wrote: 'We are the last voice, and we do not know who is listening.' Then the Veshari vanished too. Find their reliquary. We will trade you the index of every ruin we have catalogued - and we have catalogued many.",
+          "options": [
+            { "text": "I'll find it.", "next": "END", "effects": { "quest": "q_veshari", "reputation": 4 } },
+            { "text": "[Back]", "next": "vanishing" }
+          ]
+        },
+        "ancients": {
+          "text": "We are children squatting in the ruins of giants. The Network Age linked ten thousand worlds with quantum voice. Then the Sundering War killed stars, and then - silence. Three billion years of it. Do you understand what three billion years of silence does to a species that remembers everything?",
+          "options": [
+            { "text": "It makes you careful.", "next": "careful" },
+            { "text": "[Back]", "next": "greet" }
+          ]
+        },
+        "careful": {
+          "text": "It makes us correct. Survey the Perseus Arm. Log every ruin with its date. We will pay in precursor alloy - and in warnings.",
+          "options": [
+            { "text": "[Accept survey contract]", "next": "END", "effects": { "quest": "q_perseusSurvey", "reputation": 3, "giveResource": { "superconductor": 20 } } },
+            { "text": "[Back]", "next": "greet" }
+          ]
+        },
+        "passage": {
+          "text": "Passage is granted to the respectful and denied to the greedy. You are presently unproven. Prove yourself in the arm, offworlder.",
+          "options": [
+            { "text": "[Back]", "next": "greet" }
+          ]
+        }
+      }
+    },
+
+    {
+      "id": "kelthari",
+      "name": "Kelthari Chorus",
+      "status": "current",
+      "homeRegion": "outerDisk",
+      "techLevel": 6,
+      "government": "Distributed song-councils; no fixed capital",
+      "philosophy": "The Long Song. A civilisation is a melody; its duty is to keep the melody recognisable across millennia.",
+      "traits": ["collective", "patient", "nonVerbal", "gentle", "inscrutable"],
+      "biology": "Colonial gas-filled floaters; individuals are temporary, the Chorus is continuous",
+      "language": { "family": "Harmonic-phase", "notes": "Spoken in chords over hours. Translation engines take weeks. They do not mind waiting." },
+      "economy": { "strength": ["alienBiomass", "hydrogen", "carbon"], "weakness": ["iron", "rareMetals"], "currency": "song-share" },
+      "architecture": "Living reef-cities grown from engineered coral-analogues in gas giant atmospheres.",
+      "background": "The Kelthari have no history - only a continuous memory. They remember a galaxy with ten thousand singing worlds, and they have been singing into the dark ever since, waiting for an answer.",
+      "conflicts": ["none active; they do not hold grudges, they hold vigil"],
+      "existentialProblem": "They are waiting for a reply that has not come in four billion years, and they are beginning to suspect they are not supposed to get one.",
+      "relations": { "terranConcord": 0.3, "vherrathi": 0.1, "ashenRemnant": 0.0 },
+      "startingReputation": 0.4,
+      "dialogue": {
+        "greet": {
+          "text": "[A slow chord, three tones wide, resolves into your translator's approximation: 'Traveller. Your song is short and bright. Sit. We have time that you do not.']",
+          "options": [
+            { "text": "You knew the old civilisations.", "next": "memory" },
+            { "text": "Why do you sing into the dark?", "next": "singing" },
+            { "text": "Can you teach me?", "next": "teach" },
+            { "text": "[Leave]", "next": "END" }
+          ]
+        },
+        "memory": {
+          "text": "['We remember when the dark answered. Our oldest songs are copies of copies of copies. Ten thousand voices. Then, gradually, fewer. We kept singing. We are still singing.']",
+          "options": [
+            { "text": "What did the dark answer?", "next": "answer" },
+            { "text": "[Back]", "next": "greet" }
+          ]
+        },
+        "answer": {
+          "text": "['We do not know. The songs were changed by it. That is all the copies preserved. Something listened to the network, and afterwards the network was gone, and the worlds were gone, and only the songs remained.']",
+          "options": [
+            { "text": "That's the Vanishing.", "next": "vanishing" },
+            { "text": "[Back]", "next": "greet" }
+          ]
+        },
+        "vanishing": {
+          "text": "['If that is your word for it, keep it. We would trade a great deal for a record that is not a song. You dig in stone. Bring us what you dig up, and we will give you our deepest memory of the age before.']",
+          "options": [
+            { "text": "[Accept]", "next": "END", "effects": { "quest": "q_kelthariSongs", "reputation": 4 } },
+            { "text": "[Back]", "next": "greet" }
+          ]
+        },
+        "singing": {
+          "text": "['Because someone should. Because the first songs we learned were answers, and we have forgotten the question. Because if we stop, the dark will have won a small thing, and we are not made of great surrenders.']",
+          "options": [
+            { "text": "I'll help you find the question.", "next": "END", "effects": { "reputation": 2, "flag": "kelthari_quest_promise" } },
+            { "text": "[Back]", "next": "greet" }
+          ]
+        },
+        "teach": {
+          "text": "['We can teach patience, and how to hear a chord in a frequency you have not learned. Bring us the bones of the old worlds and we will teach you to read what they were singing.']",
+          "options": [
+            { "text": "[Back]", "next": "greet" }
+          ]
+        }
+      }
+    },
+
+    {
+      "id": "ashenRemnant",
+      "name": "The Ashen Remnant",
+      "status": "current",
+      "homeRegion": "innerDisk",
+      "techLevel": 6,
+      "government": "Loose syndicate of salvage clans under a rotating First Salvager",
+      "philosophy": "Everything is salvage, including you. Value is what someone will pay before it kills them.",
+      "traits": ["pragmatic", "opportunistic", "secretive", "blackMarket", "survivors"],
+      "biology": "Genetically heterogeneous humans and near-humans; clan-marked",
+      "language": { "family": "Trade cant over twelve substrate languages", "notes": "Price is in the grammar. Insults are in the tense." },
+      "economy": { "strength": ["ancientAlloy", "civCore", "hydrogen"], "weakness": ["silicon", "quantumCrystal"], "currency": "credit" },
+      "architecture": "Swiss-cheese habitats hollowed from captured asteroids; nothing is built that could not be sold.",
+      "background": "Founded by refugees of a Concord colonial collapse, the Remnant discovered that precursor technology could be sold without being understood. They have grown rich on other people's heritage and nervous about what they've woken up.",
+      "conflicts": ["Vherrathi suppression fleets", "internal clan wars over ruin claims"],
+      "existentialProblem": "They opened a precursor vault in the Inner Disk three years ago. It was empty. It should not have been empty.",
+      "relations": { "terranConcord": -0.4, "vherrathi": -0.6, "kelthari": 0.0 },
+      "startingReputation": -0.15,
+      "dialogue": {
+        "greet": {
+          "text": "Remnant free-port. You're docked, which means you're paying. Talk fast - docking fees accrue and I'm not sentimental.",
+          "options": [
+            { "text": "You sell precursor tech.", "next": "precursor" },
+            { "text": "What did you find in the vault?", "next": "vault" },
+            { "text": "I need work.", "next": "work" },
+            { "text": "[Leave]", "next": "END" }
+          ]
+        },
+        "precursor": {
+          "text": "We sell what others are too polite to dig up. Alloy, cores, whole drive sections if you've got the credits. We don't ask where you found it and you don't ask where we found it. That's the etiquette.",
+          "options": [
+            { "text": "Where did YOU find it?", "next": "vault" },
+            { "text": "[Back]", "next": "greet" }
+          ]
+        },
+        "vault": {
+          "text": "Three years back we cracked a reliquary in the Inner Disk. Sealed for four billion years. Sealed from the inside, if you get my meaning. We opened it and it was empty. Clean. Dust patterns wrong - like something walked out recently. Clan Kesh lost eleven people finding that out and we've been trying to forget it ever since.",
+          "options": [
+            { "text": "Something emptied it.", "next": "empty" },
+            { "text": "[Back]", "next": "greet" }
+          ]
+        },
+        "empty": {
+          "text": "Something, or something's maintenance drones. The vault had power. Something was keeping it running. Look - you seem like the type who goes where the maps end. Go look. If you find out what's been emptying our ruins, we'll give you the salvage rights and a very large discount.",
+          "options": [
+            { "text": "[Accept]", "next": "END", "effects": { "quest": "q_emptyVault", "reputation": 3 } },
+            { "text": "[Back]", "next": "greet" }
+          ]
+        },
+        "work": {
+          "text": "Salvage runs. We mark the ruins, you dig them out, we take a cut and you keep the rest. No paperwork, no witnesses, no refunds.",
+          "options": [
+            { "text": "[Accept salvage contract]", "next": "END", "effects": { "quest": "q_salvageRun", "reputation": 1, "giveResource": { "ancientAlloy": 4 } } },
+            { "text": "[Back]", "next": "greet" }
+          ]
+        }
+      }
+    }
+  ],
+
+  "extinct": [
+    {
+      "id": "aelthera",
+      "name": "Ael'thera",
+      "era": "eraFirstLight",
+      "bya": 9.4,
+      "desc": "The earliest civilisations we can prove existed: metal-poor, patient, building cities of light around the galaxy's oldest stars. Their signature is a seven-pointed star cut into everything.",
+      "signature": "sevenPointStar",
+      "evidenceTags": ["aelthera"]
+    },
+    {
+      "id": "synthari",
+      "name": "Synthari Network",
+      "era": "eraNetworks",
+      "bya": 7.6,
+      "desc": "Ten thousand worlds linked by quantum voice. Knowledge became effectively immortal - until it wasn't.",
+      "signature": "networkNode",
+      "evidenceTags": ["synthari"]
+    },
+    {
+      "id": "korrathi",
+      "name": "Korrathi Hegemony",
+      "era": "eraConflict",
+      "bya": 5.8,
+      "desc": "The Sundering War's most complete records are theirs. They killed stars to hold a border. Their historians insisted it was necessary. Their timestamps disagree with everyone else's.",
+      "signature": "brokenCrown",
+      "evidenceTags": ["korrathi"]
+    },
+    {
+      "id": "veshari",
+      "name": "Veshari Collective",
+      "era": "eraVanishing",
+      "bya": 4.7,
+      "desc": "The last voice. The Veshari watched the sky go quiet over nine centuries and wrote it all down. Then they vanished too - mid-sentence, in some records.",
+      "signature": "lastVoice",
+      "evidenceTags": ["veshari"]
+    },
+    {
+      "id": "shepherd",
+      "name": "The Shepherd",
+      "era": "eraVanishing",
+      "bya": 4.6,
+      "desc": "Not a civilisation. A hypothesis with teeth: that the disappearances were catalogued, selected, and curated by something that has been pruning intelligence since before the galaxy had a spiral.",
+      "signature": "unknownGeometry",
+      "evidenceTags": ["shepherd", "unknown"]
+    }
+  ]
+}

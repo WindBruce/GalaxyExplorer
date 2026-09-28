@@ -1,0 +1,135 @@
+{
+  "_comment": "Artifacts / archaeological evidence. `type` maps to the investigation system's evidence classes. `supports` lists timeline event ids this artifact is evidence for. `techTag` (when set) unlocks an unknown-category technology once analysed.",
+
+  "artifacts": [
+    { "id": "art_sevenStar", "name": "Seven-Pointed Tablet", "type": "inscription", "civTag": "aelthera", "era": "eraFirstLight", "tier": 1, "value": 400,
+      "desc": "A slate of unfamiliar alloy cut with a seven-pointed star and a line of glyphs.",
+      "evidenceText": "The glyphs repeat in a strict cadence - a counting formula. Someone was recording how long their city had stood. The final count is enormous.",
+      "supports": ["evFirstCities"], "techTag": null },
+
+    { "id": "art_firstLamp", "name": "First Lamp", "type": "relic", "civTag": "aelthera", "era": "eraFirstLight", "tier": 1, "value": 900,
+      "desc": "A sealed vessel that still emits warm light after nine billion years.",
+      "evidenceText": "The lamp's chemistry implies a power source with no measurable decay. Whoever built it did not expect it to be found by anyone.",
+      "supports": ["evFirstCities"], "techTag": null },
+
+    { "id": "art_oldStarMap", "name": "Old Star Chart", "type": "starMap", "civTag": "aelthera", "era": "eraFirstLight", "tier": 2, "value": 1200,
+      "desc": "A folded plate engraved with positions that no longer match the sky.",
+      "evidenceText": "Corrected for galactic rotation, the chart marks twenty-nine systems as inhabited. Eight of those stars are gone. The chart is not wrong - the stars are.",
+      "supports": ["evFirstCities", "evStarKilling"], "techTag": null },
+
+    { "id": "art_networkRelay", "name": "Network Relay Fragment", "type": "relic", "civTag": "synthari", "era": "eraNetworks", "tier": 2, "value": 2600,
+      "desc": "A lattice of quantum channels, still faintly coherent.",
+      "evidenceText": "The relay's entanglement pairs are not random. They were multiplexed - thousands of simultaneous conversations across light-years.",
+      "supports": ["evNetworkBuild"], "techTag": "echo_schematic" },
+
+    { "id": "art_chorusOfTenThousand", "name": "Chorus of Ten Thousand", "type": "quantumRecording", "civTag": "synthari", "era": "eraNetworks", "tier": 3, "value": 4200,
+      "desc": "A recording medium holding ten thousand overlapping voices, each a world.",
+      "evidenceText": "Decoded partially. The voices are not speaking - they are being catalogued. Something asked each world a question, and each world answered, and the answers were filed.",
+      "supports": ["evNetworkBuild", "evCoreSignal"], "techTag": "chorus_schematic" },
+
+    { "id": "art_coreReply", "name": "The Core's Reply", "type": "quantumRecording", "civTag": "synthari", "era": "eraNetworks", "tier": 4, "value": 6000,
+      "desc": "A single standing wave, addressed to the whole network at once.",
+      "evidenceText": "The reply predates the network's own architecture by four hundred million years. They did not contact something new. They answered something that had been waiting, patiently, with a message already prepared.",
+      "supports": ["evCoreSignal"], "techTag": null },
+
+    { "id": "art_korrathiStandard", "name": "Korrathi Battle Standard", "type": "relic", "civTag": "korrathi", "era": "eraConflict", "tier": 2, "value": 1800,
+      "desc": "A broken crown of black metal, still warm to the touch.",
+      "evidenceText": "The standard's log records eleven star-killings as 'border corrections'. The Korrathi historians were not boasting. They were filing reports.",
+      "supports": ["evSunderingWar", "evStarKilling"], "techTag": "carapace_schematic" },
+
+    { "id": "art_warHelm", "name": "Sundering War Helm", "type": "weapon", "civTag": "korrathi", "era": "eraConflict", "tier": 2, "value": 1500,
+      "desc": "A combat helmet fused to its wearer's remains by a single energy discharge.",
+      "evidenceText": "Vital signs ended mid-breath. The discharge that killed the wearer was not Korrathi in origin, and not from any direction the helm could face.",
+      "supports": ["evSunderingWar"], "techTag": null },
+
+    { "id": "art_borderTreaty", "name": "Border Treaty, Signed Twice", "type": "inscription", "civTag": "korrathi", "era": "eraConflict", "tier": 3, "value": 2400,
+      "desc": "A treaty slab bearing two signatures, one of them dated three thousand years before the treaty was drafted.",
+      "evidenceText": "The Korrathi signed a treaty with a counterparty whose date-stamp predates the Korrathi written language by millennia. One party was not keeping time as we understand it.",
+      "supports": ["evSunderingWar", "evShepherd"], "techTag": null },
+
+    { "id": "art_veshariLastPage", "name": "Veshari Final Page", "type": "inscription", "civTag": "veshari", "era": "eraVanishing", "tier": 3, "value": 3800,
+      "desc": "A single leaf, the last page of a record that ran for nine centuries.",
+      "evidenceText": "'We are the last voice, and we do not know who is listening. If anyone reads this: it was not a war. It was not a plague. It was an audit. We did not pass.'",
+      "supports": ["evVanishing", "evShepherd"], "techTag": null },
+
+    { "id": "art_veshariDatabase", "name": "Veshari Observatory Log", "type": "database", "civTag": "veshari", "era": "eraVanishing", "tier": 4, "value": 5200,
+      "desc": "A damaged database of nine hundred years of sky observations.",
+      "evidenceText": "Reconstructed: 40,000 recorded civilisations at the start of the log. 31 at the end. No battles. No plagues. Just... deletions, arranged in an order that is not chronological.",
+      "supports": ["evVanishing", "evShepherd"], "techTag": "attic_schematic" },
+
+    { "id": "art_memoryTrace", "name": "Memory Trace", "type": "aiMemory", "civTag": "veshari", "era": "eraVanishing", "tier": 3, "value": 3400,
+      "desc": "A mnemonic imprint that replays a person's last hour.",
+      "evidenceText": "A Veshari archivist, calmly copying records, looks up - and stops. Not in fear. In recognition. She says a name we cannot pronounce, and then she is not there.",
+      "supports": ["evVanishing"], "techTag": "memory_trace" },
+
+    { "id": "art_shepherdGeometry", "name": "Shepherd Geometry", "type": "energySignature", "civTag": "shepherd", "era": "eraVanishing", "tier": 4, "value": 7000,
+      "desc": "A standing field that describes a shape with no interior.",
+      "evidenceText": "The field is not a signal. It is a form - a way of arranging spacetime that computes. It has been running since before the galaxy's spiral arms settled.",
+      "supports": ["evShepherd"], "techTag": "mnemos_schematic" },
+
+    { "id": "art_catalogueIndex", "name": "Catalogue Index", "type": "database", "civTag": "shepherd", "era": "eraVanishing", "tier": 4, "value": 8000,
+      "desc": "A structured index of civilisations, by extinction date.",
+      "evidenceText": "The index lists species, worlds, technologies, and a final column in a notation we cannot read. Forty-one thousand entries. The last entry is dated... in our future.",
+      "supports": ["evShepherd", "evVanishing"], "techTag": null },
+
+    { "id": "art_emptyReliquary", "name": "Empty Reliquary", "type": "architecture", "civTag": "unknown", "era": "eraVanishing", "tier": 3, "value": 500,
+      "desc": "A sealed vault, opened from the inside, with dust patterns that make no sense.",
+      "evidenceText": "The reliquary's internal power was live until recently. Something maintained it, and something removed its contents - carefully, without damage. A looter would have broken things.",
+      "supports": ["evVanishing"], "techTag": null },
+
+    { "id": "art_driveSchematic", "name": "Resonance Drive Schematic", "type": "database", "civTag": "synthari", "era": "eraNetworks", "tier": 5, "value": 12000,
+      "desc": "Manufacturing data for a drive that folds space by remembering it.",
+      "evidenceText": "The schematic is written as a proof, not a drawing. To build it you must first accept that destination is a property of the traveller, not the map.",
+      "supports": ["evNetworkBuild"], "techTag": "drive_schematic" },
+
+    { "id": "art_aegisSchematic", "name": "Aegis Schematic", "type": "database", "civTag": "korrathi", "era": "eraConflict", "tier": 5, "value": 12000,
+      "desc": "Shield-field generation data with no power input specified.",
+      "evidenceText": "The field draws from the vacuum itself. The schematic's annotations read 'borrowed, never repaid'.",
+      "supports": ["evSunderingWar"], "techTag": "aegis_schematic" },
+
+    { "id": "art_vaultSchematic", "name": "Vault Schematic", "type": "database", "civTag": "aelthera", "era": "eraFirstLight", "tier": 5, "value": 12000,
+      "desc": "Architectural plans for a volume larger inside than out.",
+      "evidenceText": "The plans include a storage room with negative displacement. The margins contain a warning in seven languages, including two that are not from any known civilisation.",
+      "supports": ["evFirstCities"], "techTag": "vault_schematic" },
+
+    { "id": "art_cradleSchematic", "name": "Cradle Schematic", "type": "database", "civTag": "synthari", "era": "eraNetworks", "tier": 5, "value": 12000,
+      "desc": "Extraction machinery designed to negotiate with ore.",
+      "evidenceText": "The device does not break rock. It proposes. The proposal's success rate is listed as 100%, with a footnote: 'the rock always agrees, eventually.'",
+      "supports": ["evNetworkBuild"], "techTag": "cradle_schematic" },
+
+    { "id": "art_servitorSchematic", "name": "Servitor Schematic", "type": "database", "civTag": "veshari", "era": "eraVanishing", "tier": 5, "value": 12000,
+      "desc": "Designs for maintenance drones with a four-billion-year duty cycle.",
+      "evidenceText": "The servitors' prime directive is 'preserve the record'. Their city is gone. They are still preserving. You have met some of them. You did not notice.",
+      "supports": ["evVanishing"], "techTag": "servitor_schematic" },
+
+    { "id": "art_coreSchematic", "name": "Core Schematic", "type": "database", "civTag": "shepherd", "era": "eraVanishing", "tier": 5, "value": 16000,
+      "desc": "How to tap a civilisation core without destroying it.",
+      "evidenceText": "The core is not a power plant. It is a person - a preserved mind, city-sized, still running its city. The schematic is, in effect, instructions for asking politely.",
+      "supports": ["evShepherd"], "techTag": "core_schematic" },
+
+    { "id": "art_alloyAnalysis", "name": "Alloy Analysis Sample", "type": "database", "civTag": "unknown", "era": "eraFirstLight", "tier": 3, "value": 2200,
+      "desc": "A fragment of ancient alloy with a full spectral workup.",
+      "evidenceText": "The alloy's crystal lattice contains error-correcting structure at the atomic scale. It was designed to survive being misunderstood.",
+      "supports": ["evFirstCities"], "techTag": "alloy_analysis" },
+
+    { "id": "art_xenoAtlas", "name": "Xenobiology Atlas", "type": "database", "civTag": "veshari", "era": "eraVanishing", "tier": 3, "value": 2800,
+      "desc": "A catalogue of 12,000 biochemistries from 12,000 worlds.",
+      "evidenceText": "Every entry is annotated with the same symbol: a closed eye. The atlas is not a record of life. It is a record of life that was permitted.",
+      "supports": ["evVanishing", "evShepherd"], "techTag": "xenobiology_atlas" },
+
+    { "id": "art_gateFragment", "name": "Gate Fragment", "type": "relic", "civTag": "synthari", "era": "eraNetworks", "tier": 4, "value": 6500,
+      "desc": "A curved surface that connects to somewhere you cannot see.",
+      "evidenceText": "The fragment is a wormhole mouth with its far end... missing. Not destroyed. Removed, cleanly, as if someone had taken the other half with them.",
+      "supports": ["evNetworkBuild"], "techTag": "gate_fragment" },
+
+    { "id": "art_killStarRecord", "name": "Record of a Dying Star", "type": "database", "civTag": "korrathi", "era": "eraConflict", "tier": 4, "value": 4800,
+      "desc": "A star's death, logged by three civilisations with three different timestamps.",
+      "evidenceText": "The Korrathi claim the kill. The Veshari claim to have watched it die four hundred years earlier. The third record is not from any civilisation we know - and it is dated before the star formed.",
+      "supports": ["evStarKilling", "evShepherd"], "techTag": null },
+
+    { "id": "art_theQuestion", "name": "The Question", "type": "quantumRecording", "civTag": "shepherd", "era": "eraVanishing", "tier": 5, "value": 20000,
+      "desc": "A recording addressed to you specifically. It knows your ship's registry.",
+      "evidenceText": "It is not a message. It is an examination. Every question it asks is one your civilisation has not yet answered, and it is marking your answers. The last question is 'do you intend to continue', and the recording is still waiting.",
+      "supports": ["evShepherd", "evVanishing", "evCoreSignal"], "techTag": null }
+  ]
+}

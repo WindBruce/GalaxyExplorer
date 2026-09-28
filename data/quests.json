@@ -1,0 +1,180 @@
+{
+  "_comment": "Quest templates. QuestSystem instantiates these, resolving 'any' targets into concrete systems/ruins so every playthrough differs. Objective types: scanSystem | scanBody | collectResource | analyzeArtifact | discoverRuin | landOnPlanet | travelTo | reachReputation | researchTech | discoverCiv | defeatHostiles | scanAnomaly | returnTo | talkTo.",
+
+  "quests": [
+    {
+      "id": "q_firstSurvey",
+      "title": "First Survey Contract",
+      "giver": "terranConcord",
+      "category": "main",
+      "chain": "prologue",
+      "description": "Commander Vance wants proof you can do the job: survey an uncharted system in the Spur and bring back resources.",
+      "objectives": [
+        { "type": "travelTo", "target": "any", "region": "orionSpur", "desc": "Jump to an uncharted system in the Orion Spur" },
+        { "type": "scanSystem", "count": 1, "desc": "Complete a system survey" },
+        { "type": "collectResource", "resource": "iron", "count": 40, "desc": "Recover 40 iron (mine asteroids or planetary nodes)" },
+        { "type": "returnTo", "civ": "terranConcord", "desc": "Return to the Concord and report" }
+      ],
+      "rewards": { "credits": 6000, "research": 150, "resources": { "silicon": 30 }, "reputation": 5, "xp": 250, "unlockQuest": "q_ruinSignal" }
+    },
+
+    {
+      "id": "q_ruinSignal",
+      "title": "Signal Beneath the Regolith",
+      "giver": "terranConcord",
+      "category": "main",
+      "chain": "prologue",
+      "description": "Your survey caught an energy signature on a terrestrial world. The Concord wants it investigated before someone else claims it.",
+      "objectives": [
+        { "type": "travelTo", "target": "any", "hasRuin": true, "desc": "Travel to the system containing the ruin signature" },
+        { "type": "scanBody", "target": "anyRuin", "desc": "Scan the ruin from orbit" },
+        { "type": "landOnPlanet", "target": "anyRuinPlanet", "desc": "Land at the ruin site" },
+        { "type": "analyzeArtifact", "count": 1, "desc": "Recover and analyse at least one artifact" }
+      ],
+      "rewards": { "credits": 9000, "research": 300, "reputation": 6, "xp": 400, "unlockQuest": "q_translation" }
+    },
+
+    {
+      "id": "q_translation",
+      "title": "The Glyphs Will Not Sit Still",
+      "giver": "terranConcord",
+      "category": "main",
+      "chain": "prologue",
+      "description": "The artifact's inscriptions resist translation. The Concord suspects the language encodes a date. Build the capability to read it.",
+      "objectives": [
+        { "type": "researchTech", "target": "sci_stratigraphy", "desc": "Research Field Stratigraphy" },
+        { "type": "analyzeArtifact", "count": 2, "desc": "Analyse two artifacts" }
+      ],
+      "rewards": { "credits": 12000, "research": 400, "resources": { "quantumCrystal": 4 }, "reputation": 6, "xp": 500 }
+    },
+
+    {
+      "id": "q_perseusSurvey",
+      "title": "Spire-House Survey Contract",
+      "giver": "vherrathi",
+      "category": "side",
+      "chain": "vherrathi",
+      "description": "The Vherrathi will pay in precursor alloy for a full survey of Perseus Arm systems - and they want ruin dates, not just positions.",
+      "objectives": [
+        { "type": "scanSystem", "count": 3, "region": "perseusArm", "desc": "Survey three systems in the Perseus Arm" },
+        { "type": "discoverRuin", "count": 1, "desc": "Locate and catalogue one ruin" }
+      ],
+      "rewards": { "credits": 18000, "research": 250, "resources": { "ancientAlloy": 8, "superconductor": 25 }, "reputation": 8, "xp": 600, "unlockQuest": "q_veshari" }
+    },
+
+    {
+      "id": "q_veshari",
+      "title": "The Last Voice",
+      "giver": "vherrathi",
+      "category": "main",
+      "chain": "mystery",
+      "description": "The Veshari reliquary holds the only complete record of the Vanishing. The Vherrathi have its region. Go and read it.",
+      "objectives": [
+        { "type": "travelTo", "target": "any", "hasRuin": true, "region": "perseusArm", "desc": "Travel to a system with ruins in the Perseus Arm" },
+        { "type": "analyzeArtifact", "artifactType": "database", "count": 1, "desc": "Recover a Veshari database" },
+        { "type": "analyzeArtifact", "artifactType": "inscription", "count": 1, "desc": "Recover a Veshari inscription" },
+        { "type": "returnTo", "civ": "vherrathi", "desc": "Report to the Vherrathi Ascendancy" }
+      ],
+      "rewards": { "credits": 26000, "research": 700, "resources": { "ancientAlloy": 12, "quantumCrystal": 8 }, "reputation": 10, "xp": 1200, "unlockQuest": "q_theQuestion" }
+    },
+
+    {
+      "id": "q_kelthariSongs",
+      "title": "Songs and Stones",
+      "giver": "kelthari",
+      "category": "side",
+      "chain": "kelthari",
+      "description": "The Kelthari will trade their deepest memory of the age before for archaeological records they cannot dig up themselves.",
+      "objectives": [
+        { "type": "analyzeArtifact", "count": 3, "desc": "Analyse three artifacts of any origin" },
+        { "type": "scanAnomaly", "count": 1, "desc": "Scan an anomalous region" }
+      ],
+      "rewards": { "credits": 15000, "research": 500, "resources": { "alienBiomass": 10 }, "reputation": 8, "xp": 700 }
+    },
+
+    {
+      "id": "q_emptyVault",
+      "title": "The Vault That Emptied Itself",
+      "giver": "ashenRemnant",
+      "category": "main",
+      "chain": "mystery",
+      "description": "Something has been emptying sealed reliquaries from the inside. Find out what - and whether it is still doing it.",
+      "objectives": [
+        { "type": "analyzeArtifact", "artifactType": "architecture", "count": 1, "desc": "Examine an emptied reliquary" },
+        { "type": "scanAnomaly", "count": 2, "desc": "Scan two anomalous regions" }
+      ],
+      "rewards": { "credits": 22000, "research": 600, "resources": { "unknownEnergy": 1 }, "reputation": 6, "xp": 900, "unlockQuest": "q_theQuestion" }
+    },
+
+    {
+      "id": "q_salvageRun",
+      "title": "Salvage Run",
+      "giver": "ashenRemnant",
+      "category": "side",
+      "chain": "remnant",
+      "description": "The Remnant marks ruins; you dig them out; everyone profits and nobody files paperwork.",
+      "objectives": [
+        { "type": "collectResource", "resource": "ancientAlloy", "count": 6, "desc": "Recover 6 ancient alloy" },
+        { "type": "discoverRuin", "count": 2, "desc": "Catalogue two ruins" }
+      ],
+      "rewards": { "credits": 20000, "research": 200, "reputation": 5, "xp": 500 }
+    },
+
+    {
+      "id": "q_vanishing",
+      "title": "The Vanishing",
+      "giver": "terranConcord",
+      "category": "main",
+      "chain": "mystery",
+      "description": "The Concord will fund anything that produces a working theory of the Vanishing. That means evidence, not opinions.",
+      "objectives": [
+        { "type": "analyzeArtifact", "count": 5, "desc": "Analyse five artifacts" },
+        { "type": "researchTech", "target": "sci_mnemo", "desc": "Research Mnemo-Translation" }
+      ],
+      "rewards": { "credits": 40000, "research": 1200, "resources": { "quantumCrystal": 15, "ancientAlloy": 6 }, "reputation": 12, "xp": 2000, "unlockQuest": "q_theQuestion" }
+    },
+
+    {
+      "id": "q_theQuestion",
+      "title": "The Question",
+      "giver": "unknown",
+      "category": "main",
+      "chain": "mystery",
+      "description": "Something has left a recording addressed to your ship. It knows your registry. It is waiting for an answer.",
+      "objectives": [
+        { "type": "travelTo", "target": "any", "region": "unknownRegions", "desc": "Travel to an Unknown Anomalous Region" },
+        { "type": "scanAnomaly", "count": 3, "desc": "Scan three anomalies" },
+        { "type": "analyzeArtifact", "artifactType": "quantumRecording", "count": 2, "desc": "Recover two quantum recordings" },
+        { "type": "researchTech", "target": "unk_mnemos", "desc": "Reconstruct the Mnemos Shard" }
+      ],
+      "rewards": { "credits": 80000, "research": 3000, "resources": { "anomalousMatter": 2, "unknownEnergy": 2 }, "reputation": 20, "xp": 5000 }
+    },
+
+    {
+      "id": "q_hostileSpace",
+      "title": "Clearing the Lane",
+      "giver": "terranConcord",
+      "category": "side",
+      "chain": "combat",
+      "description": "Pirates have been hitting survey ships on the Kepler lane. The Concord pays per hull destroyed.",
+      "objectives": [
+        { "type": "defeatHostiles", "count": 3, "desc": "Destroy three hostiles" }
+      ],
+      "rewards": { "credits": 14000, "research": 100, "reputation": 4, "xp": 600 }
+    },
+
+    {
+      "id": "q_derelict",
+      "title": "The Long Missing",
+      "giver": "unknown",
+      "category": "side",
+      "chain": "exploration",
+      "description": "A derelict survey ship, missing for sixty years, has started broadcasting again. Its last log entry is nine seconds long and contains a voice that is not on the crew manifest.",
+      "objectives": [
+        { "type": "scanBody", "target": "anyDerelict", "desc": "Scan the derelict" },
+        { "type": "analyzeArtifact", "count": 1, "desc": "Recover its log core" }
+      ],
+      "rewards": { "credits": 16000, "research": 400, "resources": { "ancientAlloy": 3 }, "xp": 700 }
+    }
+  ]
+}

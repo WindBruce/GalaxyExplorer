@@ -1,0 +1,143 @@
+{
+  "_comment": "The galactic timeline, reconstructed by the player through archaeology. Each event has an id that evidence (artifacts) references. reconstruction state lives in ArchaeologySystem.",
+
+  "eras": [
+    {
+      "id": "eraFormation",
+      "name": "The Long Dark",
+      "startBya": 13.0,
+      "endBya": 10.0,
+      "desc": "The galaxy forms. Old halo stars ignite. No life, no voices, only gravity."
+    },
+    {
+      "id": "eraFirstLight",
+      "name": "First Light",
+      "startBya": 10.0,
+      "endBya": 8.0,
+      "desc": "The earliest known civilisations arise on metal-poor worlds around ancient stars."
+    },
+    {
+      "id": "eraNetworks",
+      "name": "The Network Age",
+      "startBya": 8.0,
+      "endBya": 6.0,
+      "desc": "Interstellar civilisation networks span the core and inner disk. Quantum communication links thousands of worlds."
+    },
+    {
+      "id": "eraConflict",
+      "name": "The Sundering",
+      "startBya": 6.0,
+      "endBya": 5.0,
+      "desc": "A galaxy-wide conflict. Records disagree on who fired first. Stars are killed."
+    },
+    {
+      "id": "eraVanishing",
+      "name": "The Vanishing",
+      "startBya": 5.0,
+      "endBya": 4.0,
+      "desc": "Every advanced civilisation disappears within a few tens of millions of years. No bodies. No survivors' accounts."
+    },
+    {
+      "id": "eraSilence",
+      "name": "The Silence",
+      "startBya": 4.0,
+      "endBya": 1.0,
+      "desc": "Three billion years of quiet. Ruins endure. Nothing rebuilds."
+    },
+    {
+      "id": "eraRenaissance",
+      "name": "The Second Dawn",
+      "startBya": 1.0,
+      "endBya": 0.0,
+      "desc": "New civilisations emerge - younger, shorter-lived, unaware of what came before."
+    },
+    {
+      "id": "eraPlayer",
+      "name": "The Present Age",
+      "startBya": 0.0,
+      "endBya": 0.0,
+      "desc": "You. And whatever is still listening in the dark between the stars."
+    }
+  ],
+
+  "events": [
+    {
+      "id": "evFirstCities",
+      "era": "eraFirstLight",
+      "bya": 9.4,
+      "title": "The First Cities",
+      "summary": "Ancient civilisations raise stone-and-light cities around the galaxy's oldest stars.",
+      "knownByDefault": false
+    },
+    {
+      "id": "evNetworkBuild",
+      "era": "eraNetworks",
+      "bya": 7.6,
+      "title": "The Network is Woven",
+      "summary": "A quantum communication network links thousands of worlds; knowledge becomes effectively immortal.",
+      "knownByDefault": false
+    },
+    {
+      "id": "evCoreSignal",
+      "era": "eraNetworks",
+      "bya": 7.2,
+      "title": "The Core Answers",
+      "summary": "The network's deepest relay, at the galactic core, receives a signal that was already waiting for them.",
+      "knownByDefault": false
+    },
+    {
+      "id": "evSunderingWar",
+      "era": "eraConflict",
+      "bya": 5.8,
+      "title": "The Sundering War",
+      "summary": "A conflict tears the network apart. Stellar ignition weapons are used. Whole systems are sterilised.",
+      "knownByDefault": false
+    },
+    {
+      "id": "evStarKilling",
+      "era": "eraConflict",
+      "bya": 5.5,
+      "title": "The Killing of Stars",
+      "summary": "Several stars are induced to collapse. The records call it necessary. The timestamps do not agree.",
+      "knownByDefault": false
+    },
+    {
+      "id": "evVanishing",
+      "era": "eraVanishing",
+      "bya": 4.7,
+      "title": "The Vanishing",
+      "summary": "Every advanced civilisation disappears without trace, within a few tens of millions of years of each other.",
+      "knownByDefault": false
+    },
+    {
+      "id": "evShepherd",
+      "era": "eraVanishing",
+      "bya": 4.6,
+      "title": "The Shepherd Hypothesis",
+      "summary": "The disappearances were not random. Something catalogued them. Something chose which worlds survived.",
+      "knownByDefault": false
+    },
+    {
+      "id": "evSecondDawn",
+      "era": "eraRenaissance",
+      "bya": 0.9,
+      "title": "The Second Dawn",
+      "summary": "Life re-diversifies. New intelligences arise on the ruins of the old, and call themselves first.",
+      "knownByDefault": false
+    }
+  ],
+
+  "mystery": {
+    "id": "mysteryCore",
+    "name": "The Resonance",
+    "summary": "An intelligence older than the galaxy's spiral structure, resident in the geometry of spacetime itself, that has been cataloguing civilisations - and pruning them - since before the first stars cooled.",
+    "stages": [
+      { "id": "m0", "label": "Unexplained", "requiresEvents": [] },
+      { "id": "m1", "label": "Something is wrong with the ruins", "requiresEvents": ["evFirstCities"] },
+      { "id": "m2", "label": "The disappearances were coordinated", "requiresEvents": ["evVanishing", "evNetworkBuild"] },
+      { "id": "m3", "label": "A signal predates the network", "requiresEvents": ["evCoreSignal", "evSunderingWar"] },
+      { "id": "m4", "label": "The Shepherd", "requiresEvents": ["evShepherd", "evStarKilling"] },
+      { "id": "m5", "label": "The Resonance", "requiresEvents": ["evShepherd", "evCoreSignal", "evVanishing", "evStarKilling"] }
+    ]
+  }
+}

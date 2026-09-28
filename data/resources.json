@@ -1,0 +1,169 @@
+{
+  "_comment": "Resource economy. Categories: basic | advanced | ancient | unknown | meta. value = base credits per unit. scarcity drives market prices at civilisations.",
+
+  "iron": {
+    "name": "Iron",
+    "category": "basic",
+    "tier": 1,
+    "value": 2,
+    "color": "#b08968",
+    "desc": "Ubiquitous structural metal. The backbone of hull plating and early construction.",
+    "foundIn": ["terrestrial", "asteroid", "volcanic", "barren"]
+  },
+  "nickel": {
+    "name": "Nickel",
+    "category": "basic",
+    "tier": 1,
+    "value": 3,
+    "color": "#9db2a4",
+    "desc": "Corrosion-resistant alloying metal. Essential for heat shields and drive housings.",
+    "foundIn": ["asteroid", "terrestrial", "ice"]
+  },
+  "silicon": {
+    "name": "Silicon",
+    "category": "basic",
+    "tier": 1,
+    "value": 3,
+    "color": "#8d99ae",
+    "desc": "Semiconductor substrate for every circuit aboard your ship.",
+    "foundIn": ["terrestrial", "desert", "asteroid"]
+  },
+  "carbon": {
+    "name": "Carbon",
+    "category": "basic",
+    "tier": 1,
+    "value": 2,
+    "color": "#3d3d3d",
+    "desc": "Life's scaffolding and the base of every carbon-fibre composite.",
+    "foundIn": ["terrestrial", "ocean", "ice", "gasGiant"]
+  },
+  "hydrogen": {
+    "name": "Hydrogen",
+    "category": "basic",
+    "tier": 1,
+    "value": 1,
+    "color": "#7fd4ff",
+    "desc": "Fuel for fusion cores and reaction mass. Scooped from gas giants and ice.",
+    "foundIn": ["gasGiant", "ice", "ocean", "star"]
+  },
+  "oxygen": {
+    "name": "Oxygen",
+    "category": "basic",
+    "tier": 1,
+    "value": 2,
+    "color": "#a8dadc",
+    "desc": "Breathable atmosphere component and oxidiser. Life support depends on it.",
+    "foundIn": ["terrestrial", "ocean", "ice", "desert"]
+  },
+
+  "rareMetals": {
+    "name": "Rare Metals",
+    "category": "advanced",
+    "tier": 2,
+    "value": 26,
+    "color": "#e0aaff",
+    "desc": "Platinum-group and refractory metals: catalysts, sensors, precision alloys.",
+    "foundIn": ["terrestrial", "asteroid", "volcanic", "neutron"]
+  },
+  "superconductor": {
+    "name": "Superconductive Filament",
+    "category": "advanced",
+    "tier": 2,
+    "value": 42,
+    "color": "#90e0ef",
+    "desc": "Room-temperature quantum-locked filament. Required for efficient shields and coils.",
+    "foundIn": ["ice", "terrestrial", "asteroid", "neutron"]
+  },
+  "quantumCrystal": {
+    "name": "Quantum Crystal",
+    "category": "advanced",
+    "tier": 3,
+    "value": 120,
+    "color": "#c77dff",
+    "desc": "Lattice-perfect crystal that holds coherent quantum states. Scanner and AI cores.",
+    "foundIn": ["gasGiant", "anomaly", "terrestrial", "ruin"]
+  },
+  "energyDense": {
+    "name": "High-Density Energy Cells",
+    "category": "advanced",
+    "tier": 3,
+    "value": 150,
+    "color": "#ffd166",
+    "desc": "Metallic-hydrogen and antimatter-trap cells. Ammunition and power cores.",
+    "foundIn": ["gasGiant", "volcanic", "anomaly"]
+  },
+  "antimatter": {
+    "name": "Antimatter",
+    "category": "advanced",
+    "tier": 4,
+    "value": 480,
+    "color": "#ff6b9d",
+    "desc": "Magnetically trapped antihydrogen. Unimaginable energy density, unimaginable hazard.",
+    "foundIn": ["gasGiant", "anomaly", "blackhole", "star"]
+  },
+  "exoticMatter": {
+    "name": "Exotic Matter",
+    "category": "advanced",
+    "tier": 4,
+    "value": 900,
+    "color": "#b8f2e6",
+    "desc": "Negative-energy-density condensate. The only known way to bend spacetime cheaply.",
+    "foundIn": ["blackhole", "anomaly", "neutron", "ruin"]
+  },
+
+  "ancientAlloy": {
+    "name": "Ancient Alloy",
+    "category": "ancient",
+    "tier": 4,
+    "value": 320,
+    "color": "#caa472",
+    "desc": "A self-healing metamaterial of unknown manufacture. Older than most stars.",
+    "foundIn": ["ruin", "megastructure", "station"]
+  },
+  "alienBiomass": {
+    "name": "Alien Biological Matter",
+    "category": "ancient",
+    "tier": 3,
+    "value": 210,
+    "color": "#95d5b2",
+    "desc": "Viable non-terran biochemistry. Xenobiology labs will pay anything for samples.",
+    "foundIn": ["terrestrial", "ocean", "ruin"]
+  },
+  "anomalousMatter": {
+    "name": "Anomalous Matter",
+    "category": "unknown",
+    "tier": 5,
+    "value": 1400,
+    "color": "#f72585",
+    "desc": "Matter that does not agree with known physics. Instruments disagree about its mass.",
+    "foundIn": ["anomaly", "blackhole", "ruin", "megastructure"]
+  },
+  "civCore": {
+    "name": "Civilization Core",
+    "category": "unknown",
+    "tier": 5,
+    "value": 3200,
+    "color": "#ffea00",
+    "desc": "A functioning city-scale power and computation core from a dead civilisation.",
+    "foundIn": ["ruin", "megastructure"]
+  },
+  "unknownEnergy": {
+    "name": "Unknown Energy Structure",
+    "category": "unknown",
+    "tier": 5,
+    "value": 2600,
+    "color": "#4cc9f0",
+    "desc": "A standing geometric field that emits organised energy signatures. It may be listening.",
+    "foundIn": ["anomaly", "ruin", "megastructure"]
+  },
+
+  "credits": {
+    "name": "Credits",
+    "category": "meta",
+    "tier": 0,
+    "value": 1,
+    "color": "#ffd60a",
+    "desc": "Galactic trade currency, accepted by every known polity.",
+    "foundIn": []
+  }
+}

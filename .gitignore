@@ -1,0 +1,12 @@
+# Build / tooling artefacts
+node_modules/
+npm-debug.log*
+.DS_Store
+
+# Editor
+.idea/
+.vscode/
+*.swp
+
+# Local saves exported from the browser (never commit a player's save)
+*.save.json
