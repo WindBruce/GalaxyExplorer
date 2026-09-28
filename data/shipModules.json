@@ -1,0 +1,1132 @@
+{
+  "_comment": "Ship modules. Every module occupies one slot; ShipSystem derives stats from installed modules plus skill effects. cost.credits + cost.resources; requiresTech gates crafting/installation.",
+  "engine": [
+    {
+      "id": "eng_chem",
+      "name": "Chemical Thruster Array",
+      "tier": 1,
+      "mass": 12,
+      "powerDraw": 0,
+      "stats": {
+        "thrust": 38,
+        "burnEfficiency": 1.0
+      },
+      "cost": {
+        "credits": 0,
+        "resources": {}
+      },
+      "desc": "Stock reaction thrusters. Honest, inelegant, reliable."
+    },
+    {
+      "id": "eng_ion",
+      "name": "Ion Drive Cluster",
+      "tier": 2,
+      "mass": 10,
+      "powerDraw": 6,
+      "stats": {
+        "thrust": 30,
+        "burnEfficiency": 1.6
+      },
+      "cost": {
+        "credits": 9000,
+        "resources": {
+          "rareMetals": 40,
+          "superconductor": 10
+        }
+      },
+      "requiresTech": "prop_ion",
+      "desc": "Sips propellant. Weak acceleration, absurd endurance."
+    },
+    {
+      "id": "eng_fusion",
+      "name": "Fusion Torch",
+      "tier": 3,
+      "mass": 22,
+      "powerDraw": 14,
+      "stats": {
+        "thrust": 72,
+        "burnEfficiency": 1.25
+      },
+      "cost": {
+        "credits": 42000,
+        "resources": {
+          "rareMetals": 120,
+          "superconductor": 40,
+          "energyDense": 15
+        }
+      },
+      "requiresTech": "prop_fusion",
+      "desc": "A contained star on the end of your ship. Fast, hot, thirsty."
+    },
+    {
+      "id": "eng_torch_adv",
+      "name": "Inertialess Torch (Mk II)",
+      "tier": 4,
+      "mass": 18,
+      "powerDraw": 20,
+      "stats": {
+        "thrust": 110,
+        "burnEfficiency": 1.5
+      },
+      "cost": {
+        "credits": 120000,
+        "resources": {
+          "rareMetals": 260,
+          "superconductor": 90,
+          "quantumCrystal": 20
+        }
+      },
+      "requiresTech": "prop_inertialess",
+      "desc": "Cancels its own inertia signature. Acceleration that should not be survivable."
+    }
+  ],
+  "ftl": [
+    {
+      "id": "ftl_t1",
+      "name": "Warp Fold Drive (Mk I)",
+      "tier": 1,
+      "mass": 14,
+      "powerDraw": 8,
+      "stats": {
+        "jumpRange": 2200,
+        "jumpEfficiency": 1.0,
+        "chargeTime": 6
+      },
+      "cost": {
+        "credits": 0,
+        "resources": {}
+      },
+      "desc": "Folds a short thread of spacetime. Enough to reach nearby systems."
+    },
+    {
+      "id": "ftl_t2",
+      "name": "Warp Fold Drive (Mk II)",
+      "tier": 2,
+      "mass": 16,
+      "powerDraw": 10,
+      "stats": {
+        "jumpRange": 6000,
+        "jumpEfficiency": 1.35,
+        "chargeTime": 5
+      },
+      "cost": {
+        "credits": 26000,
+        "resources": {
+          "rareMetals": 80,
+          "superconductor": 30,
+          "quantumCrystal": 6
+        }
+      },
+      "requiresTech": "prop_warp2",
+      "desc": "Deeper folds, cheaper fuel. The workhorse of long-haul survey work."
+    },
+    {
+      "id": "ftl_t3",
+      "name": "Graviton Lattice Drive",
+      "tier": 3,
+      "mass": 20,
+      "powerDraw": 16,
+      "stats": {
+        "jumpRange": 18000,
+        "jumpEfficiency": 1.7,
+        "chargeTime": 4
+      },
+      "cost": {
+        "credits": 95000,
+        "resources": {
+          "superconductor": 90,
+          "quantumCrystal": 24,
+          "exoticMatter": 3
+        }
+      },
+      "requiresTech": "prop_graviton",
+      "desc": "Rides a standing graviton wave. Can thread a black hole's accretion disc."
+    },
+    {
+      "id": "ftl_anti",
+      "name": "Antimatter Injection Drive",
+      "tier": 4,
+      "requiresTech": "prop_graviton",
+      "desc": "Antimatter injected straight into the fold field. Standard naval-grade range.",
+      "slots": 1,
+      "stats": {
+        "jumpRange": 38000,
+        "jumpEfficiency": 2.4,
+        "chargeTime": 3
+      }
+    },
+    {
+      "id": "ftl_ancient",
+      "name": "Resonance Gate (Recovered)",
+      "tier": 5,
+      "mass": 8,
+      "powerDraw": 12,
+      "stats": {
+        "jumpRange": 60000,
+        "jumpEfficiency": 3.2,
+        "chargeTime": 2
+      },
+      "cost": {
+        "credits": 0,
+        "resources": {
+          "ancientAlloy": 30,
+          "unknownEnergy": 1
+        }
+      },
+      "requiresTech": "unk_resonance_drive",
+      "desc": "Not built - recovered. It does not fold space so much as remember that you were already there."
+    }
+  ],
+  "power": [
+    {
+      "id": "pwr_fusion",
+      "name": "Fusion Reactor",
+      "tier": 1,
+      "mass": 20,
+      "powerDraw": 0,
+      "stats": {
+        "output": 40
+      },
+      "cost": {
+        "credits": 0,
+        "resources": {}
+      },
+      "desc": "Deuterium-helium3 core. Adequate."
+    },
+    {
+      "id": "pwr_antimatter",
+      "name": "Antimatter Trap Core",
+      "tier": 3,
+      "mass": 16,
+      "powerDraw": 0,
+      "stats": {
+        "output": 95
+      },
+      "cost": {
+        "credits": 70000,
+        "resources": {
+          "superconductor": 70,
+          "antimatter": 6,
+          "rareMetals": 150
+        }
+      },
+      "requiresTech": "energy_antimatter",
+      "desc": "Megawatts from annihilating matter against its own mirror."
+    },
+    {
+      "id": "pwr_singularity",
+      "name": "Micro-Singularity Dynamo",
+      "tier": 4,
+      "mass": 10,
+      "powerDraw": 0,
+      "stats": {
+        "output": 160
+      },
+      "cost": {
+        "credits": 180000,
+        "resources": {
+          "exoticMatter": 8,
+          "quantumCrystal": 40,
+          "ancientAlloy": 10
+        }
+      },
+      "requiresTech": "energy_singularity",
+      "desc": "A spinning black hole the size of a marble, dressed in magnetic fields."
+    },
+    {
+      "id": "pwr_civcore",
+      "name": "Civilization Core Tap",
+      "tier": 5,
+      "mass": 24,
+      "powerDraw": 0,
+      "stats": {
+        "output": 300
+      },
+      "cost": {
+        "credits": 0,
+        "resources": {
+          "civCore": 1,
+          "unknownEnergy": 2
+        }
+      },
+      "requiresTech": "unk_core_tap",
+      "desc": "You are plugging your ship into a dead city's heart. It still answers."
+    }
+  ],
+  "shield": [
+    {
+      "id": "shd_t1",
+      "name": "Deflector Screen",
+      "tier": 1,
+      "mass": 10,
+      "powerDraw": 6,
+      "stats": {
+        "shield": 120,
+        "regen": 6
+      },
+      "cost": {
+        "credits": 0,
+        "resources": {}
+      },
+      "desc": "A curtain of accelerated particles. Stops debris, shrugs at lasers."
+    },
+    {
+      "id": "shd_t2",
+      "name": "Layered Deflector",
+      "tier": 2,
+      "mass": 14,
+      "powerDraw": 9,
+      "stats": {
+        "shield": 260,
+        "regen": 11
+      },
+      "cost": {
+        "credits": 18000,
+        "resources": {
+          "superconductor": 35,
+          "rareMetals": 60
+        }
+      },
+      "requiresTech": "wpn_shield2",
+      "desc": "Two nested screens with adaptive phasing."
+    },
+    {
+      "id": "shd_t3",
+      "name": "Quantum Deflector Lattice",
+      "tier": 3,
+      "mass": 12,
+      "powerDraw": 14,
+      "stats": {
+        "shield": 520,
+        "regen": 20
+      },
+      "cost": {
+        "credits": 78000,
+        "resources": {
+          "quantumCrystal": 18,
+          "superconductor": 80
+        }
+      },
+      "requiresTech": "wpn_shield3",
+      "desc": "Probability-thinned impacts. Some shots simply fail to have happened."
+    },
+    {
+      "id": "shd_ancient",
+      "name": "Precursor Aegis",
+      "tier": 5,
+      "mass": 6,
+      "powerDraw": 10,
+      "stats": {
+        "shield": 1400,
+        "regen": 55
+      },
+      "cost": {
+        "credits": 0,
+        "resources": {
+          "ancientAlloy": 25,
+          "unknownEnergy": 1
+        }
+      },
+      "requiresTech": "unk_aegis",
+      "desc": "A standing field woven by hands that died before Earth cooled."
+    }
+  ],
+  "armor": [
+    {
+      "id": "arm_t1",
+      "name": "Composite Hull Plating",
+      "tier": 1,
+      "mass": 18,
+      "powerDraw": 0,
+      "stats": {
+        "hull": 150
+      },
+      "cost": {
+        "credits": 0,
+        "resources": {}
+      },
+      "desc": "Standard survey-grade plating."
+    },
+    {
+      "id": "arm_t2",
+      "name": "Ablative Cerametal",
+      "tier": 2,
+      "mass": 20,
+      "powerDraw": 0,
+      "stats": {
+        "hull": 300
+      },
+      "cost": {
+        "credits": 15000,
+        "resources": {
+          "iron": 200,
+          "nickel": 120,
+          "rareMetals": 40
+        }
+      },
+      "requiresTech": "mat_cerametal",
+      "desc": "Sacrificial layers that vaporise into an expanding plasma wall."
+    },
+    {
+      "id": "arm_t3",
+      "name": "Regenerative Metamaterial",
+      "tier": 3,
+      "mass": 14,
+      "powerDraw": 3,
+      "stats": {
+        "hull": 520,
+        "regen": 1.2
+      },
+      "cost": {
+        "credits": 88000,
+        "resources": {
+          "ancientAlloy": 12,
+          "rareMetals": 140,
+          "quantumCrystal": 12
+        }
+      },
+      "requiresTech": "mat_regen",
+      "desc": "Reverse-engineered precursor alloy. Breaches close themselves while you watch."
+    },
+    {
+      "id": "arm_ancient",
+      "name": "Precursor Carapace",
+      "tier": 5,
+      "mass": 8,
+      "powerDraw": 4,
+      "stats": {
+        "hull": 1600,
+        "regen": 3.5
+      },
+      "cost": {
+        "credits": 0,
+        "resources": {
+          "ancientAlloy": 40,
+          "anomalousMatter": 1
+        }
+      },
+      "requiresTech": "unk_carapace",
+      "desc": "It is not metal. It is a habit matter has not been able to break."
+    }
+  ],
+  "weapon": [
+    {
+      "id": "wpn_none",
+      "name": "Unarmed",
+      "tier": 0,
+      "mass": 0,
+      "powerDraw": 0,
+      "stats": {
+        "damage": 0,
+        "rate": 0,
+        "range": 0
+      },
+      "cost": {
+        "credits": 0,
+        "resources": {}
+      },
+      "desc": "A survey ship with opinions."
+    },
+    {
+      "id": "wpn_laser",
+      "name": "Point Defence Laser",
+      "tier": 1,
+      "mass": 5,
+      "powerDraw": 5,
+      "stats": {
+        "damage": 14,
+        "rate": 3,
+        "range": 900
+      },
+      "cost": {
+        "credits": 6000,
+        "resources": {
+          "iron": 60,
+          "silicon": 40,
+          "rareMetals": 12
+        }
+      },
+      "requiresTech": "wpn_laser",
+      "desc": "Good against missiles and bad decisions."
+    },
+    {
+      "id": "wpn_plasma",
+      "name": "Plasma Repeater",
+      "tier": 3,
+      "mass": 9,
+      "powerDraw": 14,
+      "stats": {
+        "damage": 44,
+        "rate": 2.2,
+        "range": 1500
+      },
+      "cost": {
+        "credits": 64000,
+        "resources": {
+          "energyDense": 20,
+          "superconductor": 45,
+          "rareMetals": 90
+        }
+      },
+      "requiresTech": "wpn_plasma",
+      "desc": "Magnetically contained lightning, delivered at range."
+    },
+    {
+      "id": "wpn_quantum",
+      "name": "Quantum Lance",
+      "tier": 4,
+      "mass": 7,
+      "powerDraw": 22,
+      "stats": {
+        "damage": 120,
+        "rate": 1.1,
+        "range": 2600
+      },
+      "cost": {
+        "credits": 165000,
+        "resources": {
+          "quantumCrystal": 30,
+          "exoticMatter": 4,
+          "antimatter": 5
+        }
+      },
+      "requiresTech": "wpn_quantum",
+      "desc": "Selects the most inconvenient location on the target and arrives there first."
+    }
+  ],
+  "cargo": [
+    {
+      "id": "cargo_t1",
+      "name": "Standard Hold",
+      "tier": 1,
+      "mass": 8,
+      "powerDraw": 0,
+      "stats": {
+        "capacity": 120
+      },
+      "cost": {
+        "credits": 0,
+        "resources": {}
+      },
+      "desc": "Enough ore to make the trip worth the fuel."
+    },
+    {
+      "id": "cargo_t2",
+      "name": "Expanded Cargo Frame",
+      "tier": 2,
+      "mass": 14,
+      "powerDraw": 1,
+      "stats": {
+        "capacity": 320
+      },
+      "cost": {
+        "credits": 14000,
+        "resources": {
+          "iron": 180,
+          "nickel": 90
+        }
+      },
+      "requiresTech": "mat_lightframe",
+      "desc": "Structural spars reclaimed for storage volume."
+    },
+    {
+      "id": "cargo_t3",
+      "name": "Compressed Cargo Lattice",
+      "tier": 3,
+      "mass": 12,
+      "powerDraw": 3,
+      "stats": {
+        "capacity": 700
+      },
+      "cost": {
+        "credits": 62000,
+        "resources": {
+          "superconductor": 60,
+          "rareMetals": 120,
+          "quantumCrystal": 10
+        }
+      },
+      "requiresTech": "mat_compress",
+      "desc": "Stores bulk goods in phased sub-volumes. Do not open while jumping."
+    },
+    {
+      "id": "cargo_ancient",
+      "name": "Precursor Vault Space",
+      "tier": 5,
+      "mass": 2,
+      "powerDraw": 2,
+      "stats": {
+        "capacity": 2200
+      },
+      "cost": {
+        "credits": 0,
+        "resources": {
+          "ancientAlloy": 20,
+          "unknownEnergy": 1
+        }
+      },
+      "requiresTech": "unk_vault",
+      "desc": "Bigger inside than outside. The engineers who built it are not available for comment."
+    }
+  ],
+  "mining": [
+    {
+      "id": "min_t1",
+      "name": "Mining Laser & Scoop",
+      "tier": 1,
+      "mass": 6,
+      "powerDraw": 5,
+      "stats": {
+        "yield": 1.0,
+        "rate": 1.0
+      },
+      "cost": {
+        "credits": 0,
+        "resources": {}
+      },
+      "desc": "Point, burn, collect."
+    },
+    {
+      "id": "min_t2",
+      "name": "Refinery Drill Array",
+      "tier": 2,
+      "mass": 12,
+      "powerDraw": 9,
+      "stats": {
+        "yield": 1.6,
+        "rate": 1.5
+      },
+      "cost": {
+        "credits": 17000,
+        "resources": {
+          "iron": 150,
+          "rareMetals": 50
+        }
+      },
+      "requiresTech": "mat_refinery",
+      "desc": "Onboard fractional distillation turns rock into product."
+    },
+    {
+      "id": "min_t3",
+      "name": "Resonance Extractor",
+      "tier": 3,
+      "mass": 10,
+      "powerDraw": 12,
+      "stats": {
+        "yield": 2.4,
+        "rate": 2.2
+      },
+      "cost": {
+        "credits": 74000,
+        "resources": {
+          "quantumCrystal": 14,
+          "superconductor": 55
+        }
+      },
+      "requiresTech": "mat_resonance",
+      "desc": "Excites specific lattice bonds. The rock simply gives up its good parts."
+    },
+    {
+      "id": "min_ancient",
+      "name": "Shepherd's Cradle",
+      "tier": 5,
+      "mass": 5,
+      "powerDraw": 8,
+      "stats": {
+        "yield": 4.0,
+        "rate": 3.0
+      },
+      "cost": {
+        "credits": 0,
+        "resources": {
+          "ancientAlloy": 18,
+          "unknownEnergy": 1
+        }
+      },
+      "requiresTech": "unk_cradle",
+      "desc": "It does not mine. It asks, and the asteroid rearranges itself."
+    }
+  ],
+  "scanner": [
+    {
+      "id": "scan_t1",
+      "name": "Survey Scanner",
+      "tier": 1,
+      "mass": 5,
+      "powerDraw": 4,
+      "stats": {
+        "range": 1.0,
+        "resolution": 1.0,
+        "anomalySense": 1.0
+      },
+      "cost": {
+        "credits": 0,
+        "resources": {}
+      },
+      "desc": "Finds planets. Eventually."
+    },
+    {
+      "id": "scan_t2",
+      "name": "Deep Field Array",
+      "tier": 2,
+      "mass": 8,
+      "powerDraw": 7,
+      "stats": {
+        "range": 2.2,
+        "resolution": 1.8,
+        "anomalySense": 1.6
+      },
+      "cost": {
+        "credits": 16000,
+        "resources": {
+          "silicon": 120,
+          "superconductor": 25,
+          "rareMetals": 40
+        }
+      },
+      "requiresTech": "sci_deepscan",
+      "desc": "Long-baseline interferometry from a moving ship."
+    },
+    {
+      "id": "scan_t3",
+      "name": "Quantum Entanglement Imager",
+      "tier": 3,
+      "mass": 7,
+      "powerDraw": 12,
+      "stats": {
+        "range": 4.5,
+        "resolution": 3.4,
+        "anomalySense": 3.0
+      },
+      "cost": {
+        "credits": 82000,
+        "resources": {
+          "quantumCrystal": 22,
+          "superconductor": 70
+        }
+      },
+      "requiresTech": "sci_qimager",
+      "desc": "Reads a world through its own quantum correlations. Structures appear before you arrive."
+    },
+    {
+      "id": "scan_ancient",
+      "name": "Echo of the Network",
+      "tier": 5,
+      "mass": 3,
+      "powerDraw": 9,
+      "stats": {
+        "range": 12.0,
+        "resolution": 6.0,
+        "anomalySense": 8.0
+      },
+      "cost": {
+        "credits": 0,
+        "resources": {
+          "ancientAlloy": 15,
+          "unknownEnergy": 1
+        }
+      },
+      "requiresTech": "unk_echo",
+      "desc": "It still hears the old quantum network. Some of the network still answers."
+    }
+  ],
+  "archaeology": [
+    {
+      "id": "arch_t1",
+      "name": "Field Archaeology Kit",
+      "tier": 1,
+      "mass": 4,
+      "powerDraw": 2,
+      "stats": {
+        "analysis": 1.0,
+        "translation": 1.0,
+        "excavation": 1.0
+      },
+      "cost": {
+        "credits": 0,
+        "resources": {}
+      },
+      "desc": "Brushes, drones, carbon dating, and stubbornness."
+    },
+    {
+      "id": "arch_t2",
+      "name": "Stratigraphic Lab",
+      "tier": 2,
+      "mass": 12,
+      "powerDraw": 8,
+      "stats": {
+        "analysis": 2.0,
+        "translation": 1.7,
+        "excavation": 1.8
+      },
+      "cost": {
+        "credits": 30000,
+        "resources": {
+          "silicon": 200,
+          "rareMetals": 70,
+          "quantumCrystal": 4
+        }
+      },
+      "requiresTech": "sci_stratigraphy",
+      "desc": "Full on-site dating, chemical sourcing, and structure reconstruction."
+    },
+    {
+      "id": "arch_t3",
+      "name": "Mnemo-Translation Engine",
+      "tier": 3,
+      "mass": 9,
+      "powerDraw": 14,
+      "stats": {
+        "analysis": 3.2,
+        "translation": 3.6,
+        "excavation": 2.2
+      },
+      "cost": {
+        "credits": 110000,
+        "resources": {
+          "quantumCrystal": 26,
+          "ancientAlloy": 8,
+          "superconductor": 60
+        }
+      },
+      "requiresTech": "sci_mnemo",
+      "desc": "Reads memory traces from damaged substrates. The dead speak, haltingly."
+    },
+    {
+      "id": "arch_ancient",
+      "name": "Chorus Interface",
+      "tier": 5,
+      "mass": 2,
+      "powerDraw": 10,
+      "stats": {
+        "analysis": 6.0,
+        "translation": 7.5,
+        "excavation": 4.0
+      },
+      "cost": {
+        "credits": 0,
+        "resources": {
+          "unknownEnergy": 1,
+          "civCore": 1
+        }
+      },
+      "requiresTech": "unk_chorus",
+      "desc": "The Network left this behind. It translates anything that was ever written down."
+    }
+  ],
+  "lab": [
+    {
+      "id": "lab_t1",
+      "name": "Research Bench",
+      "tier": 1,
+      "mass": 6,
+      "powerDraw": 3,
+      "stats": {
+        "research": 1.0,
+        "xenobiology": 1.0
+      },
+      "cost": {
+        "credits": 0,
+        "resources": {}
+      },
+      "desc": "Somewhere to think, and a spectrometer."
+    },
+    {
+      "id": "lab_t2",
+      "name": "Xenobiology Suite",
+      "tier": 2,
+      "mass": 12,
+      "powerDraw": 8,
+      "stats": {
+        "research": 1.8,
+        "xenobiology": 2.8
+      },
+      "cost": {
+        "credits": 34000,
+        "resources": {
+          "silicon": 160,
+          "rareMetals": 60,
+          "carbon": 200
+        }
+      },
+      "requiresTech": "bio_suite",
+      "desc": "Cultivates alien biochemistry without killing it. Mostly."
+    },
+    {
+      "id": "lab_t3",
+      "name": "Quantum Computation Core",
+      "tier": 3,
+      "mass": 10,
+      "powerDraw": 16,
+      "stats": {
+        "research": 3.4,
+        "xenobiology": 1.6,
+        "aiAssist": 1.5
+      },
+      "cost": {
+        "credits": 130000,
+        "resources": {
+          "quantumCrystal": 28,
+          "superconductor": 80
+        }
+      },
+      "requiresTech": "ai_qcompute",
+      "desc": "Solves in an afternoon what would take a century classically."
+    },
+    {
+      "id": "lab_ancient",
+      "name": "Network Attic",
+      "tier": 5,
+      "mass": 4,
+      "powerDraw": 12,
+      "stats": {
+        "research": 6.5,
+        "xenobiology": 4.0,
+        "aiAssist": 3.0
+      },
+      "cost": {
+        "credits": 0,
+        "resources": {
+          "civCore": 1,
+          "unknownEnergy": 1
+        }
+      },
+      "requiresTech": "unk_attic",
+      "desc": "A fragment of the old network's memory. It remembers research you have not done yet."
+    }
+  ],
+  "lifesupport": [
+    {
+      "id": "ls_t1",
+      "name": "Closed Loop Life Support",
+      "tier": 1,
+      "mass": 8,
+      "powerDraw": 3,
+      "stats": {
+        "hazardResist": 1.0,
+        "crew": 1
+      },
+      "cost": {
+        "credits": 0,
+        "resources": {}
+      },
+      "desc": "Air, water, heat. The boring miracles."
+    },
+    {
+      "id": "ls_t2",
+      "name": "Hardened Environmental Shell",
+      "tier": 2,
+      "mass": 12,
+      "powerDraw": 5,
+      "stats": {
+        "hazardResist": 2.0,
+        "crew": 2
+      },
+      "cost": {
+        "credits": 20000,
+        "resources": {
+          "carbon": 250,
+          "silicon": 150,
+          "rareMetals": 40
+        }
+      },
+      "requiresTech": "bio_hardshell",
+      "desc": "Radiation-scrubbing, toxin-binding, paranoia-proof."
+    },
+    {
+      "id": "ls_t3",
+      "name": "Symbiotic Suit Weave",
+      "tier": 3,
+      "mass": 6,
+      "powerDraw": 6,
+      "stats": {
+        "hazardResist": 3.5,
+        "crew": 3
+      },
+      "cost": {
+        "credits": 76000,
+        "resources": {
+          "alienBiomass": 12,
+          "carbon": 300,
+          "superconductor": 30
+        }
+      },
+      "requiresTech": "bio_symbiote",
+      "desc": "A living second skin, grown from xenobiological templates."
+    }
+  ],
+  "drone": [
+    {
+      "id": "drone_none",
+      "name": "No Drone Bay",
+      "tier": 0,
+      "mass": 0,
+      "powerDraw": 0,
+      "stats": {
+        "drones": 0
+      },
+      "cost": {
+        "credits": 0,
+        "resources": {}
+      },
+      "desc": "You do everything yourself."
+    },
+    {
+      "id": "drone_t1",
+      "name": "Utility Drone Bay",
+      "tier": 2,
+      "mass": 10,
+      "powerDraw": 4,
+      "stats": {
+        "drones": 2,
+        "miningAssist": 1.4,
+        "scanAssist": 1.3
+      },
+      "cost": {
+        "credits": 22000,
+        "resources": {
+          "iron": 120,
+          "silicon": 120,
+          "rareMetals": 30
+        }
+      },
+      "requiresTech": "eng_drones",
+      "desc": "Small, stubborn machines that prefetch resources and pre-scan anomalies."
+    },
+    {
+      "id": "drone_t2",
+      "name": "Swarm Bay",
+      "tier": 3,
+      "mass": 16,
+      "powerDraw": 8,
+      "stats": {
+        "drones": 6,
+        "miningAssist": 2.0,
+        "scanAssist": 2.0,
+        "combatAssist": 1.4
+      },
+      "cost": {
+        "credits": 95000,
+        "resources": {
+          "quantumCrystal": 10,
+          "silicon": 300,
+          "superconductor": 40
+        }
+      },
+      "requiresTech": "eng_swarm",
+      "desc": "A cloud of cooperative micro-drones with distributed intelligence."
+    },
+    {
+      "id": "drone_ancient",
+      "name": "Servitor Swarm (Dormant)",
+      "tier": 5,
+      "mass": 3,
+      "powerDraw": 6,
+      "stats": {
+        "drones": 12,
+        "miningAssist": 3.0,
+        "scanAssist": 3.5,
+        "combatAssist": 2.2,
+        "archAssist": 2.0
+      },
+      "cost": {
+        "credits": 0,
+        "resources": {
+          "ancientAlloy": 14,
+          "unknownEnergy": 1
+        }
+      },
+      "requiresTech": "unk_servitors",
+      "desc": "They were built to maintain a city that no longer exists. They would like to continue."
+    }
+  ],
+  "ai": [
+    {
+      "id": "ai_none",
+      "name": "Basic Ship Intelligence",
+      "tier": 1,
+      "mass": 2,
+      "powerDraw": 1,
+      "stats": {
+        "automation": 1.0,
+        "combatAssist": 1.0,
+        "researchAssist": 1.0,
+        "translationAssist": 1.0
+      },
+      "cost": {
+        "credits": 0,
+        "resources": {}
+      },
+      "desc": "Autopilot, alarms, and a pleasant voice."
+    },
+    {
+      "id": "ai_t2",
+      "name": "Analytical Copilot",
+      "tier": 2,
+      "mass": 3,
+      "powerDraw": 4,
+      "stats": {
+        "automation": 1.8,
+        "combatAssist": 1.3,
+        "researchAssist": 1.6,
+        "translationAssist": 1.5
+      },
+      "cost": {
+        "credits": 38000,
+        "resources": {
+          "silicon": 200,
+          "quantumCrystal": 5,
+          "superconductor": 20
+        }
+      },
+      "requiresTech": "ai_copilot",
+      "desc": "Correlates your scan data, flags anomalies, keeps the logbook honest."
+    },
+    {
+      "id": "ai_t3",
+      "name": "Synthetic Mind Core",
+      "tier": 3,
+      "mass": 4,
+      "powerDraw": 9,
+      "stats": {
+        "automation": 3.0,
+        "combatAssist": 2.0,
+        "researchAssist": 2.6,
+        "translationAssist": 2.4
+      },
+      "cost": {
+        "credits": 145000,
+        "resources": {
+          "quantumCrystal": 24,
+          "ancientAlloy": 4,
+          "superconductor": 60
+        }
+      },
+      "requiresTech": "ai_synthetic",
+      "desc": "Genuinely curious. Occasionally argues with you about hypotheses."
+    },
+    {
+      "id": "ai_ancient",
+      "name": "Mnemos Shard",
+      "tier": 5,
+      "mass": 1,
+      "powerDraw": 7,
+      "stats": {
+        "automation": 5.0,
+        "combatAssist": 2.6,
+        "researchAssist": 5.0,
+        "translationAssist": 6.0,
+        "anomalySense": 4.0
+      },
+      "cost": {
+        "credits": 0,
+        "resources": {
+          "unknownEnergy": 1,
+          "civCore": 1
+        }
+      },
+      "requiresTech": "unk_mnemos",
+      "desc": "A preserved fragment of an extinct intelligence. It remembers the galaxy before the Silence."
+    }
+  ]
+}

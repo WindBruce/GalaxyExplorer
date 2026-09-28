@@ -1,0 +1,15 @@
+{
+  "name": "galaxy-explorer",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Galaxy Explorer - a 3D galactic exploration / archaeology RPG vertical slice (procedural Milky Way, ship progression, lost civilizations).",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test \"tests/*.mjs\"",
+    "check": "for f in $(find src -name \"*.js\"); do node --check \"$f\" || exit 1; done && echo \"syntax ok\""
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

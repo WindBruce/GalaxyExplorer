@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>GALAXY EXPLORER — Vertical Slice</title>
+<link rel="stylesheet" href="styles.css" />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='9' fill='%2366ffee'/><circle cx='16' cy='16' r='14' fill='none' stroke='%2366ffee' stroke-width='1.5' opacity='.5'/></svg>" />
+</head>
+<body>
+<div id="app">
+  <canvas id="game-canvas"></canvas>
+
+  <!-- Scanline / vignette overlay -->
+  <div id="crt-overlay"></div>
+
+  <!-- Crosshair -->
+  <div id="crosshair" class="hidden">
+    <div class="ch-dot"></div>
+    <div class="ch-ring"></div>
+    <div class="ch-tick t"></div><div class="ch-tick b"></div><div class="ch-tick l"></div><div class="ch-tick r"></div>
+  </div>
+
+  <!-- HUD -->
+  <div id="hud" class="hidden">
+    <div id="hud-topleft" class="hud-block">
+      <div class="hud-title" id="hud-system-name">—</div>
+      <div class="hud-sub" id="hud-region">—</div>
+      <div class="hud-sub" id="hud-stardate">SD 0.00</div>
+      <div class="bar-row"><span class="bar-label">HULL</span><div class="bar"><div class="bar-fill hull" id="bar-hull"></div></div><span class="bar-val" id="val-hull"></span></div>
+      <div class="bar-row"><span class="bar-label">SHLD</span><div class="bar"><div class="bar-fill shield" id="bar-shield"></div></div><span class="bar-val" id="val-shield"></span></div>
+      <div class="bar-row"><span class="bar-label">FUEL</span><div class="bar"><div class="bar-fill fuel" id="bar-fuel"></div></div><span class="bar-val" id="val-fuel"></span></div>
+      <div class="bar-row"><span class="bar-label">CARGO</span><div class="bar"><div class="bar-fill cargo" id="bar-cargo"></div></div><span class="bar-val" id="val-cargo"></span></div>
+    </div>
+
+    <div id="hud-topright" class="hud-block">
+      <div class="hud-title small">SHIP</div>
+      <div class="hud-sub" id="hud-power">PWR 0/0</div>
+      <div class="hud-sub" id="hud-modules">—</div>
+      <div class="hud-sub" id="hud-credits">¢ 0</div>
+      <div class="hud-sub" id="hud-level">LVL 1</div>
+    </div>
+
+    <div id="hud-target" class="hud-block hidden">
+      <div class="hud-title small" id="target-name">—</div>
+      <div class="hud-sub" id="target-label">—</div>
+      <div class="hud-sub" id="target-dist">—</div>
+      <div class="hud-sub dim" id="target-scan">[T] scan</div>
+      <div class="scan-bar hidden" id="scan-bar"><div id="scan-fill"></div></div>
+    </div>
+
+    <div id="hud-bottom">
+      <div id="hud-speed"><span id="speed-val">0</span><span class="unit">u/s</span></div>
+      <div id="hud-boost" class="hidden">BOOST</div>
+    </div>
+
+    <div id="hud-prompt" class="hidden"></div>
+    <div id="hud-alerts"></div>
+    <div id="hud-keys" class="dim">M map · I cargo · U ship · K skills · L tech · J archaeology · B civs · A archive · P missions · N system · V view · Esc menu</div>
+  </div>
+
+  <!-- Notifications -->
+  <div id="notifications"></div>
+
+  <!-- Panels -->
+  <div id="panel-root" class="hidden"></div>
+
+  <!-- Modal root (dialogue, events, station, scan results) -->
+  <div id="modal-root" class="hidden"></div>
+
+  <!-- Galactic map overlay -->
+  <div id="map-ui" class="hidden">
+    <div id="map-header">
+      <div class="map-title">GALACTIC MAP</div>
+      <div class="map-sub" id="map-seedline">—</div>
+    </div>
+    <div id="map-legend"></div>
+    <div id="map-info" class="hidden">
+      <div class="map-info-title" id="mi-name">—</div>
+      <div class="map-info-sub" id="mi-region">—</div>
+      <div class="map-info-body" id="mi-body">—</div>
+      <div class="map-info-stats" id="mi-stats"></div>
+      <div class="map-actions">
+        <button id="map-jump" class="btn primary">JUMP</button>
+        <button id="map-focus" class="btn">FOCUS</button>
+        <button id="map-close" class="btn">CLOSE [M]</button>
+      </div>
+    </div>
+    <div id="map-help" class="dim">Drag to orbit · Wheel to zoom · Click a star to select · F focus · R reset</div>
+  </div>
+
+  <!-- Main menu -->
+  <div id="main-menu">
+    <div class="menu-bg"></div>
+    <div class="menu-inner">
+      <h1 class="game-title">GALAXY<span>EXPLORER</span></h1>
+      <div class="game-tagline">The galaxy was old before you arrived. Reconstruct what it forgot.</div>
+      <div class="menu-box" id="menu-main">
+        <button class="btn primary big" id="btn-new-game">NEW EXPEDITION</button>
+        <button class="btn big" id="btn-continue">CONTINUE</button>
+        <button class="btn big" id="btn-load">LOAD SAVE</button>
+        <button class="btn big" id="btn-help">BRIEFING</button>
+        <div class="menu-seed">
+          <label for="seed-input">Galaxy seed</label>
+          <input id="seed-input" type="text" value="MilkyWay-4471" maxlength="32" />
+        </div>
+      </div>
+      <div class="menu-box hidden" id="menu-saves">
+        <div class="menu-heading">LOAD SAVE</div>
+        <div id="save-slots"></div>
+        <button class="btn" id="btn-saves-back">BACK</button>
+      </div>
+      <div class="menu-box hidden" id="menu-help">
+        <div class="menu-heading">BRIEFING</div>
+        <div id="help-content" class="help-content"></div>
+        <button class="btn" id="btn-help-back">BACK</button>
+      </div>
+      <div class="menu-foot dim" id="menu-foot">A vertical slice · procedural Milky Way · deterministic seeds</div>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div id="loading">
+    <div class="loading-title">GALAXY EXPLORER</div>
+    <div class="loading-bar"><div id="loading-fill"></div></div>
+    <div class="loading-status" id="loading-status">Initialising…</div>
+  </div>
+
+  <!-- Pause menu -->
+  <div id="pause-menu" class="hidden">
+    <div class="pause-inner">
+      <div class="menu-heading">PAUSED</div>
+      <button class="btn big" id="btn-resume">RESUME</button>
+      <button class="btn big" id="btn-save">SAVE GAME</button>
+      <button class="btn big" id="btn-pause-load">LOAD SAVE</button>
+      <button class="btn big" id="btn-pause-help">CONTROLS</button>
+      <button class="btn big danger" id="btn-quit">ABANDON EXPEDITION</button>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="src/main.js"></script>
+</body>
+</html>

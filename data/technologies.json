@@ -1,0 +1,563 @@
+{
+  "_comment": "Technology tree. Categories: energy | propulsion | materials | weapons | ai | quantum | biotech | spatial | civilization | unknown. Techs with requiresArtifact can ONLY be unlocked by reconstructing archaeological knowledge - exploration is a source of technology.",
+
+  "energy_cell": {
+    "name": "Capacitor Banks",
+    "category": "energy",
+    "tier": 1,
+    "cost": { "research": 40, "resources": { "iron": 60, "silicon": 40 } },
+    "requires": [],
+    "requiresArtifact": null,
+    "desc": "Burst power storage for weapons and shields.",
+    "unlocks": { "capabilities": ["burstFire"] }
+  },
+  "energy_antimatter": {
+    "name": "Antimatter Confinement",
+    "category": "energy",
+    "tier": 3,
+    "cost": { "research": 260, "resources": { "superconductor": 50, "antimatter": 3, "rareMetals": 120 } },
+    "requires": ["energy_cell"],
+    "requiresArtifact": null,
+    "desc": "Penning traps that hold antihydrogen without annihilating the ship.",
+    "unlocks": { "modules": ["pwr_antimatter"] }
+  },
+  "energy_singularity": {
+    "name": "Micro-Singularity Dynamo",
+    "category": "energy",
+    "tier": 4,
+    "cost": { "research": 620, "resources": { "exoticMatter": 4, "quantumCrystal": 30 } },
+    "requires": ["energy_antimatter", "spatial_curvature"],
+    "requiresArtifact": null,
+    "desc": "Harness a captive black hole's rotational energy.",
+    "unlocks": { "modules": ["pwr_singularity"] }
+  },
+
+  "prop_ion": {
+    "name": "Ion Propulsion",
+    "category": "propulsion",
+    "tier": 2,
+    "cost": { "research": 90, "resources": { "rareMetals": 30, "superconductor": 8 } },
+    "requires": [],
+    "requiresArtifact": null,
+    "desc": "Electric thrusters with extraordinary specific impulse.",
+    "unlocks": { "modules": ["eng_ion"] }
+  },
+  "prop_fusion": {
+    "name": "Fusion Torch",
+    "category": "propulsion",
+    "tier": 3,
+    "cost": { "research": 300, "resources": { "rareMetals": 100, "superconductor": 30, "energyDense": 10 } },
+    "requires": ["prop_ion"],
+    "requiresArtifact": null,
+    "desc": "Direct fusion exhaust. Real thrust between the planets.",
+    "unlocks": { "modules": ["eng_fusion"] }
+  },
+  "prop_warp2": {
+    "name": "Deep Fold Geometry",
+    "category": "propulsion",
+    "tier": 2,
+    "cost": { "research": 140, "resources": { "superconductor": 25, "quantumCrystal": 4 } },
+    "requires": [],
+    "requiresArtifact": null,
+    "desc": "Longer, stabler spacetime folds for interstellar jumps.",
+    "unlocks": { "modules": ["ftl_t2"] }
+  },
+  "prop_graviton": {
+    "name": "Graviton Lattice",
+    "category": "propulsion",
+    "tier": 3,
+    "cost": { "research": 480, "resources": { "quantumCrystal": 18, "exoticMatter": 2, "superconductor": 60 } },
+    "requires": ["prop_warp2", "spatial_curvature"],
+    "requiresArtifact": null,
+    "desc": "Surf standing gravitational waves across the spiral arms.",
+    "unlocks": { "modules": ["ftl_t3"] }
+  },
+  "prop_inertialess": {
+    "name": "Inertial Damping",
+    "category": "propulsion",
+    "tier": 4,
+    "cost": { "research": 700, "resources": { "quantumCrystal": 35, "exoticMatter": 5, "rareMetals": 200 } },
+    "requires": ["prop_fusion", "prop_graviton"],
+    "requiresArtifact": null,
+    "desc": "Cancel the ship's inertia. Then accelerate like a missile.",
+    "unlocks": { "modules": ["eng_torch_adv"] }
+  },
+
+  "mat_cerametal": {
+    "name": "Ablative Cerametal",
+    "category": "materials",
+    "tier": 2,
+    "cost": { "research": 110, "resources": { "iron": 150, "nickel": 80 } },
+    "requires": [],
+    "requiresArtifact": null,
+    "desc": "Layered armour that trades itself for your survival.",
+    "unlocks": { "modules": ["arm_t2"] }
+  },
+  "mat_lightframe": {
+    "name": "Lightweight Framing",
+    "category": "materials",
+    "tier": 2,
+    "cost": { "research": 80, "resources": { "carbon": 120, "iron": 60 } },
+    "requires": [],
+    "requiresArtifact": null,
+    "desc": "Stronger spars, less mass, more cargo.",
+    "unlocks": { "modules": ["cargo_t2"] }
+  },
+  "mat_refinery": {
+    "name": "Orbital Refining",
+    "category": "materials",
+    "tier": 2,
+    "cost": { "research": 120, "resources": { "iron": 120, "rareMetals": 30 } },
+    "requires": [],
+    "requiresArtifact": null,
+    "desc": "Refine ore to product before it ever enters the hold.",
+    "unlocks": { "modules": ["min_t2"] }
+  },
+  "mat_compress": {
+    "name": "Volumetric Compression",
+    "category": "materials",
+    "tier": 3,
+    "cost": { "research": 340, "resources": { "superconductor": 45, "quantumCrystal": 8 } },
+    "requires": ["mat_lightframe"],
+    "requiresArtifact": null,
+    "desc": "Store bulk cargo in phased sub-volumes.",
+    "unlocks": { "modules": ["cargo_t3"] }
+  },
+  "mat_resonance": {
+    "name": "Resonance Extraction",
+    "category": "materials",
+    "tier": 3,
+    "cost": { "research": 380, "resources": { "quantumCrystal": 12, "superconductor": 40 } },
+    "requires": ["mat_refinery"],
+    "requiresArtifact": null,
+    "desc": "Shake a rock's lattice until it surrenders its rare elements.",
+    "unlocks": { "modules": ["min_t3"] }
+  },
+  "mat_regen": {
+    "name": "Regenerative Metamaterial",
+    "category": "materials",
+    "tier": 3,
+    "cost": { "research": 520, "resources": { "ancientAlloy": 8, "rareMetals": 120, "quantumCrystal": 10 } },
+    "requires": ["mat_cerametal"],
+    "requiresArtifact": "alloy_analysis",
+    "desc": "Rebuilt from precursor alloy fragments. It repairs itself.",
+    "unlocks": { "modules": ["arm_t3"] }
+  },
+
+  "wpn_laser": {
+    "name": "Directed Energy Weapons",
+    "category": "weapons",
+    "tier": 1,
+    "cost": { "research": 70, "resources": { "iron": 50, "silicon": 30, "rareMetals": 10 } },
+    "requires": [],
+    "requiresArtifact": null,
+    "desc": "Fast, cheap, light-hitting lasers.",
+    "unlocks": { "modules": ["wpn_laser"] }
+  },
+  "wpn_shield2": {
+    "name": "Layered Deflectors",
+    "category": "weapons",
+    "tier": 2,
+    "cost": { "research": 160, "resources": { "superconductor": 30, "rareMetals": 50 } },
+    "requires": ["wpn_laser"],
+    "requiresArtifact": null,
+    "desc": "Nested defensive screens with adaptive phasing.",
+    "unlocks": { "modules": ["shd_t2"] }
+  },
+  "wpn_plasma": {
+    "name": "Plasma Projection",
+    "category": "weapons",
+    "tier": 3,
+    "cost": { "research": 400, "resources": { "energyDense": 15, "superconductor": 35, "rareMetals": 80 } },
+    "requires": ["wpn_laser", "energy_cell"],
+    "requiresArtifact": null,
+    "desc": "Magnetically contained plasma bolts.",
+    "unlocks": { "modules": ["wpn_plasma"] }
+  },
+  "wpn_shield3": {
+    "name": "Quantum Deflectors",
+    "category": "weapons",
+    "tier": 3,
+    "cost": { "research": 460, "resources": { "quantumCrystal": 14, "superconductor": 60 } },
+    "requires": ["wpn_shield2", "q_entangle"],
+    "requiresArtifact": null,
+    "desc": "Shields that thin the probability of being hit.",
+    "unlocks": { "modules": ["shd_t3"] }
+  },
+  "wpn_quantum": {
+    "name": "Quantum Lance",
+    "category": "weapons",
+    "tier": 4,
+    "cost": { "research": 820, "resources": { "quantumCrystal": 25, "exoticMatter": 3, "antimatter": 4 } },
+    "requires": ["wpn_plasma", "q_collapse"],
+    "requiresArtifact": null,
+    "desc": "A beam that arrives before it is fired.",
+    "unlocks": { "modules": ["wpn_quantum"] }
+  },
+
+  "ai_copilot": {
+    "name": "Analytical Copilot",
+    "category": "ai",
+    "tier": 2,
+    "cost": { "research": 130, "resources": { "silicon": 150, "quantumCrystal": 3 } },
+    "requires": [],
+    "requiresArtifact": null,
+    "desc": "An assistant that correlates data you forgot you collected.",
+    "unlocks": { "modules": ["ai_t2"] }
+  },
+  "ai_qcompute": {
+    "name": "Quantum Computation",
+    "category": "ai",
+    "tier": 3,
+    "cost": { "research": 420, "resources": { "quantumCrystal": 20, "superconductor": 50 } },
+    "requires": ["ai_copilot", "q_entangle"],
+    "requiresArtifact": null,
+    "desc": "Massively parallel problem solving aboard ship.",
+    "unlocks": { "modules": ["lab_t3"] }
+  },
+  "ai_neural": {
+    "name": "Neural Modelling",
+    "category": "ai",
+    "tier": 3,
+    "cost": { "research": 300, "resources": { "silicon": 250, "quantumCrystal": 10 } },
+    "requires": ["ai_copilot"],
+    "requiresArtifact": null,
+    "desc": "Learn faster, forget less. Also: better threat prediction.",
+    "unlocks": { "capabilities": ["fastLearning"] }
+  },
+  "ai_synthetic": {
+    "name": "Synthetic Minds",
+    "category": "ai",
+    "tier": 4,
+    "cost": { "research": 640, "resources": { "quantumCrystal": 20, "ancientAlloy": 3, "superconductor": 50 } },
+    "requires": ["ai_qcompute", "q_collapse"],
+    "requiresArtifact": null,
+    "desc": "A mind that runs on your ship and thinks alongside you.",
+    "unlocks": { "modules": ["ai_t3"] }
+  },
+  "eng_drones": {
+    "name": "Utility Drones",
+    "category": "ai",
+    "tier": 2,
+    "cost": { "research": 150, "resources": { "iron": 100, "silicon": 100 } },
+    "requires": [],
+    "requiresArtifact": null,
+    "desc": "Small autonomous helpers for mining and scanning.",
+    "unlocks": { "modules": ["drone_t1"] }
+  },
+  "eng_swarm": {
+    "name": "Drone Swarms",
+    "category": "ai",
+    "tier": 3,
+    "cost": { "research": 380, "resources": { "quantumCrystal": 8, "silicon": 250, "superconductor": 30 } },
+    "requires": ["eng_drones", "ai_copilot"],
+    "requiresArtifact": null,
+    "desc": "Distributed intelligence in a cloud of micro-machines.",
+    "unlocks": { "modules": ["drone_t2"] }
+  },
+
+  "q_entangle": {
+    "name": "Entanglement Theory",
+    "category": "quantum",
+    "tier": 2,
+    "cost": { "research": 200, "resources": { "silicon": 180, "quantumCrystal": 5 } },
+    "requires": [],
+    "requiresArtifact": null,
+    "desc": "Practical exploitation of non-local correlations.",
+    "unlocks": { "capabilities": ["quantumScanning"] }
+  },
+  "q_collapse": {
+    "name": "Controlled State Collapse",
+    "category": "quantum",
+    "tier": 3,
+    "cost": { "research": 480, "resources": { "quantumCrystal": 16, "superconductor": 40 } },
+    "requires": ["q_entangle"],
+    "requiresArtifact": null,
+    "desc": "Force a superposition to resolve where you want it to.",
+    "unlocks": { "capabilities": ["probabilityWeapons"] }
+  },
+  "q_chrono": {
+    "name": "Chronometric Dating",
+    "category": "quantum",
+    "tier": 3,
+    "cost": { "research": 360, "resources": { "quantumCrystal": 12, "silicon": 200 } },
+    "requires": ["q_entangle"],
+    "requiresArtifact": null,
+    "desc": "Date ruins to within a thousand years, on site.",
+    "unlocks": { "capabilities": ["precisionDating"] }
+  },
+  "q_teleport": {
+    "name": "Quantum Tunnelling Relay",
+    "category": "quantum",
+    "tier": 4,
+    "cost": { "research": 700, "resources": { "quantumCrystal": 30, "exoticMatter": 3 } },
+    "requires": ["q_collapse", "spatial_gate"],
+    "requiresArtifact": null,
+    "desc": "Move small objects without crossing the space between.",
+    "unlocks": { "capabilities": ["matterRelay"] }
+  },
+
+  "bio_hardshell": {
+    "name": "Hardened Environment Suits",
+    "category": "biotech",
+    "tier": 2,
+    "cost": { "research": 120, "resources": { "carbon": 150, "silicon": 100 } },
+    "requires": [],
+    "requiresArtifact": null,
+    "desc": "Survive radiation, acid, cold and bad decisions.",
+    "unlocks": { "modules": ["ls_t2"] }
+  },
+  "bio_suite": {
+    "name": "Xenobiology",
+    "category": "biotech",
+    "tier": 2,
+    "cost": { "research": 190, "resources": { "silicon": 140, "carbon": 150, "rareMetals": 40 } },
+    "requires": [],
+    "requiresArtifact": null,
+    "desc": "Study life that did not evolve on Earth.",
+    "unlocks": { "modules": ["lab_t2"], "capabilities": ["xenobiology"] }
+  },
+  "bio_symbiote": {
+    "name": "Symbiotic Suit Weave",
+    "category": "biotech",
+    "tier": 3,
+    "cost": { "research": 440, "resources": { "alienBiomass": 10, "carbon": 250, "superconductor": 25 } },
+    "requires": ["bio_suite"],
+    "requiresArtifact": "xenobiology_atlas",
+    "desc": "A living suit, half-grown from alien templates.",
+    "unlocks": { "modules": ["ls_t3"] }
+  },
+
+  "sci_deepscan": {
+    "name": "Deep Field Scanning",
+    "category": "spatial",
+    "tier": 2,
+    "cost": { "research": 130, "resources": { "silicon": 110, "superconductor": 20, "rareMetals": 30 } },
+    "requires": [],
+    "requiresArtifact": null,
+    "desc": "See further, resolve finer, from further out.",
+    "unlocks": { "modules": ["scan_t2"] }
+  },
+  "sci_qimager": {
+    "name": "Quantum Entanglement Imaging",
+    "category": "spatial",
+    "tier": 3,
+    "cost": { "research": 460, "resources": { "quantumCrystal": 18, "superconductor": 55 } },
+    "requires": ["sci_deepscan", "q_entangle"],
+    "requiresArtifact": null,
+    "desc": "Image a world's surface and subsurface from orbit.",
+    "unlocks": { "modules": ["scan_t3"] }
+  },
+  "sci_stratigraphy": {
+    "name": "Field Stratigraphy",
+    "category": "spatial",
+    "tier": 2,
+    "cost": { "research": 170, "resources": { "silicon": 160, "rareMetals": 50, "quantumCrystal": 2 } },
+    "requires": [],
+    "requiresArtifact": null,
+    "desc": "On-site excavation, dating and reconstruction.",
+    "unlocks": { "modules": ["arch_t2"] }
+  },
+  "sci_mnemo": {
+    "name": "Mnemo-Translation",
+    "category": "spatial",
+    "tier": 3,
+    "cost": { "research": 500, "resources": { "quantumCrystal": 20, "ancientAlloy": 5, "superconductor": 45 } },
+    "requires": ["sci_stratigraphy", "q_chrono"],
+    "requiresArtifact": "memory_trace",
+    "desc": "Recover linguistic and mnemonic traces from damaged media.",
+    "unlocks": { "modules": ["arch_t3"] }
+  },
+  "spatial_curvature": {
+    "name": "Spacetime Curvature Theory",
+    "category": "spatial",
+    "tier": 3,
+    "cost": { "research": 400, "resources": { "quantumCrystal": 14, "exoticMatter": 1 } },
+    "requires": ["prop_warp2"],
+    "requiresArtifact": null,
+    "desc": "The mathematics of bending where you are.",
+    "unlocks": { "capabilities": ["gravityModelling"] }
+  },
+  "spatial_gate": {
+    "name": "Permanent Gate Construction",
+    "category": "spatial",
+    "tier": 4,
+    "cost": { "research": 780, "resources": { "exoticMatter": 6, "quantumCrystal": 35, "ancientAlloy": 5 } },
+    "requires": ["spatial_curvature", "q_teleport"],
+    "requiresArtifact": "gate_fragment",
+    "desc": "Build fixed wormhole mouths. The galaxy shrinks.",
+    "unlocks": { "capabilities": ["gateConstruction"] }
+  },
+  "spatial_farsight": {
+    "name": "Farsight Observation",
+    "category": "spatial",
+    "tier": 3,
+    "cost": { "research": 340, "resources": { "quantumCrystal": 12, "superconductor": 40 } },
+    "requires": ["sci_deepscan"],
+    "requiresArtifact": null,
+    "desc": "Observe distant events as they were, faster than light allows.",
+    "unlocks": { "capabilities": ["farsight"] }
+  },
+
+  "civ_trade": {
+    "name": "Trade Protocols",
+    "category": "civilization",
+    "tier": 1,
+    "cost": { "research": 60, "resources": { "carbon": 60 } },
+    "requires": [],
+    "requiresArtifact": null,
+    "desc": "Learn to buy and sell without starting incidents.",
+    "unlocks": { "capabilities": ["trade"] }
+  },
+  "civ_diplomacy": {
+    "name": "Diplomatic Theory",
+    "category": "civilization",
+    "tier": 2,
+    "cost": { "research": 180, "resources": { "carbon": 120, "silicon": 120 } },
+    "requires": ["civ_trade"],
+    "requiresArtifact": null,
+    "desc": "Negotiate across species and across centuries of grievance.",
+    "unlocks": { "capabilities": ["diplomacy"] }
+  },
+  "civ_culture": {
+    "name": "Xeno-Cultural Studies",
+    "category": "civilization",
+    "tier": 2,
+    "cost": { "research": 200, "resources": { "carbon": 150, "silicon": 150 } },
+    "requires": ["civ_trade"],
+    "requiresArtifact": null,
+    "desc": "Understand what a civilisation values before you insult it.",
+    "unlocks": { "capabilities": ["culturalInsight"] }
+  },
+  "civ_xenotech": {
+    "name": "Xenotechnology Integration",
+    "category": "civilization",
+    "tier": 3,
+    "cost": { "research": 420, "resources": { "rareMetals": 100, "quantumCrystal": 10 } },
+    "requires": ["civ_culture", "q_entangle"],
+    "requiresArtifact": null,
+    "desc": "Adapt alien engineering to your hull without explosions.",
+    "unlocks": { "capabilities": ["xenotechIntegration"] }
+  },
+  "civ_espionage": {
+    "name": "Covert Operations",
+    "category": "civilization",
+    "tier": 3,
+    "cost": { "research": 300, "resources": { "silicon": 200, "rareMetals": 60 } },
+    "requires": ["civ_diplomacy"],
+    "requiresArtifact": null,
+    "desc": "Observe, extract, deny. Not everything is learned by asking.",
+    "unlocks": { "capabilities": ["espionage"] }
+  },
+
+  "unk_resonance_drive": {
+    "name": "Resonance Drive",
+    "category": "unknown",
+    "tier": 5,
+    "cost": { "research": 300, "resources": { "ancientAlloy": 20, "unknownEnergy": 1 } },
+    "requires": ["prop_graviton"],
+    "requiresArtifact": "drive_schematic",
+    "desc": "Recovered precursor propulsion. Cross the galaxy in a handful of jumps.",
+    "unlocks": { "modules": ["ftl_ancient"] }
+  },
+  "unk_aegis": {
+    "name": "Precursor Aegis",
+    "category": "unknown",
+    "tier": 5,
+    "cost": { "research": 300, "resources": { "ancientAlloy": 15, "unknownEnergy": 1 } },
+    "requires": ["wpn_shield3"],
+    "requiresArtifact": "aegis_schematic",
+    "desc": "A shield field older than the human species.",
+    "unlocks": { "modules": ["shd_ancient"] }
+  },
+  "unk_carapace": {
+    "name": "Precursor Carapace",
+    "category": "unknown",
+    "tier": 5,
+    "cost": { "research": 300, "resources": { "ancientAlloy": 20, "anomalousMatter": 1 } },
+    "requires": ["mat_regen"],
+    "requiresArtifact": "carapace_schematic",
+    "desc": "Hull plating that predates planetary formation.",
+    "unlocks": { "modules": ["arm_ancient"] }
+  },
+  "unk_vault": {
+    "name": "Precursor Vault Space",
+    "category": "unknown",
+    "tier": 5,
+    "cost": { "research": 300, "resources": { "ancientAlloy": 12, "unknownEnergy": 1 } },
+    "requires": ["mat_compress"],
+    "requiresArtifact": "vault_schematic",
+    "desc": "Cargo volume that ignores its own exterior dimensions.",
+    "unlocks": { "modules": ["cargo_ancient"] }
+  },
+  "unk_cradle": {
+    "name": "Shepherd's Cradle",
+    "category": "unknown",
+    "tier": 5,
+    "cost": { "research": 300, "resources": { "ancientAlloy": 10, "unknownEnergy": 1 } },
+    "requires": ["mat_resonance"],
+    "requiresArtifact": "cradle_schematic",
+    "desc": "Extraction by negotiation rather than force.",
+    "unlocks": { "modules": ["min_ancient"] }
+  },
+  "unk_echo": {
+    "name": "Echo of the Network",
+    "category": "unknown",
+    "tier": 5,
+    "cost": { "research": 300, "resources": { "ancientAlloy": 8, "unknownEnergy": 1 } },
+    "requires": ["sci_qimager"],
+    "requiresArtifact": "echo_schematic",
+    "desc": "A scanner that listens to a network that died four billion years ago.",
+    "unlocks": { "modules": ["scan_ancient"] }
+  },
+  "unk_chorus": {
+    "name": "Chorus Interface",
+    "category": "unknown",
+    "tier": 5,
+    "cost": { "research": 400, "resources": { "unknownEnergy": 1, "civCore": 1 } },
+    "requires": ["sci_mnemo"],
+    "requiresArtifact": "chorus_schematic",
+    "desc": "Translate anything ever written, in any language, anywhere.",
+    "unlocks": { "modules": ["arch_ancient"] }
+  },
+  "unk_attic": {
+    "name": "Network Attic",
+    "category": "unknown",
+    "tier": 5,
+    "cost": { "research": 400, "resources": { "civCore": 1, "unknownEnergy": 1 } },
+    "requires": ["ai_synthetic"],
+    "requiresArtifact": "attic_schematic",
+    "desc": "A preserved shard of the old network's memory.",
+    "unlocks": { "modules": ["lab_ancient"] }
+  },
+  "unk_servitors": {
+    "name": "Servitor Swarm",
+    "category": "unknown",
+    "tier": 5,
+    "cost": { "research": 300, "resources": { "ancientAlloy": 10, "unknownEnergy": 1 } },
+    "requires": ["eng_swarm"],
+    "requiresArtifact": "servitor_schematic",
+    "desc": "Dormant maintenance drones that remember their city.",
+    "unlocks": { "modules": ["drone_ancient"] }
+  },
+  "unk_mnemos": {
+    "name": "Mnemos Shard",
+    "category": "unknown",
+    "tier": 5,
+    "cost": { "research": 400, "resources": { "unknownEnergy": 1, "civCore": 1 } },
+    "requires": ["ai_synthetic", "sci_mnemo"],
+    "requiresArtifact": "mnemos_schematic",
+    "desc": "An extinct intelligence, preserved, willing to talk.",
+    "unlocks": { "modules": ["ai_ancient"] }
+  },
+  "unk_core_tap": {
+    "name": "Civilization Core Tap",
+    "category": "unknown",
+    "tier": 5,
+    "cost": { "research": 500, "resources": { "civCore": 1, "unknownEnergy": 2 } },
+    "requires": ["energy_singularity"],
+    "requiresArtifact": "core_schematic",
+    "desc": "Plug your power systems into a dead civilisation's heart.",
+    "unlocks": { "modules": ["pwr_civcore"] }
+  }
+}
