@@ -14,7 +14,8 @@ export class SurfaceState {
   constructor(game) {
     this.game = game;
     this.name = 'surface';
-    this.scene = new TerrainScene(game.state);
+    // Built on enter(): see SpaceState._ensureScene().
+    this.scene = null;
     this.controls = null;
     this.character = null;
     this.prompt = null;
@@ -22,6 +23,18 @@ export class SurfaceState {
     this.mineCooldown = 0;
     this.hazardTimer = 0;
     this.time = 0;
+  }
+
+  /** Lazily (re)create the terrain scene for the current game state. */
+  _ensureScene() {
+    const game = this.game;
+    if (this.scene && this.scene.state === game.state) return this.scene;
+    if (this.scene) {
+      game.scene.remove(this.scene.root);
+      this.scene.dispose();
+    }
+    this.scene = new TerrainScene(game.state);
+    return this.scene;
   }
 
   enter(payload = {}) {
@@ -36,8 +49,9 @@ export class SurfaceState {
     state.location.mode = 'surface';
     state.location.landingSite = ruin?.id ?? null;
 
-    this.scene.build(planet, ruin);
-    game.scene.add(this.scene.root);
+    const scene = this._ensureScene();
+    scene.build(planet, ruin);
+    game.scene.add(scene.root);
 
     this.character = makeCharacter();
     // Spawn a little way from the site so the ruin is visible on arrival.
@@ -45,12 +59,12 @@ export class SurfaceState {
     const spawnRadius = ruin ? 110 : 40;
     const sx = Math.cos(spawnAngle) * spawnRadius;
     const sz = Math.sin(spawnAngle) * spawnRadius;
-    this.character.position.set(sx, this.scene.heightAt(sx, sz), sz);
-    this.scene.root.add(this.character);
+    this.character.position.set(sx, scene.heightAt(sx, sz), sz);
+    scene.root.add(this.character);
 
     this.controls = new CharacterControls(game.camera, this.character);
     this.controls.yaw = Math.atan2(-sx, -sz);
-    game.camera.position.set(sx, this.scene.heightAt(sx, sz) + 1.7, sz);
+    game.camera.position.set(sx, scene.heightAt(sx, sz) + 1.7, sz);
     game.camera.rotation.set(0, this.controls.yaw, 0);
 
     game.ui.hud.setPlanet(planet, ruin);
@@ -64,8 +78,10 @@ export class SurfaceState {
   }
 
   exit() {
-    this.game.scene.remove(this.scene.root);
-    this.scene.dispose();
+    if (this.scene) {
+      this.game.scene.remove(this.scene.root);
+      this.scene.dispose();
+    }
     this.character = null;
     this.game.ui.hud.setPrompt(null);
     this.game.ui.hud.setPlanet(null, null);
@@ -76,6 +92,8 @@ export class SurfaceState {
     const state = game.state;
     const input = game.input;
     this.time += dt;
+    // Never run half-initialised (a failed enter() must not spam the console).
+    if (!state || !this.scene || !this.controls || !this.character) return;
 
     // --- Movement --------------------------------------------------------
     const charPos = this.character.position;

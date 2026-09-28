@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "start": "node server.js",
-    "test": "node --test \"tests/*.mjs\"",
+    "test": "node --import ./tests/helpers/register.mjs --test \"tests/*.mjs\"",
     "check": "for f in $(find src -name \"*.js\"); do node --check \"$f\" || exit 1; done && echo \"syntax ok\""
   },
   "engines": {

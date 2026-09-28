@@ -148,13 +148,16 @@ export class Game {
     step(70, 'Initialising systems…');
     this.ui.menu.show();
     step(100, 'Ready');
-    setTimeout(() => document.getElementById('loading').classList.add('hidden'), 350);
+    // Capture the element: this timer can outlive the global document lookup.
+    const loading = document.getElementById('loading');
+    setTimeout(() => loading?.classList.add('hidden'), 350);
     this.start();
   }
 
   newGame(seed, playerName = 'Commander') {
     if (!this.state) this.state = new GameState(this.data);
     this.state.newGame(seed, playerName);
+    this.ui.menu.hide();
     this.ui.hud.setSystem(this.state.location.system);
     this.ui.notify(
       'Expedition begins',
@@ -162,7 +165,7 @@ export class Game {
       'good',
       12000
     );
-    this.states.change('space');
+    this.states.change('space', null, true);
     this.input.requestPointerLock();
     this.saveGame('autosave');
   }
@@ -170,8 +173,10 @@ export class Game {
   loadGame(slot) {
     const res = this.save.load(slot, this.state);
     if (res.ok) {
+      this.ui.menu.hide();
       this.ui.hud.setSystem(this.state.location.system);
-      this.states.change(this.state.location.mode === 'surface' ? 'surface' : 'space');
+      // Force the re-entry: the world under the current state just changed.
+      this.states.change(this.state.location.mode === 'surface' ? 'surface' : 'space', null, true);
       this.input.requestPointerLock();
     }
     return res;

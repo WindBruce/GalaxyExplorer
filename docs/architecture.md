@@ -171,6 +171,30 @@ simulation.
 
 ---
 
+## 5.1 State machine contract
+
+`StateMachine.change(name, payload, force)`:
+
+* **Scenes are created lazily.** `Game` constructs its states in the
+  constructor, *before* `boot()` creates the `GameState` - so `SpaceState` and
+  `SurfaceState` build their `SpaceScene` / `TerrainScene` on `enter()`, via
+  `_ensureScene()`, which also rebuilds when the `GameState` object is replaced
+  (new game / load). Capturing `game.state` at construction time was the cause
+  of the `Cannot read properties of null (reading 'update')` crash: `enter()`
+  threw, and every subsequent frame then ticked a state whose `controls` had
+  never been assigned.
+* **`force` re-enters the current state.** Loading a save changes the world
+  under the current state, so `loadGame()` passes `force = true`.
+* **Re-entering the same state skips `exit()`.** Its `enter()` rebuilds the
+  scene; exiting afterwards would dispose what was just built.
+* **`payload` is normalised to `undefined`** when absent, so state defaults
+  (`enter(payload = {})`) apply - passing `null` crashed `SurfaceState.enter`
+  on `payload.planet`.
+* **A failing `enter()` is contained.** The error is logged once and the
+  machine stays on (or recovers to) the previous state, instead of ticking a
+  half-initialised state every frame. States also guard `update()` with
+  `if (!state || !this.scene || !this.controls) return;`.
+
 ## 6. Rendering
 
 * Three.js r0.160.1 is vendored at `vendor/three.module.js` and imported with a
@@ -195,18 +219,24 @@ simulation.
 | `tests/test_content.mjs` | 12 tests: every relative import resolves, every DOM id referenced by JS exists in `index.html`, all packs are well-formed, no dangling references anywhere in the content |
 | `tests/test_ui.mjs` | 11 tests: jsdom drives the real HUD, all nine panels, dialogue, events, station/trade, analysis, galactic map and main menu |
 | `tests/test_scenes.mjs` | 5 tests: real Three.js scene construction, animation loops, controls, object factories |
+| `tests/test_boot.mjs` | 6 tests: constructs the real `Game` with only `WebGLRenderer` stubbed (`tests/helpers/three-stub.mjs`, installed via `node --import ./tests/helpers/register.mjs`) and drives boot -> new game -> flight -> save/load -> page-reload continue -> surface resume -> contained `enter()` failure |
 | `tests/test_playthrough.mjs` + `tests/test_gameplay.mjs` | 9 tests: fly → target → scan → map → jump → land → excavate → mine → fight → dock → save/load, through the real state machine |
 
 The DOM-dependent suites need jsdom; if it is not installed they skip
-themselves, so `npm test` stays green in a bare checkout.
+themselves, so `npm test` stays green in a bare checkout. `tests/helpers/dom.mjs`
+installs jsdom as Node globals (minus `performance`, whose jsdom implementation
+recurses under Node).
 
 Bugs this harness caught during development (all fixed): broken vendor import
 depth in `src/render` + `src/states`, a `_comment` key leaking into the
 technology table, a missing `makeBolt` import (first shot crashed), the weapon
 rate-of-fire stat being dropped by the slot alias table, combat/hazard/event
 damage calling a non-existent `state.ship.applyDamage`, an FTL range that made
-the galaxy unreachable, and flight damping that capped the ship below its own
-`maxSpeed`.
+the galaxy unreachable, flight damping that capped the ship below its own
+`maxSpeed`, hostiles that could never close to weapon range, and the state
+machine bugs in section 5.1 (states built before the `GameState` existed, a
+state machine that exited the state it had just re-entered, a `null` payload
+crashing `SurfaceState.enter`, and a failed `enter()` being ticked every frame).
 
 ## 8. Persistence
 

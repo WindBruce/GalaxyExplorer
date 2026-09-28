@@ -15,18 +15,61 @@ export class StateMachine {
     return state;
   }
 
-  change(name, payload = null) {
-    if (this.currentName === name) return;
+  /**
+   * Switch states.
+   *
+   * `force` re-runs enter() even when the name is unchanged — a save load
+   * needs that, because the world changed under the current state.
+   *
+   * Re-entering the *same* state skips exit(): its enter() rebuilds its own
+   * scene, and exiting afterwards would tear down what was just built.
+   *
+   * A failing enter() is contained: the machine logs once and recovers to the
+   * previous state instead of ticking a half-initialised one every frame.
+   */
+  change(name, payload = null, force = false) {
+    if (!force && this.currentName === name) return false;
     const next = this.states.get(name);
     if (!next) {
       console.error(`[StateMachine] unknown state "${name}"`);
-      return;
+      return false;
     }
-    if (this.current?.exit) this.current.exit();
+    const prev = this.current;
+    const prevName = this.currentName;
+    const same = prev === next;
+
+    if (!same && prev?.exit) {
+      try {
+        prev.exit();
+      } catch (err) {
+        console.error(`[StateMachine] failed to exit "${prevName}":`, err);
+      }
+    }
+
+    if (next.enter) {
+      try {
+        next.enter(payload ?? undefined);
+      } catch (err) {
+        console.error(`[StateMachine] failed to enter "${name}":`, err);
+        if (prev && !same) {
+          // Put the player back where they were if we can.
+          try {
+            prev.enter?.();
+            this.current = prev;
+            this.currentName = prevName;
+          } catch {
+            this.current = null;
+            this.currentName = null;
+          }
+        }
+        return false;
+      }
+    }
+
     this.currentName = name;
     this.current = next;
-    if (next.enter) next.enter(payload);
     this.game.bus.emit('state:changed', { name, payload });
+    return true;
   }
 
   update(dt) {

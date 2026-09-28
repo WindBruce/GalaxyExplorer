@@ -78,7 +78,8 @@ export async function installDom(html) {
     Image: window.Image,
     Blob: window.Blob,
     URL: window.URL,
-    performance: window.performance,
+    // NOTE: jsdom's `performance` is deliberately NOT installed - its now()
+    // recurses forever under Node. Node's own performance.now() is a drop-in.
     getComputedStyle: window.getComputedStyle,
     CustomEvent: window.CustomEvent,
     Event: window.Event,

@@ -18,7 +18,9 @@ export class SpaceState {
   constructor(game) {
     this.game = game;
     this.name = 'space';
-    this.scene = new SpaceScene(game.state);
+    // Built on enter(): Game constructs the states before boot() creates the
+    // GameState, and loading a save replaces that state object entirely.
+    this.scene = null;
     this.controls = null;
     this.target = null;
     this.scanProgress = 0;
@@ -34,17 +36,35 @@ export class SpaceState {
     this.time = 0;
   }
 
+  /**
+   * The scene is created lazily and rebuilt whenever the game state object
+   * changes (new game or load), so it always matches the live simulation.
+   */
+  _ensureScene() {
+    const game = this.game;
+    if (this.scene && this.scene.state === game.state) return this.scene;
+    if (this.scene) {
+      game.scene.remove(this.scene.root);
+      this.scene.dispose();
+    }
+    this.scene = new SpaceScene(game.state);
+    return this.scene;
+  }
+
   enter() {
     const game = this.game;
-    const system = game.state.location.system ?? game.state.galaxy.home;
-    game.state.location.systemId = system.id;
-    game.state.location.system = system;
-    game.state.location.mode = 'space';
+    const state = game.state;
+    if (!state) return;
+    const system = state.location.system ?? state.galaxy.home;
+    state.location.systemId = system.id;
+    state.location.system = system;
+    state.location.mode = 'space';
 
-    this.scene.build(system);
-    game.scene.add(this.scene.root);
+    const scene = this._ensureScene();
+    scene.build(system);
+    game.scene.add(scene.root);
 
-    this.controls = new FlightControls(game.camera, this.scene.shipObject);
+    this.controls = new FlightControls(game.camera, scene.shipObject);
     this.controls.reset();
 
     game.ui.hud.setSystem(system);
@@ -57,8 +77,10 @@ export class SpaceState {
   }
 
   exit() {
-    this.game.scene.remove(this.scene.root);
-    this.scene.dispose();
+    if (this.scene) {
+      this.game.scene.remove(this.scene.root);
+      this.scene.dispose();
+    }
     this.target = null;
     this.scanning = null;
     this.game.ui.hud.setPrompt(null);
@@ -77,6 +99,8 @@ export class SpaceState {
     const state = game.state;
     const input = game.input;
     this.time += dt;
+    // Never run half-initialised (a failed enter() must not spam the console).
+    if (!state || !this.scene || !this.controls) return;
 
     if (state.ship.destroyed) {
       game.ui.hud.setPrompt('SHIP DESTROYED - press R to respawn at the last station');
