@@ -249,8 +249,8 @@ export class Galaxy {
     return out.sort((a, b) => a.distanceLy - b.distanceLy);
   }
 
-  /** Find systems matching a predicate (used by quest resolution). */
-  find(pred, limit = 1) {
+  /** Find up to `limit` matching systems; the result is always an array. */
+  findSystems(pred, limit = 1) {
     const out = [];
     for (const id of this.order) {
       const s = this.systems.get(id);
@@ -260,6 +260,11 @@ export class Galaxy {
       }
     }
     return out;
+  }
+
+  /** @deprecated Use findSystems(); this compatibility alias also returns an array. */
+  find(pred, limit = 1) {
+    return this.findSystems(pred, limit);
   }
 
   /** Region metadata for the galactic map UI. */

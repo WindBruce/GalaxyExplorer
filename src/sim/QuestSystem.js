@@ -72,6 +72,14 @@ export class QuestSystem {
 
     const resolution = { targetGroups: {} };
     const objectives = tpl.objectives.map((o, i) => this._resolveObjective(questId, o, i, resolution));
+    if (this._hasUnresolvedRequiredTarget(objectives)) {
+      return {
+        ok: false,
+        reason: 'No valid target for this quest in the current galaxy',
+        reasonKey: 'sim.questNoTarget',
+      };
+    }
+
     const quest = {
       id: tpl.id,
       title: tpl.title,
@@ -90,6 +98,20 @@ export class QuestSystem {
     return { ok: true, quest };
   }
 
+  /** Refuse to start a quest when a required dynamic target could not be resolved. */
+  _hasUnresolvedRequiredTarget(objectives) {
+    return objectives.some((objective) => {
+      if (objective.type === 'travelTo' && objective.target === 'any') return !objective.targetId;
+      if (objective.type === 'scanBody' && ['anyRuin', 'anyDerelict'].includes(objective.target)) {
+        return !objective.targetId;
+      }
+      if (objective.type === 'landOnPlanet' && objective.target === 'anyRuinPlanet') {
+        return !objective.targetId || !objective.systemId;
+      }
+      return false;
+    });
+  }
+
   /** Resolve an objective template into a concrete, trackable objective. */
   _resolveObjective(questId, o, index, resolution = { targetGroups: {} }) {
     const galaxy = this.state.galaxy;
@@ -101,20 +123,22 @@ export class QuestSystem {
 
     switch (o.type) {
       case 'travelTo': {
-        const candidates = galaxy.find((s) => {
+        const candidates = galaxy.findSystems((s) => {
           if (s.visited) return false;
           if (o.region && s.regionId !== o.region) return false;
           if (o.hasRuin && !s.ruins.length) return false;
           if (o.hasLandableRuin && !s.ruins.some((ruin) => this._landablePlanetForRuin(s, ruin))) return false;
           return true;
         }, 12);
-        const pick = candidates.length ? rng.pick(candidates) : galaxy.home;
-        obj.targetId = pick.id;
-        obj.targetName = pick.name;
-        obj.region = o.region ?? pick.regionId;
-        if (targetGroup) {
-          targetGroup.system = pick;
-          targetGroup.requiresLandableRuin = Boolean(o.hasLandableRuin);
+        const pick = candidates.length ? rng.pick(candidates) : null;
+        if (pick) {
+          obj.targetId = pick.id;
+          obj.targetName = pick.name;
+          obj.region = o.region ?? pick.regionId;
+          if (targetGroup) {
+            targetGroup.system = pick;
+            targetGroup.requiresLandableRuin = Boolean(o.hasLandableRuin);
+          }
         }
         break;
       }
@@ -122,7 +146,7 @@ export class QuestSystem {
         if (o.target === 'anyRuin') {
           let system = targetGroup?.system ?? null;
           let ruin = targetGroup?.ruin ?? null;
-          if (!system) system = galaxy.find((s) => s.ruins.length > 0 && !s.visited)[0] ?? null;
+          if (!system && !targetGroup) system = galaxy.findSystems((s) => s.ruins.length > 0 && !s.visited)[0] ?? null;
           if (system && !ruin) {
             ruin = targetGroup?.requiresLandableRuin
               ? system.ruins.find((site) => this._landablePlanetForRuin(system, site)) ?? null
@@ -140,7 +164,7 @@ export class QuestSystem {
             }
           }
         } else if (o.target === 'anyDerelict') {
-          const st = galaxy.find((s) => s.stations.some((x) => x.derelict)).flatMap((s) => s.stations.filter((x) => x.derelict))[0];
+          const st = galaxy.findSystems((s) => s.stations.some((x) => x.derelict)).flatMap((s) => s.stations.filter((x) => x.derelict))[0];
           if (st) { obj.targetId = st.id; obj.targetName = st.name; }
         }
         break;
@@ -148,8 +172,8 @@ export class QuestSystem {
       case 'landOnPlanet': {
         let system = targetGroup?.system ?? null;
         let ruin = targetGroup?.ruin ?? null;
-        if (!system) {
-          system = galaxy.find((s) => s.ruins.some((site) => this._landablePlanetForRuin(s, site)))[0] ?? null;
+        if (!system && !targetGroup) {
+          system = galaxy.findSystems((s) => s.ruins.some((site) => this._landablePlanetForRuin(s, site)))[0] ?? null;
         }
         if (system && (!ruin || !this._landablePlanetForRuin(system, ruin))) {
           ruin = system.ruins.find((site) => this._landablePlanetForRuin(system, site)) ?? null;

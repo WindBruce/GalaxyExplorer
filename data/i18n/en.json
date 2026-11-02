@@ -356,6 +356,7 @@
   "sim.unknownQuest": "Unknown quest",
   "sim.questActive": "Already active",
   "sim.questComplete": "Already completed",
+  "sim.questNoTarget": "No valid target for this quest in the current galaxy",
   "sim.noArtifact": "No such artifact",
   "sim.unknownArtifact": "Unknown artifact",
   "sim.alreadyAnalysed": "Already analysed",

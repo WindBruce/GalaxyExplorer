@@ -30,6 +30,9 @@ test('galaxy generates deterministically from a seed', () => {
   const g3 = createGalaxy('beta', data.regions);
   assert.equal(g1.allSystems().length, g2.allSystems().length);
   assert.equal(g1.allSystems().length, g3.allSystems().length);
+  const matches = g1.findSystems(() => true, 2);
+  assert.ok(Array.isArray(matches), 'findSystems always returns an array');
+  assert.equal(matches.length, 2);
   const a = g1.getSystem(g1.order[10]);
   const b = g2.getSystem(g2.order[10]);
   assert.deepEqual(a.planets.map((p) => p.name), b.planets.map((p) => p.name));
@@ -251,6 +254,27 @@ test('ruin signal objectives resolve to the same landable ruin site', () => {
     assert.equal(scan.progress, 1, `${seed}: the assigned ruin scan counts`);
     assert.equal(landing.progress, 1, `${seed}: the assigned planet landing counts`);
   }
+});
+
+test('quest start fails closed when a required dynamic target is unavailable', () => {
+  const state = freshState('ruinless-galaxy');
+  for (const system of state.galaxy.allSystems()) system.ruins.length = 0;
+  const xpBefore = state.player.xp;
+
+  const started = state.quests.start('q_ruinSignal');
+  assert.equal(started.ok, false);
+  assert.equal(started.reasonKey, 'sim.questNoTarget');
+  assert.equal(state.quests.isActive('q_ruinSignal'), false);
+  assert.equal(state.player.xp, xpBefore, 'a failed start has no XP side effects');
+
+  const noDerelicts = freshState('derelictless-galaxy');
+  for (const system of noDerelicts.galaxy.allSystems()) {
+    system.stations = system.stations.filter((station) => !station.derelict);
+  }
+  const derelictQuest = noDerelicts.quests.start('q_derelict');
+  assert.equal(derelictQuest.ok, false);
+  assert.equal(derelictQuest.reasonKey, 'sim.questNoTarget');
+  assert.equal(noDerelicts.quests.isActive('q_derelict'), false);
 });
 
 test('quests resolve targets, track progress and pay out', () => {

@@ -356,6 +356,7 @@
   "sim.unknownQuest": "未知任务",
   "sim.questActive": "已在进行中",
   "sim.questComplete": "已完成",
+  "sim.questNoTarget": "当前银河系中没有此任务所需的有效目标",
   "sim.noArtifact": "无此器物",
   "sim.unknownArtifact": "未知器物",
   "sim.alreadyAnalysed": "已分析",
