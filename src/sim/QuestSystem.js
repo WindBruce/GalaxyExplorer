@@ -177,10 +177,6 @@ export class QuestSystem {
       for (const q of this.active) {
         for (const o of q.objectives) {
           if (o.type === 'travelTo' && !o.done && (!o.targetId || o.targetId === systemId)) this._advance(q, o);
-          if (o.type === 'scanSystem' && o.region) {
-            const sys = this.state.galaxy.getSystem(systemId);
-            if (sys && sys.regionId === o.region) this._advance(q, o);
-          }
         }
       }
       this._checkCompletion();

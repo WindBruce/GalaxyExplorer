@@ -193,6 +193,33 @@ test('mystery stage advances as events are confirmed', () => {
   assert.equal(stage1, 'm1');
 });
 
+test('system survey objectives require a real one-time survey, not just travel', () => {
+  const state = freshState();
+  const started = state.quests.start('q_perseusSurvey');
+  const objective = started.quest.objectives.find((o) => o.type === 'scanSystem');
+  const target = state.galaxy.regionSystems('perseusArm').find((s) => !s.visited);
+  assert.ok(target, 'an unvisited system exists in the contracted region');
+
+  // Arrival is not itself a survey.
+  state.bus.emit('travel:complete', { systemId: target.id });
+  assert.equal(objective.progress, 0);
+
+  state.location.systemId = target.id;
+  state.location.system = target;
+  let surveyEvents = 0;
+  const off = state.bus.on('scan:system', () => { surveyEvents++; });
+  assert.equal(state.surveySystem(), target);
+  assert.equal(objective.progress, 1);
+  assert.equal(surveyEvents, 1);
+  assert.ok(target.planets.every((planet) => planet.discovered));
+
+  // Reopening the system map cannot farm XP or mission progress.
+  assert.equal(state.surveySystem(), null);
+  assert.equal(objective.progress, 1);
+  assert.equal(surveyEvents, 1);
+  off();
+});
+
 test('quests resolve targets, track progress and pay out', () => {
   const state = bigHold(freshState());
   const started = state.quests.start('q_firstSurvey');

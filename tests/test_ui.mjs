@@ -179,6 +179,38 @@ test('every panel opens, renders content and closes', async (t) => {
   }
 });
 
+test('system map exposes a one-time survey action that advances the first mission', async (t) => {
+  if (!JSDOM) return t.skip('jsdom unavailable');
+  const { window, game, state, restore } = await makeUi();
+  try {
+    const quest = state.quests.start('q_firstSurvey').quest;
+    const surveyObjective = quest.objectives.find((o) => o.type === 'scanSystem');
+    const system = state.location.system;
+    let surveyEvents = 0;
+    const off = state.bus.on('scan:system', () => { surveyEvents++; });
+
+    game.ui.panels.open('systemMap');
+    const button = window.document.querySelector('[data-action="survey-system"]');
+    assert.ok(button, 'full survey action is visible in the system map');
+    assert.equal(button.disabled, false);
+    button.click();
+
+    assert.equal(system.surveyed, true, 'survey state persisted on the system');
+    assert.ok(system.planets.every((planet) => planet.discovered), 'survey reveals its planets');
+    assert.equal(surveyObjective.progress, 1, 'the mission receives the scan event');
+    assert.equal(surveyEvents, 1);
+    assert.equal(button.disabled, true, 'the action cannot be repeated');
+    assert.match(button.textContent, /COMPLETE|完成/i);
+
+    assert.equal(state.surveySystem(), null, 'simulation rejects a duplicate survey');
+    assert.equal(surveyObjective.progress, 1, 'duplicate survey does not grant extra progress');
+    assert.equal(surveyEvents, 1, 'duplicate survey emits no second event');
+    off();
+  } finally {
+    restore();
+  }
+});
+
 test('ship panel installs a module through the UI', async (t) => {
   if (!JSDOM) return t.skip('jsdom unavailable');
   const { window, game, state, restore } = await makeUi();
