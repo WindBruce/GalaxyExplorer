@@ -30,6 +30,9 @@ test('galaxy generates deterministically from a seed', () => {
   const g3 = createGalaxy('beta', data.regions);
   assert.equal(g1.allSystems().length, g2.allSystems().length);
   assert.equal(g1.allSystems().length, g3.allSystems().length);
+  const matches = g1.findSystems(() => true, 2);
+  assert.ok(Array.isArray(matches), 'findSystems always returns an array');
+  assert.equal(matches.length, 2);
   const a = g1.getSystem(g1.order[10]);
   const b = g2.getSystem(g2.order[10]);
   assert.deepEqual(a.planets.map((p) => p.name), b.planets.map((p) => p.name));
@@ -191,6 +194,87 @@ test('mystery stage advances as events are confirmed', () => {
   state.archaeology.eventEvidence['evFirstCities'] = new Set(['art_sevenStar', 'art_firstLamp']);
   const stage1 = state.archaeology.mysteryStage().stage.id;
   assert.equal(stage1, 'm1');
+});
+
+test('system survey objectives require a real one-time survey, not just travel', () => {
+  const state = freshState();
+  const started = state.quests.start('q_perseusSurvey');
+  const objective = started.quest.objectives.find((o) => o.type === 'scanSystem');
+  const target = state.galaxy.regionSystems('perseusArm').find((s) => !s.visited);
+  assert.ok(target, 'an unvisited system exists in the contracted region');
+
+  // Arrival is not itself a survey.
+  state.bus.emit('travel:complete', { systemId: target.id });
+  assert.equal(objective.progress, 0);
+
+  state.location.systemId = target.id;
+  state.location.system = target;
+  let surveyEvents = 0;
+  const off = state.bus.on('scan:system', () => { surveyEvents++; });
+  assert.equal(state.surveySystem(), target);
+  assert.equal(objective.progress, 1);
+  assert.equal(surveyEvents, 1);
+  assert.ok(target.planets.every((planet) => planet.discovered));
+
+  // Reopening the system map cannot farm XP or mission progress.
+  assert.equal(state.surveySystem(), null);
+  assert.equal(objective.progress, 1);
+  assert.equal(surveyEvents, 1);
+  off();
+});
+
+test('ruin signal objectives resolve to the same landable ruin site', () => {
+  for (const seed of ['ruin-alpha', 'ruin-beta', 'ruin-gamma', 'ruin-delta']) {
+    const state = freshState(seed);
+    const started = state.quests.start('q_ruinSignal');
+    assert.equal(started.ok, true, `${seed}: quest starts without target-resolution errors`);
+
+    const travel = started.quest.objectives.find((o) => o.type === 'travelTo');
+    const scan = started.quest.objectives.find((o) => o.type === 'scanBody');
+    const landing = started.quest.objectives.find((o) => o.type === 'landOnPlanet');
+    const system = state.galaxy.getSystem(travel.targetId);
+    const ruin = system.ruins.find((site) => site.id === scan.targetId);
+    const planet = system.planets.find((p) => p.id === landing.targetId);
+
+    assert.ok(system, `${seed}: travel target exists`);
+    assert.equal(scan.systemId, system.id, `${seed}: scan target is in the travel system`);
+    assert.equal(landing.systemId, system.id, `${seed}: landing target is in the travel system`);
+    assert.equal(landing.ruinId, ruin?.id, `${seed}: landing uses the scanned ruin`);
+    assert.ok(planet?.landable, `${seed}: ruin planet is landable`);
+    assert.equal(ruin.planetId, planet.id, `${seed}: ruin belongs to that planet`);
+
+    const otherSystemId = state.galaxy.allSystems().find((s) => s.id !== system.id).id;
+    state.bus.emit('scan:body', { bodyId: scan.targetId, kind: 'ruin', systemId: otherSystemId });
+    state.bus.emit('landing', { planetId: landing.targetId, systemId: otherSystemId });
+    assert.equal(scan.progress, 0, `${seed}: scanning the ruin from another system does not count`);
+    assert.equal(landing.progress, 0, `${seed}: landing in another system does not count`);
+
+    state.bus.emit('scan:body', { bodyId: scan.targetId, kind: 'ruin', systemId: system.id });
+    state.bus.emit('landing', { planetId: landing.targetId, systemId: system.id });
+    assert.equal(scan.progress, 1, `${seed}: the assigned ruin scan counts`);
+    assert.equal(landing.progress, 1, `${seed}: the assigned planet landing counts`);
+  }
+});
+
+test('quest start fails closed when a required dynamic target is unavailable', () => {
+  const state = freshState('ruinless-galaxy');
+  for (const system of state.galaxy.allSystems()) system.ruins.length = 0;
+  const xpBefore = state.player.xp;
+
+  const started = state.quests.start('q_ruinSignal');
+  assert.equal(started.ok, false);
+  assert.equal(started.reasonKey, 'sim.questNoTarget');
+  assert.equal(state.quests.isActive('q_ruinSignal'), false);
+  assert.equal(state.player.xp, xpBefore, 'a failed start has no XP side effects');
+
+  const noDerelicts = freshState('derelictless-galaxy');
+  for (const system of noDerelicts.galaxy.allSystems()) {
+    system.stations = system.stations.filter((station) => !station.derelict);
+  }
+  const derelictQuest = noDerelicts.quests.start('q_derelict');
+  assert.equal(derelictQuest.ok, false);
+  assert.equal(derelictQuest.reasonKey, 'sim.questNoTarget');
+  assert.equal(noDerelicts.quests.isActive('q_derelict'), false);
 });
 
 test('quests resolve targets, track progress and pay out', () => {

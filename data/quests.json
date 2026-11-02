@@ -1,5 +1,5 @@
 {
-  "_comment": "Quest templates. QuestSystem instantiates these, resolving 'any' targets into concrete systems/ruins so every playthrough differs. Objective types: scanSystem | scanBody | collectResource | analyzeArtifact | discoverRuin | landOnPlanet | travelTo | reachReputation | researchTech | discoverCiv | defeatHostiles | scanAnomaly | returnTo | talkTo.",
+  "_comment": "Quest templates. QuestSystem instantiates these, resolving 'any' targets into concrete systems/ruins so every playthrough differs. Use targetGroup to bind travel/scan/landing objectives to one site; hasLandableRuin restricts a travel target to systems with a ruin on a landable planet. Objective types: scanSystem | scanBody | collectResource | analyzeArtifact | discoverRuin | landOnPlanet | travelTo | reachReputation | researchTech | discoverCiv | defeatHostiles | scanAnomaly | returnTo | talkTo.",
 
   "quests": [
     {
@@ -26,9 +26,9 @@
       "chain": "prologue",
       "description": "Your survey caught an energy signature on a terrestrial world. The Concord wants it investigated before someone else claims it.",
       "objectives": [
-        { "type": "travelTo", "target": "any", "hasRuin": true, "desc": "Travel to the system containing the ruin signature" },
-        { "type": "scanBody", "target": "anyRuin", "desc": "Scan the ruin from orbit" },
-        { "type": "landOnPlanet", "target": "anyRuinPlanet", "desc": "Land at the ruin site" },
+        { "type": "travelTo", "target": "any", "hasRuin": true, "hasLandableRuin": true, "targetGroup": "signalRuin", "desc": "Travel to the system containing the ruin signature" },
+        { "type": "scanBody", "target": "anyRuin", "targetGroup": "signalRuin", "desc": "Scan the ruin from orbit" },
+        { "type": "landOnPlanet", "target": "anyRuinPlanet", "targetGroup": "signalRuin", "desc": "Land at the ruin site" },
         { "type": "analyzeArtifact", "count": 1, "desc": "Recover and analyse at least one artifact" }
       ],
       "rewards": { "credits": 9000, "research": 300, "reputation": 6, "xp": 400, "unlockQuest": "q_translation" }

@@ -65,7 +65,7 @@ early.
 | `R` | Respawn after destruction · reset map view |
 | `H` | Emergency rescue tow (when fuel is dry) |
 | `E` | Scoop a nearby wreck (space) · excavate (on foot) |
-| `I` `U` `K` `L` `J` `B` `A` `P` `N` | Cargo · ship · skills · tech · archaeology · civilisations · archive · missions · system map |
+| `I` `U` `K` `L` `J` `B` `A` `P` `N` | Cargo · ship · skills · tech · archaeology · civilisations · archive · missions · system map / full survey |
 | `F2` | Settings: language, audio volumes, narration |
 | `Esc` | Close modal → settings → panel → map → pause |
 

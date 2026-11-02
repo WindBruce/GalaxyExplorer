@@ -769,6 +769,32 @@ export class Panels {
       return panel;
     }
 
+    // A full survey is part of the main exploration loop and must be reachable
+    // from the player-facing system map, not just the simulation API.
+    const survey = h('div', 'panel-section');
+    survey.appendChild(h('h3', null, T('sysmap.surveyTitle')));
+    survey.appendChild(h('div', 'card-sub', T('sysmap.surveyHint')));
+    const canSurvey = !sys.surveyed && state.location.mode !== 'surface';
+    const surveyButton = h('button', 'btn primary', sys.surveyed
+      ? T('sysmap.surveyDone')
+      : T('sysmap.surveyAction'));
+    surveyButton.dataset.action = 'survey-system';
+    surveyButton.disabled = !canSurvey;
+    if (!sys.surveyed && !canSurvey) surveyButton.title = T('sysmap.surveyOrbitOnly');
+    surveyButton.onclick = () => {
+      const result = state.surveySystem();
+      if (!result) return;
+      surveyButton.disabled = true;
+      surveyButton.textContent = T('sysmap.surveyDone');
+      this.game.ui.notify(
+        T('state.scanComplete', { name: sys.name }),
+        T('sysmap.surveyResult', { n: sys.planets.length }),
+        'scan'
+      );
+    };
+    survey.appendChild(surveyButton);
+    body.appendChild(survey);
+
     // Orbital diagram on a canvas.
     const canvas = h('canvas');
     canvas.width = 520;

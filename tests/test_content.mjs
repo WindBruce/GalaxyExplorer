@@ -153,7 +153,16 @@ test('quest chains and reward references are consistent', () => {
     for (const [res] of Object.entries(q.rewards?.resources ?? {})) {
       assert.ok(resources[res], `${q.id} rewards unknown resource ${res}`);
     }
+    const targetGroups = new Map();
     for (const o of q.objectives) {
+      if (o.targetGroup && o.type !== 'travelTo') {
+        const anchor = targetGroups.get(o.targetGroup);
+        assert.ok(anchor, `${q.id} uses target group ${o.targetGroup} before a travel anchor`);
+        if (o.target === 'anyRuin') assert.ok(anchor.hasRuin, `${q.id} needs a ruin in target group ${o.targetGroup}`);
+        if (o.target === 'anyRuinPlanet') assert.ok(anchor.hasLandableRuin, `${q.id} needs a landable ruin in target group ${o.targetGroup}`);
+      }
+      if (o.type === 'travelTo' && o.targetGroup) targetGroups.set(o.targetGroup, o);
+      if (o.hasLandableRuin) assert.equal(o.type, 'travelTo', `${q.id} can only require a landable ruin on travel targets`);
       if (o.type === 'researchTech') assert.ok(technologies[o.target], `${q.id} requires unknown tech ${o.target}`);
       if (o.type === 'collectResource') assert.ok(resources[o.resource], `${q.id} requires unknown resource ${o.resource}`);
       if (o.type === 'returnTo' || o.type === 'talkTo') assert.ok(civIds.has(o.civ), `${q.id} references unknown civ ${o.civ}`);

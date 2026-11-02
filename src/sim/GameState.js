@@ -201,20 +201,23 @@ export class GameState {
     }
   }
 
-  /** Survey the current system (full scan). */
+  /** Survey the current system (full scan). Returns null if it was already surveyed. */
   surveySystem() {
     const sys = this.location.system;
-    if (!sys) return null;
+    if (!sys || sys.surveyed) return null;
+
     sys.surveyed = true;
     sys.discovered = true;
-    this.addXp(200);
-    this.bus?.emit('scan:system', { systemId: sys.id, regionId: sys.regionId, name: sys.name });
-    for (const p of sys.planets) p.discovered = true;
+    for (const planet of sys.planets) planet.discovered = true;
     this.archive.add('star', sys.star.name, {
       name: sys.star.name,
       summary: `${sys.star.classLabel} (${sys.star.spectral}), ${sys.star.temp}K. ${sys.summary}`,
       meta: { classId: sys.star.classId, systemId: sys.id },
     });
+    this.addXp(200);
+    // Emit only after the world and archive are updated. Quest progress listens
+    // to this event, so repeatedly opening the system map cannot farm surveys.
+    this.bus?.emit('scan:system', { systemId: sys.id, regionId: sys.regionId, name: sys.name });
     return sys;
   }
 

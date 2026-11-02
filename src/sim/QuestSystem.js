@@ -70,7 +70,16 @@ export class QuestSystem {
       return { ok: false, reason: 'Already completed', reasonKey: 'sim.questComplete' };
     }
 
-    const objectives = tpl.objectives.map((o, i) => this._resolveObjective(questId, o, i));
+    const resolution = { targetGroups: {} };
+    const objectives = tpl.objectives.map((o, i) => this._resolveObjective(questId, o, i, resolution));
+    if (this._hasUnresolvedRequiredTarget(objectives)) {
+      return {
+        ok: false,
+        reason: 'No valid target for this quest in the current galaxy',
+        reasonKey: 'sim.questNoTarget',
+      };
+    }
+
     const quest = {
       id: tpl.id,
       title: tpl.title,
@@ -89,42 +98,97 @@ export class QuestSystem {
     return { ok: true, quest };
   }
 
+  /** Refuse to start a quest when a required dynamic target could not be resolved. */
+  _hasUnresolvedRequiredTarget(objectives) {
+    return objectives.some((objective) => {
+      if (objective.type === 'travelTo' && objective.target === 'any') return !objective.targetId;
+      if (objective.type === 'scanBody' && ['anyRuin', 'anyDerelict'].includes(objective.target)) {
+        return !objective.targetId;
+      }
+      if (objective.type === 'landOnPlanet' && objective.target === 'anyRuinPlanet') {
+        return !objective.targetId || !objective.systemId;
+      }
+      return false;
+    });
+  }
+
   /** Resolve an objective template into a concrete, trackable objective. */
-  _resolveObjective(questId, o, index) {
+  _resolveObjective(questId, o, index, resolution = { targetGroups: {} }) {
     const galaxy = this.state.galaxy;
     const obj = { ...o, index, progress: 0, required: o.count ?? 1, done: false, targetId: null, targetName: null };
     const rng = new Rng((galaxy.seed ^ hashString(questId + o.type + index)) >>> 0);
+    const targetGroup = o.targetGroup
+      ? (resolution.targetGroups[o.targetGroup] ??= {})
+      : null;
 
     switch (o.type) {
       case 'travelTo': {
-        const candidates = galaxy.find((s) => {
+        const candidates = galaxy.findSystems((s) => {
           if (s.visited) return false;
           if (o.region && s.regionId !== o.region) return false;
           if (o.hasRuin && !s.ruins.length) return false;
+          if (o.hasLandableRuin && !s.ruins.some((ruin) => this._landablePlanetForRuin(s, ruin))) return false;
           return true;
         }, 12);
-        const pick = candidates.length ? rng.pick(candidates) : galaxy.home;
-        obj.targetId = pick.id;
-        obj.targetName = pick.name;
-        obj.region = o.region ?? pick.regionId;
+        const pick = candidates.length ? rng.pick(candidates) : null;
+        if (pick) {
+          obj.targetId = pick.id;
+          obj.targetName = pick.name;
+          obj.region = o.region ?? pick.regionId;
+          if (targetGroup) {
+            targetGroup.system = pick;
+            targetGroup.requiresLandableRuin = Boolean(o.hasLandableRuin);
+          }
+        }
         break;
       }
       case 'scanBody': {
         if (o.target === 'anyRuin') {
-          const ruin = galaxy.find((s) => s.ruins.length > 0 && !s.visited).flatMap((s) => s.ruins)[0];
-          if (ruin) { obj.targetId = ruin.id; obj.targetName = ruin.name; }
+          let system = targetGroup?.system ?? null;
+          let ruin = targetGroup?.ruin ?? null;
+          if (!system && !targetGroup) system = galaxy.findSystems((s) => s.ruins.length > 0 && !s.visited)[0] ?? null;
+          if (system && !ruin) {
+            ruin = targetGroup?.requiresLandableRuin
+              ? system.ruins.find((site) => this._landablePlanetForRuin(system, site)) ?? null
+              : system.ruins[0] ?? null;
+          }
+          if (system && ruin) {
+            obj.targetId = ruin.id;
+            obj.targetName = ruin.name;
+            obj.systemId = system.id;
+            obj.ruinId = ruin.id;
+            if (targetGroup) {
+              targetGroup.system = system;
+              targetGroup.ruin = ruin;
+              targetGroup.planet = this._landablePlanetForRuin(system, ruin);
+            }
+          }
         } else if (o.target === 'anyDerelict') {
-          const st = galaxy.find((s) => s.stations.some((x) => x.derelict)).flatMap((s) => s.stations.filter((x) => x.derelict))[0];
+          const st = galaxy.findSystems((s) => s.stations.some((x) => x.derelict)).flatMap((s) => s.stations.filter((x) => x.derelict))[0];
           if (st) { obj.targetId = st.id; obj.targetName = st.name; }
         }
         break;
       }
       case 'landOnPlanet': {
-        const sys = galaxy.find((s) => s.ruins.length > 0 && s.planets.some((p) => p.landable));
-        if (sys) {
-          const ruin = sys.ruins[0];
-          const planet = sys.planets.find((p) => p.id === ruin.planetId) ?? sys.planets.find((p) => p.landable);
-          if (planet) { obj.targetId = planet.id; obj.targetName = planet.name; obj.systemId = sys.id; }
+        let system = targetGroup?.system ?? null;
+        let ruin = targetGroup?.ruin ?? null;
+        if (!system && !targetGroup) {
+          system = galaxy.findSystems((s) => s.ruins.some((site) => this._landablePlanetForRuin(s, site)))[0] ?? null;
+        }
+        if (system && (!ruin || !this._landablePlanetForRuin(system, ruin))) {
+          ruin = system.ruins.find((site) => this._landablePlanetForRuin(system, site)) ?? null;
+        }
+        const planet = this._landablePlanetForRuin(system, ruin);
+        if (system && ruin && planet) {
+          obj.targetId = planet.id;
+          obj.targetName = planet.name;
+          obj.systemId = system.id;
+          obj.ruinId = ruin.id;
+          if (targetGroup) {
+            targetGroup.system = system;
+            targetGroup.ruin = ruin;
+            targetGroup.planet = planet;
+          }
         }
         break;
       }
@@ -158,6 +222,14 @@ export class QuestSystem {
     return obj;
   }
 
+  /** Resolve the actual landable planet associated with a ruin. */
+  _landablePlanetForRuin(system, ruin) {
+    if (!system || !ruin) return null;
+    const direct = system.planets.find((planet) => planet.id === ruin.planetId && planet.landable);
+    if (direct) return direct;
+    return system.planets.find((planet) => planet.landable && planet.ruinSiteIds.includes(ruin.id)) ?? null;
+  }
+
   /** Progress an objective. Returns true if it (newly) completed. */
   _advance(quest, obj, amount = 1) {
     if (obj.done) return false;
@@ -177,10 +249,6 @@ export class QuestSystem {
       for (const q of this.active) {
         for (const o of q.objectives) {
           if (o.type === 'travelTo' && !o.done && (!o.targetId || o.targetId === systemId)) this._advance(q, o);
-          if (o.type === 'scanSystem' && o.region) {
-            const sys = this.state.galaxy.getSystem(systemId);
-            if (sys && sys.regionId === o.region) this._advance(q, o);
-          }
         }
       }
       this._checkCompletion();
@@ -196,11 +264,13 @@ export class QuestSystem {
       this._checkCompletion();
     });
 
-    bus.on('scan:body', ({ bodyId, kind }) => {
+    bus.on('scan:body', ({ bodyId, kind, systemId }) => {
       for (const q of this.active) {
         for (const o of q.objectives) {
           if (o.type === 'scanBody' && !o.done) {
-            if (!o.targetId || o.targetId === bodyId) this._advance(q, o);
+            const targetMatches = !o.targetId || o.targetId === bodyId;
+            const systemMatches = !o.systemId || !systemId || o.systemId === systemId;
+            if (targetMatches && systemMatches) this._advance(q, o);
           }
           if (o.type === 'scanAnomaly' && kind === 'anomaly') this._advance(q, o);
         }
@@ -235,10 +305,13 @@ export class QuestSystem {
       this._checkCompletion();
     });
 
-    bus.on('landing', ({ planetId }) => {
+    bus.on('landing', ({ planetId, systemId }) => {
       for (const q of this.active) {
         for (const o of q.objectives) {
-          if (o.type === 'landOnPlanet' && !o.done && (!o.targetId || o.targetId === planetId)) this._advance(q, o);
+          if (o.type !== 'landOnPlanet' || o.done) continue;
+          const targetMatches = !o.targetId || o.targetId === planetId;
+          const systemMatches = !o.systemId || !systemId || o.systemId === systemId;
+          if (targetMatches && systemMatches) this._advance(q, o);
         }
       }
       this._checkCompletion();
