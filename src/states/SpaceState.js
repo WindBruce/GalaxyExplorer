@@ -447,7 +447,7 @@ export class SpaceState {
     state.location.planetId = prompt.planet.id;
     state.location.landingSite = null;
     state.stats.planetsLanded += 1;
-    state.bus.emit('landing', { planetId: prompt.planet.id });
+    state.bus.emit('landing', { planetId: prompt.planet.id, systemId: state.location.systemId });
     state.addXp(80);
     this.game.states.change('surface', { planet: prompt.planet, ruin: null });
   }

@@ -220,6 +220,39 @@ test('system survey objectives require a real one-time survey, not just travel',
   off();
 });
 
+test('ruin signal objectives resolve to the same landable ruin site', () => {
+  for (const seed of ['ruin-alpha', 'ruin-beta', 'ruin-gamma', 'ruin-delta']) {
+    const state = freshState(seed);
+    const started = state.quests.start('q_ruinSignal');
+    assert.equal(started.ok, true, `${seed}: quest starts without target-resolution errors`);
+
+    const travel = started.quest.objectives.find((o) => o.type === 'travelTo');
+    const scan = started.quest.objectives.find((o) => o.type === 'scanBody');
+    const landing = started.quest.objectives.find((o) => o.type === 'landOnPlanet');
+    const system = state.galaxy.getSystem(travel.targetId);
+    const ruin = system.ruins.find((site) => site.id === scan.targetId);
+    const planet = system.planets.find((p) => p.id === landing.targetId);
+
+    assert.ok(system, `${seed}: travel target exists`);
+    assert.equal(scan.systemId, system.id, `${seed}: scan target is in the travel system`);
+    assert.equal(landing.systemId, system.id, `${seed}: landing target is in the travel system`);
+    assert.equal(landing.ruinId, ruin?.id, `${seed}: landing uses the scanned ruin`);
+    assert.ok(planet?.landable, `${seed}: ruin planet is landable`);
+    assert.equal(ruin.planetId, planet.id, `${seed}: ruin belongs to that planet`);
+
+    const otherSystemId = state.galaxy.allSystems().find((s) => s.id !== system.id).id;
+    state.bus.emit('scan:body', { bodyId: scan.targetId, kind: 'ruin', systemId: otherSystemId });
+    state.bus.emit('landing', { planetId: landing.targetId, systemId: otherSystemId });
+    assert.equal(scan.progress, 0, `${seed}: scanning the ruin from another system does not count`);
+    assert.equal(landing.progress, 0, `${seed}: landing in another system does not count`);
+
+    state.bus.emit('scan:body', { bodyId: scan.targetId, kind: 'ruin', systemId: system.id });
+    state.bus.emit('landing', { planetId: landing.targetId, systemId: system.id });
+    assert.equal(scan.progress, 1, `${seed}: the assigned ruin scan counts`);
+    assert.equal(landing.progress, 1, `${seed}: the assigned planet landing counts`);
+  }
+});
+
 test('quests resolve targets, track progress and pay out', () => {
   const state = bigHold(freshState());
   const started = state.quests.start('q_firstSurvey');
